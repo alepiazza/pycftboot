@@ -23,8 +23,10 @@ jobs:
       image: wlandry/sdpb:2.5.1
     steps:
       - uses: actions/checkout@v2
-      - name: install test dependencies
+      - name: install pip and test dependencies
         run: |
+          apt-get update -qq
+          apt-get install -yqq python3-pip
           pip install coverage
       - name: make tests and generate coverage report
         run: |
