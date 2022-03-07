@@ -1,4 +1,5 @@
 # Packaging
+build
 dist
 __pycache__
 *.egg-info
@@ -6,6 +7,9 @@ __pycache__
 # Test and coverage
 .coverage
 htmlcov
+
+# Docs
+docs/build
 
 # Other stuff
 venv
