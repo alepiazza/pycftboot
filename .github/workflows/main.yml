@@ -25,9 +25,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: install pip and test dependencies
         run: |
-          apt-get update -qq
-          apt-get install -yqq python3-pip
-          pip install coverage
+          apt-get -qq update
+          apt-get -qq install -y python3-pip
+          pip3 install coverage
+      - name: install pycftboot
+        run: |
+          pip3 install -e .
       - name: make tests and generate coverage report
         run: |
           coverage run -m unittest
