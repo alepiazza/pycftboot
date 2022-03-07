@@ -48,5 +48,20 @@ jobs:
         run: |
           coverage run -m unittest
           coverage xml
-      - name: upload coverage to codecov
-        uses: codecov/codecov-action@v2
+      - name: upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report-xml
+          path: |
+            coverage.xml
+
+  codecov:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: download coverage report
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-report-xml
+      - uses: codecov/codecov-action@v2
