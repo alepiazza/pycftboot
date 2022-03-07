@@ -1,4 +1,5 @@
 # PyCFTBoot
+[![pycftboot Actions Status](https://github.com/alepiazza/pycftboot/actions/workflows/main.yml/badge.svg)](https://github.com/alepiazza/pycftboot/actions)
 
 PyCFTBoot is an interface for the conformal bootstrap as discussed in [its 2008 revival](http://arxiv.org/abs/0807.0004). Starting from the analytic structure of conformal blocks, the code formulates semidefinite programs without any proprietary software. The code does NOT perform the actual optimization. It assumes you already have a program for that, namely [SDPB](https://github.com/davidsd/sdpb) by David Simmons-Duffin.
 
@@ -17,7 +18,7 @@ If you use one of the mainstream Linux distributions, the following instructions
         # WITH_PTHREAD and WITH_SYMENGINE_THREAD_SAFE might be helpful as well
         cmake .. -DWITH_MPFR:BOOL=ON
         make
-        
+
 4. Lastly, compile and install [Symengine.py](https://github.com/symengine/symengine.py).
 
 5. Additionally, extracting the spectrum with PyCFTBoot will require the binary [unisolve](https://numpi.dm.unipi.it/mpsolve-2.2/).
@@ -40,7 +41,7 @@ Thanks to Jaehoon Lee for writing these instructions and testing them on OS X 10
         # Cython
         pip install cython
 
-        # Sympy 
+        # Sympy
         pip install sympy
 
         # Mpmath - technically not required as it is included in sympy
@@ -53,7 +54,7 @@ Thanks to Jaehoon Lee for writing these instructions and testing them on OS X 10
 4. Download [Symengine](https://github.com/symengine/symengine) and compile it. If you fail to install and need to rebuild, remove the build folder and start remaking it. Unpack the source file within the directory and run:
 
         mkdir build && cd build
-        # Turning on the MPFR option is critical for using PyCFTBoot 
+        # Turning on the MPFR option is critical for using PyCFTBoot
         CC=gcc CXX=g++ cmake .. -DWITH_MPFR:BOOL=ON
         make
         # Test everything is built correctly
