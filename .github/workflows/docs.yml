@@ -10,6 +10,7 @@ jobs:
     - name: generate docs
       run: |
         pip install sphinx sphinx-rtd-theme myst-parser
+        pip install .
         cd docs
         make html
     - name: publish docs
