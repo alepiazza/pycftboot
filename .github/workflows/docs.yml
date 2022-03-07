@@ -1,0 +1,19 @@
+name: pycftboot-docs
+
+on: [push]
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: generate docs
+      uses: ammaraskar/sphinx-action@master
+      with:
+        pre-build-command: "pip install sphinx-rtd-theme myst-parser"
+        docs-folder: "docs/"
+    - name: publish docs
+      uses: JamesIves/github-pages-deploy-action@v4.2.5
+      with:
+        branch: docs
+        folder: docs/build/html
