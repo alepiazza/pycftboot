@@ -42,7 +42,6 @@ jobs:
           path: dist
       - name: install pycftboot and its dependencies
         run: |
-          ls -lash
           pip3 install dist/pycftboot-0.0.1.tar.gz
       - name: make tests and generate coverage report
         run: |
