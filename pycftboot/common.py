@@ -19,12 +19,13 @@ two = 2 * one
 r_cross = 3 - 2 * sqrt(2).n(prec)
 
 ell = Symbol('ell')
-delta  = Symbol('delta')
+delta = Symbol('delta')
 delta_ext = Symbol('delta_ext')
 
 # Default paths, used as first priority if they exists
 sdpb_path = "/usr/bin/sdpb"
 mpirun_path = "/usr/bin/mpirun"
+
 
 def find_executable(name):
     if os.path.isfile(name):
@@ -36,6 +37,7 @@ def find_executable(name):
                 return test
         else:
             raise EnvironmentError("%s was not found on path." % name)
+
 
 # If default path doesn't apply, look for SDPB on user's PATH
 if not os.path.isfile(sdpb_path):
@@ -65,6 +67,7 @@ else:
     if not os.path.isfile(mpirun_path):
         mpirun_path = find_executable("mpirun")
 
+
 def rf(x, n):
     """
     Implements the rising factorial or Pochhammer symbol.
@@ -76,6 +79,7 @@ def rf(x, n):
         ret *= x + k
     return ret
 
+
 def deepcopy(array):
     """
     Copies a list of a list so that entries can be changed non-destructively.
@@ -85,13 +89,15 @@ def deepcopy(array):
         ret.append(list(el))
     return ret
 
+
 def index_iter(iter, n):
     """
     Returns the nth element of an iterator.
     """
     return next(itertools.islice(iter, n, None))
 
-def get_index(array, element, start = 0):
+
+def get_index(array, element, start=0):
     """
     Finds where an element occurs in an array or -1 if not present.
     """
@@ -100,7 +106,8 @@ def get_index(array, element, start = 0):
             return i
     return -1
 
-def get_index_approx(array, element, start = 0):
+
+def get_index_approx(array, element, start=0):
     """
     Finds where an element numerically close to the one given occurs in an array
     or -1 if not present.
@@ -109,6 +116,7 @@ def get_index_approx(array, element, start = 0):
         if abs(v - element) < tiny:
             return i
     return -1
+
 
 def gather(array):
     """
@@ -129,6 +137,7 @@ def gather(array):
             backup = backup[:i] + backup[i + 1:]
     return ret
 
+
 def extract_power(term):
     """
     Returns the degree of a single term in a polynomial. Symengine stores these
@@ -145,6 +154,7 @@ def extract_power(term):
     else:
         return int(term.args[1].args[1])
 
+
 def coefficients(polynomial):
     """
     Returns a sorted list of all coefficients in a polynomial starting with the
@@ -156,7 +166,7 @@ def coefficients(polynomial):
     if polynomial.args == ():
         return [polynomial]
 
-    coeff_list = sorted(polynomial.args, key = extract_power)
+    coeff_list = sorted(polynomial.args, key=extract_power)
     degree = extract_power(coeff_list[-1])
 
     pos = 0
@@ -172,6 +182,7 @@ def coefficients(polynomial):
             ret.append(0)
     return ret
 
+
 def build_polynomial(coefficients):
     """
     Returns a polynomial in `delta` from a list of coefficients. The first one is
@@ -184,6 +195,7 @@ def build_polynomial(coefficients):
         prod *= delta
     return ret
 
+
 def unitarity_bound(dim, spin):
     """
     Returns the lower bound for conformal dimensions in a unitary theory for a
@@ -194,7 +206,8 @@ def unitarity_bound(dim, spin):
     else:
         return dim + spin - 2
 
-def omit_all(poles, special_poles, var, shift = 0):
+
+def omit_all(poles, special_poles, var, shift=0):
     """
     Instead of returning a product of poles where each pole is not in a special
     list, this returns a product where each pole is subtracted from some variable.
@@ -210,6 +223,7 @@ def omit_all(poles, special_poles, var, shift = 0):
             power = gathered0[index_iter(gathered0.keys(), ind)]
         expression *= (var - p) ** (gathered1[p] - power)
     return expression
+
 
 def dump_table_contents(block_table, name):
     """
@@ -240,6 +254,7 @@ def dump_table_contents(block_table, name):
         dump_file.write("self.table.append(PolynomialVector(derivatives, " + block_table.table[l].label.__str__() + ", " + block_table.table[l].poles.__str__() + "))\n")
 
     dump_file.close()
+
 
 def rules(m_max, n_max):
     """
@@ -280,12 +295,13 @@ def rules(m_max, n_max):
                 expression1 = expression1.diff(a)
                 expression2 = expression2.diff(a)
 
-            rules1.append(expression1.subs({hack : RealMPFR("2", prec), a : 1, b : 0}))
-            rules2.append(expression2.subs({hack : RealMPFR("2", prec), a : 1, b : 0}))
+            rules1.append(expression1.subs({hack: RealMPFR("2", prec), a: 1, b: 0}))
+            rules2.append(expression2.subs({hack: RealMPFR("2", prec), a: 1, b: 0}))
             m_order.append(m)
             n_order.append(n)
 
     return (rules1, rules2, m_order, n_order)
+
 
 def chain_rule_single_symengine(m_order, rules, table, conformal_blocks, accessor):
     """
@@ -319,6 +335,7 @@ def chain_rule_single_symengine(m_order, rules, table, conformal_blocks, accesso
             if m == 0:
                 new_deriv = accessor(l, 0)
             table[l].vector.append(new_deriv.expand())
+
 
 def chain_rule_single(m_order, rules, table, conformal_blocks, accessor):
     """
@@ -358,6 +375,7 @@ def chain_rule_single(m_order, rules, table, conformal_blocks, accessor):
                 new_deriv += deriv[i] * accessor(l, i)
             table[l].vector.append(new_deriv.expand())
         order += 1
+
 
 def chain_rule_double_symengine(m_order, n_order, rules1, rules2, table, conformal_blocks):
     """
@@ -414,6 +432,7 @@ def chain_rule_double_symengine(m_order, n_order, rules1, rules2, table, conform
                 new_deri = new_deriv.subs(g4, conformal_blocks[l].chunks[0].get(0, 0))
                 table[l].vector.append(new_deriv.expand())
             order += 1
+
 
 def chain_rule_double(m_order, n_order, rules1, rules2, table, conformal_blocks):
     """

@@ -38,6 +38,7 @@ def convert_table(tab_short, tab_long):
             tab_short.table[l].vector[n] = tab_short.table[l].vector[n] * pole_prod
             tab_short.table[l].vector[n] = tab_short.table[l].vector[n].expand()
 
+
 def cancel_poles(polynomial_vector):
     """
     Checks which roots of a conformal block denominator are also roots of the
@@ -76,6 +77,7 @@ def cancel_poles(polynomial_vector):
 
                 polynomial_vector.vector[n] = build_polynomial(new_coeffs)
 
+
 class ConformalBlockTableSeed2:
     """
     A class which calculates tables of conformal block derivatives from scratch
@@ -84,7 +86,8 @@ class ConformalBlockTableSeed2:
     `ConformalBlockTable` calls it automatically for `m_max = 3`. Note that there
     is no `n_max` for this method.
     """
-    def __init__(self, dim, k_max, l_max, m_max, delta_12 = 0, delta_34 = 0, odd_spins = False):
+
+    def __init__(self, dim, k_max, l_max, m_max, delta_12=0, delta_34=0, odd_spins=False):
         self.dim = dim
         self.k_max = k_max
         self.l_max = l_max

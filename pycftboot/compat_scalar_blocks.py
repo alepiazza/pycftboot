@@ -14,7 +14,7 @@ def scalar_blocks_read(block_table, name):
     """
     files1 = os.listdir(name)
     files0 = sorted(files1)
-    files = sorted(files0, key = len)
+    files = sorted(files0, key=len)
     # A cheap way to get alphanumeric sort
     info = files[0]
 
@@ -119,6 +119,7 @@ def scalar_blocks_read(block_table, name):
                     poly += coeffs[c] * (delta ** (c - remove_zero))
                 derivatives[i] = poly
         block_table.table.append(PolynomialVector(derivatives, [l, 0], poles))
+
 
 def scalar_blocks_write(block_table, name):
     """

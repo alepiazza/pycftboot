@@ -14,6 +14,7 @@ class PolynomialVector:
             `vector`. This allows one to go back to the original rational functions
             instead of the more convenient polynomials.
     """
+
     def __init__(self, derivatives, spin_irrep, poles):
         if type(spin_irrep) == type(1):
             spin_irrep = [spin_irrep, 0]

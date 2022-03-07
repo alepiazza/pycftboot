@@ -3,3 +3,5 @@ __pycache__
 *.egg-info
 
 venv
+.flake8
+.dir-locals.el

@@ -36,6 +36,7 @@ def delta_pole(nu, k, l, series):
 
     return eval_mpfr(pole, prec)
 
+
 def delta_residue(nu, k, l, delta_12, delta_34, series):
     """
     Returns the residue of a meromorphic global conformal block at a particular
@@ -81,6 +82,7 @@ def delta_residue(nu, k, l, delta_12, delta_34, series):
     else:
         return - ((k * (-4) ** k) / (factorial(k) ** 2)) * (rf(1 + l - k, k) * rf((1 - k + delta_12) / two, k) * rf((1 - k + delta_34) / two, k) / rf(1 + nu + l - k, k))
 
+
 class LeadingBlockVector:
     def __init__(self, dim, l, m_max, n_max, delta_12, delta_34):
         self.spin = l
@@ -113,7 +115,7 @@ class LeadingBlockVector:
                 else:
                     expression = expression.diff(r)
 
-                chunk.append(expression.subs({r : r_cross, eta : 1}))
+                chunk.append(expression.subs({r: r_cross, eta: 1}))
             self.chunks.append(DenseMatrix(len(chunk), 1, chunk))
 
     def leading_block(self, nu, r, eta, l, delta_12, delta_34):
@@ -130,6 +132,7 @@ class LeadingBlockVector:
         else:
             return ((-1) ** l) * ret / (((1 - r ** 2) ** nu) * ((1 + r ** 2 + 2 * r * eta) ** ((one + delta_12 - delta_34) / two)) * ((1 + r ** 2 - 2 * r * eta) ** ((one - delta_12 + delta_34) / two)))
 
+
 class MeromorphicBlockVector:
     def __init__(self, leading_block):
         # A chunk is a set of r derivatives for one eta derivative
@@ -141,6 +144,7 @@ class MeromorphicBlockVector:
             self.chunks.append(DenseMatrix(rows, 1, [0] * rows))
             for n in range(0, rows):
                 self.chunks[j].set(n, 0, leading_block.chunks[j].get(n, 0))
+
 
 class ConformalBlockVector:
     def __init__(self, dim, l, delta_12, delta_34, derivative_order, kept_pole_order, s_matrix, leading_block, pol_list, res_list):
@@ -211,6 +215,7 @@ class ConformalBlockVector:
                 return k
         return -1
 
+
 class ConformalBlockTableSeed:
     """
     A class which calculates tables of conformal block derivatives from scratch
@@ -221,7 +226,8 @@ class ConformalBlockTableSeed:
     the parameters and attributes are the same as those of `ConformalBlockTable`.
     It also supports the `dump` method.
     """
-    def __init__(self, dim, k_max, l_max, m_max, n_max, delta_12 = 0, delta_34 = 0, odd_spins = False):
+
+    def __init__(self, dim, k_max, l_max, m_max, n_max, delta_12=0, delta_34=0, odd_spins=False):
         self.dim = dim
         self.k_max = k_max
         self.l_max = l_max
@@ -343,7 +349,7 @@ class ConformalBlockTableSeed:
                         continue
 
                     for j in range(0, len(res_list[l][i].chunks)):
-                         res_list[l][i].chunks[j] = new_res_list[l][i].chunks[j]
+                        res_list[l][i].chunks[j] = new_res_list[l][i].chunks[j]
 
         # Perhaps poorly named, S keeps track of a linear combination of derivatives
         # We get this by including the essential singularity, then stripping it off again
@@ -366,7 +372,7 @@ class ConformalBlockTableSeed:
         else:
             chain_rule_double(self.m_order, self.n_order, rules1, rules2, self.table, conformal_blocks)
 
-    def dump(self, name, form = None):
+    def dump(self, name, form=None):
         if form == "juliboots":
             juliboots_write(self, name)
         elif form == "scalar_blocks":
