@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>&lt;no title&gt; &mdash; PyCFTBoot  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <title>PyCFTBoot &mdash; PyCFTBoot  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -35,8 +37,15 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">PyCFTBoot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation-on-linux">Installation on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-on-mac">Installation on Mac</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#attribution">Attribution</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
 </ul>
 
@@ -54,7 +63,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>&lt;no title&gt;</li>
+      <li>PyCFTBoot</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/readme.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -64,7 +73,102 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
+  <section id="pycftboot">
+<h1>PyCFTBoot<a class="headerlink" href="#pycftboot" title="Permalink to this headline"></a></h1>
+<p><a class="reference external" href="https://github.com/alepiazza/pycftboot/actions"><img alt="pycftboot Actions Status" src="https://github.com/alepiazza/pycftboot/actions/workflows/main.yml/badge.svg" /></a>
+<a class="reference external" href="https://codecov.io/gh/alepiazza/pycftboot?branch=master"><img alt="codecov.io" src="https://codecov.io/gh/alepiazza/pycftboot/coverage.svg?branch=master" /></a></p>
+<p>PyCFTBoot is an interface for the conformal bootstrap as discussed in <a class="reference external" href="http://arxiv.org/abs/0807.0004">its 2008 revival</a>. Starting from the analytic structure of conformal blocks, the code formulates semidefinite programs without any proprietary software. The code does NOT perform the actual optimization. It assumes you already have a program for that, namely <a class="reference external" href="https://github.com/davidsd/sdpb">SDPB</a> by David Simmons-Duffin.</p>
+<p>PyCFTBoot supports bounds on scaling dimensions and OPE coefficients in an arbitrary number of spacetime dimensions. The four-point functions used for the bounds must contain only scalars but they may have any combination of scaling dimensions and transform in arbitrary representations of a global symmetry.</p>
+<section id="installation-on-linux">
+<h2>Installation on Linux<a class="headerlink" href="#installation-on-linux" title="Permalink to this headline"></a></h2>
+<p>If you use one of the mainstream Linux distributions, the following instructions should help you install PyCFTBoot and everything it depends on.</p>
+<ol class="arabic">
+<li><p>Follow <a class="reference external" href="https://github.com/davidsd/sdpb/blob/master/Install.md#linux">the instructions</a> for installing SDPB. When this is done, you will have <a class="reference external" href="http://www.boost.org">Boost</a> and <a class="reference external" href="https://gmplib.org">GMP</a> as well, so we will not need to discuss those further.</p></li>
+<li><p>Additional run-time dependencies are: <a class="reference external" href="http://www.sympy.org">Sympy</a> and <a class="reference external" href="http://www.mpfr.org/">MPFR &gt;= 4.0</a>. The build-time dependencies are: <a class="reference external" href="http://cython.org/">Cython</a> and <a class="reference external" href="https://cmake.org/">CMake &gt;= 2.8</a>. You should install all of these. You will probably not need to compile them because most distros have these packages in their repositories.</p></li>
+<li><p>There are two library dependencies left. One is <a class="reference external" href="https://github.com/symengine/symengine">Symengine</a> which probably needs to be compiled. One commit that has been tested is ec460e7. An even better idea is to use the latest commit that has been <a class="reference external" href="https://github.com/symengine/symengine.py/blob/master/symengine_version.txt">marked stable</a> for language bindings. To compile it with the recommended settings, run:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span> mkdir build &amp;&amp; cd build
+ # WITH_PTHREAD and WITH_SYMENGINE_THREAD_SAFE might be helpful as well
+ cmake .. -DWITH_MPFR:BOOL=ON
+ make
+</pre></div>
+</div>
+</li>
+<li><p>Lastly, compile and install <a class="reference external" href="https://github.com/symengine/symengine.py">Symengine.py</a>.</p></li>
+<li><p>Additionally, extracting the spectrum with PyCFTBoot will require the binary <a class="reference external" href="https://numpi.dm.unipi.it/mpsolve-2.2/">unisolve</a>.</p></li>
+</ol>
+</section>
+<section id="installation-on-mac">
+<h2>Installation on Mac<a class="headerlink" href="#installation-on-mac" title="Permalink to this headline"></a></h2>
+<p>Thanks to Jaehoon Lee for writing these instructions and testing them on OS X 10.11 (El Capitan).</p>
+<ol class="arabic">
+<li><p>Follow the instructions for <a class="reference external" href="https://github.com/davidsd/sdpb/blob/master/Install.md#mac-os-x">installing SDPB</a> on Mac OS X. Installing gcc takes a long time, so be patient. Also, you don’t need <code class="docutils literal notranslate"><span class="pre">sudo</span></code> for installing boost due to recent changes. After that, you will have homebrew, gcc, gmp, mpfr and boost installed. The default compilers should be renamed as <code class="docutils literal notranslate"><span class="pre">gcc</span></code> and <code class="docutils literal notranslate"><span class="pre">g++</span></code> following the instructions.</p></li>
+<li><p>Build all the required packages (Cython, Numpy, Sympy and Mpmath). One might alreday have these packages installed. The following assumes that no package other than the system’s Python is installed.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span> # Install homebrew&#39;s python which comes with pip
+ brew install python
+ brew linkapps python
+ pip install --upgrade pip setuptools
+
+ # Numpy
+ brew install homebrew/python/numpy
+
+ # Cython
+ pip install cython
+
+ # Sympy
+ pip install sympy
+
+ # Mpmath - technically not required as it is included in sympy
+ pip install mpmath
+</pre></div>
+</div>
+</li>
+<li><p>Install <code class="docutils literal notranslate"><span class="pre">cmake</span></code> using homebrew:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span> brew install cmake
+</pre></div>
+</div>
+</li>
+<li><p>Download <a class="reference external" href="https://github.com/symengine/symengine">Symengine</a> and compile it. If you fail to install and need to rebuild, remove the build folder and start remaking it. Unpack the source file within the directory and run:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span> mkdir build &amp;&amp; cd build
+ # Turning on the MPFR option is critical for using PyCFTBoot
+ CC=gcc CXX=g++ cmake .. -DWITH_MPFR:BOOL=ON
+ make
+ # Test everything is built correctly
+ ctest
+ # Install files to default directories
+ make install
+</pre></div>
+</div>
+</li>
+<li><p>Install the Python bindings <a class="reference external" href="https://github.com/symengine/symengine.py">Symengine.py</a>. Download the source and within the directory run:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span> CC=gcc CXX=g++ python setup.py install
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h2>
+<p>To test that PyCFTBoot is working, try to run:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>    python
+    import bootstrap
+</pre></div>
+</div>
+<p>If that doesn’t work, you should check if the dependencies import correctly.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>    python
+    import symengine
+</pre></div>
+</div>
+<p>Assuming that all of this works, <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">tutorial.py</span></code> will enter a tutorial with four examples. There are two changes that you might want to make to <code class="docutils literal notranslate"><span class="pre">bootstrap.py</span></code>. One is changing <code class="docutils literal notranslate"><span class="pre">python2</span></code> to <code class="docutils literal notranslate"><span class="pre">python</span></code> in the first line, for systems that don’t append a specific number. The other is setting the path of SDPB and related executables by searching for <code class="docutils literal notranslate"><span class="pre">/usr/bin/sdpb</span></code> and updating this. Have fun constraining CFTs and convincing cluster maintainers to install fairly new software!</p>
+</section>
+<section id="attribution">
+<h2>Attribution<a class="headerlink" href="#attribution" title="Permalink to this headline"></a></h2>
+<p>If PyCFTBoot is helpful in one of your publications, please cite:</p>
+<ul class="simple">
+<li><p>C. Behan, “PyCFTBoot: A flexible interface for the conformal bootstrap”, <a class="reference external" href="http://arxiv.org/abs/1602.02810">arXiv:1602.02810 [hep-th]</a>.</p></li>
+</ul>
+</section>
+</section>
+
 
            </div>
           </div>
