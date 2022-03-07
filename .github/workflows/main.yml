@@ -39,10 +39,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: dist-pycftboot
+          path: dist
       - name: install pycftboot and its dependencies
         run: |
-          VERSION=$(python3 -c "from pkg_resources import get_distribution; print(get_distribution('pycftboot').version)")
-          pip3 install dist/pycftboot-${VERSION}.tar.gz
+          ls -lash
+          pip3 install dist/pycftboot-0.0.1.tar.gz
       - name: make tests and generate coverage report
         run: |
           coverage run -m unittest
