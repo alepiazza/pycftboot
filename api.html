@@ -41,7 +41,7 @@
 <li class="toctree-l1"><a class="reference internal" href="readme.html">PyCFTBoot</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#pycftboot-bootstrap">pycftboot.bootstrap</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#pycftboot-polynomial-vector">pycftboot.polynomial_vector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pycftboot.polynomial_vector">pycftboot.polynomial_vector</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pycftboot-common">pycftboot.common</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pycftboot-blocks1">pycftboot.blocks1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pycftboot-blocks2">pycftboot.blocks2</a></li>
@@ -80,8 +80,51 @@
 <section id="pycftboot-bootstrap">
 <h2>pycftboot.bootstrap<a class="headerlink" href="#pycftboot-bootstrap" title="Permalink to this headline"></a></h2>
 </section>
-<section id="pycftboot-polynomial-vector">
-<h2>pycftboot.polynomial_vector<a class="headerlink" href="#pycftboot-polynomial-vector" title="Permalink to this headline"></a></h2>
+<section id="module-pycftboot.polynomial_vector">
+<span id="pycftboot-polynomial-vector"></span><h2>pycftboot.polynomial_vector<a class="headerlink" href="#module-pycftboot.polynomial_vector" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pycftboot.polynomial_vector.PolynomialVector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.polynomial_vector.</span></span><span class="sig-name descname"><span class="pre">PolynomialVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">derivatives</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_irrep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poles</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.polynomial_vector.PolynomialVector" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The main class for vectors on which the functionals being found by SDPB may act.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.polynomial_vector.PolynomialVector.vector">
+<span class="sig-name descname"><span class="pre">vector</span></span><a class="headerlink" href="#pycftboot.polynomial_vector.PolynomialVector.vector" title="Permalink to this definition"></a></dt>
+<dd><p>number of components is dictated by the number of derivatives kept in
+the search space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>A list of the components, expected to be polynomials in <cite>delta</cite>. The</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.polynomial_vector.PolynomialVector.label">
+<span class="sig-name descname"><span class="pre">label</span></span><a class="headerlink" href="#pycftboot.polynomial_vector.PolynomialVector.label" title="Permalink to this definition"></a></dt>
+<dd><p>is a user-defined label for the representation of some global symmetry
+(or 0 if none have been set yet).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>A two element list where the first element is the spin and the second</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.polynomial_vector.PolynomialVector.poles">
+<span class="sig-name descname"><span class="pre">poles</span></span><a class="headerlink" href="#pycftboot.polynomial_vector.PolynomialVector.poles" title="Permalink to this definition"></a></dt>
+<dd><p><cite>vector</cite>. This allows one to go back to the original rational functions
+instead of the more convenient polynomials.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>A list of roots of the common denominator shared by all entries in</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="pycftboot-common">
 <h2>pycftboot.common<a class="headerlink" href="#pycftboot-common" title="Permalink to this headline"></a></h2>
