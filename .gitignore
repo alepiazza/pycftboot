@@ -1,7 +1,13 @@
+# Packaging
 dist
 __pycache__
 *.egg-info
 
+# Test and coverage
+.coverage
+htmlcov
+
+# Other stuff
 venv
 .flake8
 .dir-locals.el
