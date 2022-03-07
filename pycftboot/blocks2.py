@@ -1,3 +1,12 @@
+from symengine.lib.symengine_wrapper import eval_mpfr, Integer
+
+from .polynomial_vector import PolynomialVector
+from .common import (
+    get_index_approx, delta, tiny, coefficients, prec, build_polynomial, ell,
+    r_cross, chain_rule_single, rules
+)
+
+
 def convert_table(tab_short, tab_long):
     """
     Converts a table with few poles into an equivalent table with many poles.

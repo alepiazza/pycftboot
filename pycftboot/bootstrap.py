@@ -14,28 +14,35 @@ dimensions and transform in arbitrary representations of a global symmetry.
 """
 from __future__ import print_function
 import xml.dom.minidom
-import subprocess
-import itertools
 import time
-import re
 import os
+import subprocess
+import re
 
 # Regular sympy is slow but we only use it for quick access to Gegenbauer polynomials
 # Even this could be removed since our conformal block code is needlessly general
-from symengine.lib.symengine_wrapper import *
-import sympy
+from symengine.lib.symengine_wrapper import (
+    have_mpfr, Symbol, RealMPFR, factorial, oo, uppergamma, log, DenseMatrix,
+    pi, exp, sqrt
+)
 
-if have_mpfr == False:
+from .compat_juliboots import juliboots_read, juliboots_write
+from .compat_scalar_blocks import scalar_blocks_read, scalar_blocks_write
+from .blocks1 import ConformalBlockTableSeed
+from .blocks2 import ConformalBlockTableSeed2
+from .polynomial_vector import PolynomialVector
+from .common import (
+    ell, prec, delta, two, one, dump_table_contents, delta_ext, gather,
+    get_index_approx, index_iter, r_cross, omit_all, rf, deepcopy,
+    unitarity_bound, sdpb_options, sdpb_defaults, coefficients, zero, tiny,
+    get_index,
+    sdpb_version, sdpb_path, mpirun_path, find_executable
+)
+
+if have_mpfr is False:
     print("Symengine must be compiled with MPFR support")
     quit(1)
 
-# Relocate some self-contained classes to separate files
-# Importing them would not make sense because they refer back to things in this file
-exec(open("common.py").read())
-exec(open("compat_juliboots.py").read())
-exec(open("compat_scalar_blocks.py").read())
-exec(open("blocks1.py").read())
-exec(open("blocks2.py").read())
 
 # MPFR has no trouble calling gamma_inc quickly when the first argument is zero
 # In case we need to go back to using non-zero values, the following might be faster
@@ -46,28 +53,6 @@ def uppergamma(x, a):
     return RealMPFR(str(mpmath.gammainc(mpmath.mpf(str(x)), a = mpmath.mpf(str(a)))), prec)
 """
 
-class PolynomialVector:
-    """
-    The main class for vectors on which the functionals being found by SDPB may act.
-
-    Attributes
-    ----------
-    vector: A list of the components, expected to be polynomials in `delta`. The
-            number of components is dictated by the number of derivatives kept in
-            the search space.
-    label:  A two element list where the first element is the spin and the second
-            is a user-defined label for the representation of some global symmetry
-            (or 0 if none have been set yet).
-    poles:  A list of roots of the common denominator shared by all entries in
-            `vector`. This allows one to go back to the original rational functions
-            instead of the more convenient polynomials.
-    """
-    def __init__(self, derivatives, spin_irrep, poles):
-        if type(spin_irrep) == type(1):
-            spin_irrep = [spin_irrep, 0]
-        self.vector = derivatives
-        self.label = spin_irrep
-        self.poles = poles
 
 class ConformalBlockTable:
     """
