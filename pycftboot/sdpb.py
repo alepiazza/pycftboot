@@ -47,7 +47,7 @@ class Sdpb(ABC):
 
         Returns
         -------
-        object with at least stdout, stderr, returncode attributes
+        returns a subprocess.CompletedProcess object
         """
         pass
 
@@ -131,7 +131,15 @@ class SdpbDocker(Sdpb):
 
         container.remove()
 
-        return type("run", (object,), {"stdout": stdout, "stderr": stderr, "returncode": result["StatusCode"]})
+        completed_process = subprocess.CompletedProcess(
+            args=command,
+            returncode=result["StatusCode"],
+            stdout=stdout,
+            stderr=stderr
+        )
+        completed_process.check_returncode()
+
+        return completed_process
 
     def run(self, *args):
         return self.run_in_docker(["/usr/local/bin/sdpb"] + list(args))
