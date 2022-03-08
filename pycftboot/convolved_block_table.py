@@ -64,7 +64,8 @@ class ConvolvedBlockTable:
     n_order:     A list stating how many `b` derivatives are being described by the
                  corresponding entry in a `PolynomialVector` in `table`.
     """
-    def __init__(self, block_table, odd_spins = True, symmetric = False, spins = [], content = [[1, 0, 0]]):
+
+    def __init__(self, block_table, odd_spins=True, symmetric=False, spins=[], content=[[1, 0, 0]]):
         # Copying everything but the unconvolved table is fine from a memory standpoint
         self.dim = block_table.dim
         self.k_max = block_table.k_max

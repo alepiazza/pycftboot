@@ -63,7 +63,8 @@ class ConformalBlockTable:
                at the `i`-th entry of `n_order` which is the number of `b`
                derivatives.
     """
-    def __init__(self, dim, k_max, l_max, m_max, n_max, delta_12 = 0, delta_34 = 0, odd_spins = False, name = None):
+
+    def __init__(self, dim, k_max, l_max, m_max, n_max, delta_12=0, delta_34=0, odd_spins=False, name=None):
         self.dim = dim
         self.k_max = k_max
         self.l_max = l_max
@@ -212,7 +213,7 @@ class ConformalBlockTable:
                 self.n_order.append(n)
                 index += 1
 
-    def dump(self, name, form = None):
+    def dump(self, name, form=None):
         """
         Saves a table of conformal block derivatives to a file. Unless overridden,
         the file is valid Python code which manually populates the entries of
