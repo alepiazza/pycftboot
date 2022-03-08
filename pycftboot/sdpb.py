@@ -8,7 +8,7 @@ import warnings
 import docker
 
 
-class sdpb(ABC):
+class Sdpb(ABC):
     """Abstract class for SDPB
 
     Attributes
@@ -68,7 +68,7 @@ class sdpb(ABC):
         return defaults_extra + COMMON_DEFAULTS
 
 
-class sdpb_binary(sdpb):
+class SdpbBinary(Sdpb):
     """ Class for SDPB when installed as a binary
     """
     def __init__(self, sdpb_bin='/usr/bin/sdpb', mpirun_bin='/usr/bin/mpirun'):
@@ -99,7 +99,7 @@ class sdpb_binary(sdpb):
         return subprocess.run([self.path] + list(args), capture_output=True, check=True, text=True)
 
 
-class sdpb_docker(sdpb):
+class SdpbDocker(Sdpb):
     """ Class for SDPB when running in docker
     """
 
