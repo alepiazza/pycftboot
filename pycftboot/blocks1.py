@@ -1,3 +1,5 @@
+# Regular sympy is slow but we only use it for quick access to Gegenbauer polynomials
+# Even this could be removed since our conformal block code is needlessly general
 from symengine.lib.symengine_wrapper import (
     eval_mpfr, factorial, Symbol, Integer, DenseMatrix, sqrt
 )
