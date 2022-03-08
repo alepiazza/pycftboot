@@ -41,6 +41,14 @@ pycftboot.blocks2
    :undoc-members:
    :show-inheritance:
 
+pycftboot.sdpb
+--------------------------
+
+.. automodule:: pycftboot.sdpb
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pycftboot.compat\_juliboots
 ----------------------------------
 

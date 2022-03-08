@@ -144,7 +144,7 @@ def extract_power(term):
     as (coefficient, (delta, exponent)). This is helpful for sorting polynomials
     which are not sorted by default.
     """
-    if not "args" in dir(term):
+    if "args" not in dir(term):
         return 0
 
     if term.args == ():
@@ -161,7 +161,7 @@ def coefficients(polynomial):
     constant term. Zeros are automatically added so that the length of the list
     is always one more than the degree.
     """
-    if not "args" in dir(polynomial):
+    if "args" not in dir(polynomial):
         return [polynomial]
     if polynomial.args == ():
         return [polynomial]
