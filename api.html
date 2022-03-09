@@ -42,10 +42,14 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#pycftboot-bootstrap">pycftboot.bootstrap</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pycftboot.polynomial_vector">pycftboot.polynomial_vector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pycftboot-conformal-block-table">pycftboot.conformal_block_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pycftboot-convolved-block-table">pycftboot.convolved_block_table</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pycftboot-common">pycftboot.common</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pycftboot-blocks1">pycftboot.blocks1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pycftboot-blocks2">pycftboot.blocks2</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pycftboot.sdpb">pycftboot.sdpb</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pycftboot-sdpb">pycftboot.sdpb</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pycftboot-serialize">pycftboot.serialize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pycftboot-compat-json">pycftboot.compat_json</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pycftboot-compat-juliboots">pycftboot.compat_juliboots</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pycftboot-compat-scalar-blocks">pycftboot.compat_scalar_blocks</a></li>
 </ul>
@@ -127,6 +131,12 @@ instead of the more convenient polynomials.</p>
 </dd></dl>
 
 </section>
+<section id="pycftboot-conformal-block-table">
+<h2>pycftboot.conformal_block_table<a class="headerlink" href="#pycftboot-conformal-block-table" title="Permalink to this headline"></a></h2>
+</section>
+<section id="pycftboot-convolved-block-table">
+<h2>pycftboot.convolved_block_table<a class="headerlink" href="#pycftboot-convolved-block-table" title="Permalink to this headline"></a></h2>
+</section>
 <section id="pycftboot-common">
 <h2>pycftboot.common<a class="headerlink" href="#pycftboot-common" title="Permalink to this headline"></a></h2>
 </section>
@@ -136,137 +146,14 @@ instead of the more convenient polynomials.</p>
 <section id="pycftboot-blocks2">
 <h2>pycftboot.blocks2<a class="headerlink" href="#pycftboot-blocks2" title="Permalink to this headline"></a></h2>
 </section>
-<section id="module-pycftboot.sdpb">
-<span id="pycftboot-sdpb"></span><h2>pycftboot.sdpb<a class="headerlink" href="#module-pycftboot.sdpb" title="Permalink to this headline"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.sdpb.</span></span><span class="sig-name descname"><span class="pre">Sdpb</span></span><a class="headerlink" href="#pycftboot.sdpb.Sdpb" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
-<p>Abstract class for SDPB</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.version">
-<span class="sig-name descname"><span class="pre">version</span></span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.version" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>version of the sdpb program</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.options">
-<span class="sig-name descname"><span class="pre">options</span></span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.options" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>available options</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.defaults">
-<span class="sig-name descname"><span class="pre">defaults</span></span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.defaults" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>default values of sdpb</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.get_defaults">
-<span class="sig-name descname"><span class="pre">get_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.get_defaults" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.get_options">
-<span class="sig-name descname"><span class="pre">get_options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.get_options" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.get_version">
-<span class="sig-name descname"><span class="pre">get_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.get_version" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.run">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.run" title="Permalink to this definition"></a></dt>
-<dd><p>Run sdpb command with arguments given</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>args</strong> (<em>sdpb arguments</em>) – </p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>returns a subprocess.CompletedProcess object</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pycftboot.sdpb.SdpbBinary">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.sdpb.</span></span><span class="sig-name descname"><span class="pre">SdpbBinary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdpb_bin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/usr/bin/sdpb'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpirun_bin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/usr/bin/mpirun'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.SdpbBinary" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pycftboot.sdpb.Sdpb" title="pycftboot.sdpb.Sdpb"><code class="xref py py-class docutils literal notranslate"><span class="pre">pycftboot.sdpb.Sdpb</span></code></a></p>
-<p>Class for SDPB when installed as a binary</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pycftboot.sdpb.SdpbBinary.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.SdpbBinary.run" title="Permalink to this definition"></a></dt>
-<dd><p>Run sdpb command with arguments given</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>args</strong> (<em>sdpb arguments</em>) – </p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>returns a subprocess.CompletedProcess object</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pycftboot.sdpb.SdpbDocker">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.sdpb.</span></span><span class="sig-name descname"><span class="pre">SdpbDocker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'wlandry/sdpb:2.5.1'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.SdpbDocker" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pycftboot.sdpb.Sdpb" title="pycftboot.sdpb.Sdpb"><code class="xref py py-class docutils literal notranslate"><span class="pre">pycftboot.sdpb.Sdpb</span></code></a></p>
-<p>Class for SDPB when running in docker</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pycftboot.sdpb.SdpbDocker.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.SdpbDocker.run" title="Permalink to this definition"></a></dt>
-<dd><p>Run sdpb command with arguments given</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>args</strong> (<em>sdpb arguments</em>) – </p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>returns a subprocess.CompletedProcess object</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pycftboot.sdpb.SdpbDocker.run_in_docker">
-<span class="sig-name descname"><span class="pre">run_in_docker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.SdpbDocker.run_in_docker" title="Permalink to this definition"></a></dt>
-<dd><p>Run command in a docker image specified by <cite>image</cite></p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pycftboot.sdpb.SdpbDocker.command">
-<span class="sig-name descname"><span class="pre">command</span></span><a class="headerlink" href="#pycftboot.sdpb.SdpbDocker.command" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>string or list commnad</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>object with at stdout, stderr, returncode attributes of the command</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+<section id="pycftboot-sdpb">
+<h2>pycftboot.sdpb<a class="headerlink" href="#pycftboot-sdpb" title="Permalink to this headline"></a></h2>
+</section>
+<section id="pycftboot-serialize">
+<h2>pycftboot.serialize<a class="headerlink" href="#pycftboot-serialize" title="Permalink to this headline"></a></h2>
+</section>
+<section id="pycftboot-compat-json">
+<h2>pycftboot.compat_json<a class="headerlink" href="#pycftboot-compat-json" title="Permalink to this headline"></a></h2>
 </section>
 <section id="pycftboot-compat-juliboots">
 <h2>pycftboot.compat_juliboots<a class="headerlink" href="#pycftboot-compat-juliboots" title="Permalink to this headline"></a></h2>

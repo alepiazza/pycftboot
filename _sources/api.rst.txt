@@ -17,6 +17,22 @@ pycftboot.polynomial\_vector
    :undoc-members:
    :show-inheritance:
 
+pycftboot.conformal\_block\_table
+-----------------------------------
+
+.. automodule:: pycftboot.conformal_block_table
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pycftboot.convolved\_block\_table
+-----------------------------------
+
+.. automodule:: pycftboot.convolved_block_table
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pycftboot.common
 -----------------------
 
@@ -45,6 +61,23 @@ pycftboot.sdpb
 --------------------------
 
 .. automodule:: pycftboot.sdpb
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+pycftboot.serialize
+----------------------------------
+
+.. automodule:: pyftboot.serialize
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pycftboot.compat\_json
+----------------------------------
+
+.. automodule:: pycftboot.compat_json
    :members:
    :undoc-members:
    :show-inheritance:
