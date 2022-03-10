@@ -4,6 +4,7 @@ from symengine.lib.symengine_wrapper import Add, RealMPFR, ComplexInfinity
 
 from .polynomial_vector import PolynomialVector
 from .conformal_block_table import ConformalBlockTable
+from .constants import prec
 
 
 class CustomEncoder(json.JSONEncoder):
@@ -54,7 +55,7 @@ class CustomDecoder(json.JSONDecoder):
                 poles=obj["_value"]["poles"]
             )
         elif _type == "symengine":
-            return Add(obj["_value"])
+            return Add(obj["_value"]).evalf(prec)
         return obj
 
 
