@@ -1,7 +1,7 @@
 # Regular sympy is slow but we only use it for quick access to Gegenbauer polynomials
 # Even this could be removed since our conformal block code is needlessly general
 from symengine.lib.symengine_wrapper import (
-    eval_mpfr, factorial, Symbol, Integer, DenseMatrix, sqrt
+    factorial, Symbol, Integer, DenseMatrix, sqrt
 )
 import sympy
 
@@ -30,7 +30,7 @@ def delta_pole(nu, k, l, series):
     else:
         pole = 1 + l + 2 * nu - k
 
-    return eval_mpfr(pole, prec)
+    return pole.evalf(prec)
 
 
 def delta_residue(nu, k, l, delta_12, delta_34, series):
@@ -335,7 +335,7 @@ class ConformalBlockTableSeed:
                         pole2 = delta_pole(nu, pol_list[l_new][i_new][1], l_new, pol_list[l_new][i_new][3])
 
                         for j in range(0, len(new_res_list[l][i].chunks)):
-                            new_res_list[l][i].chunks[j] = new_res_list[l][i].chunks[j].add_matrix(res_list[l_new][i_new].chunks[j].mul_scalar(1 / eval_mpfr(pole1 - pole2, prec)))
+                            new_res_list[l][i].chunks[j] = new_res_list[l][i].chunks[j].add_matrix(res_list[l_new][i_new].chunks[j].mul_scalar(1 /(pole1 - pole2).evalf(prec)))
 
                     new_pow_list[l][i] = pow_list[l][i] + new_pow
 
