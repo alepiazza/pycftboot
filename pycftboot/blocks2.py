@@ -1,30 +1,29 @@
 from symengine.lib.symengine_wrapper import Integer, RealMPFR
 
+from .cbt_common import ConformalBlockTableCommon
 from .polynomial_vector import PolynomialVector
-from .common import chain_rule_single, rules
-from .constants import delta, prec, ell, r_cross, two
+from .chain_rule import chain_rule_single
+from .common import rules
+from .constants import delta, prec, ell, r_cross
 
 
-class ConformalBlockTableSeed2:
+class ConformalBlockTableSeed2(ConformalBlockTableCommon):
     """
     A class which calculates tables of conformal block derivatives from scratch
     using a power series solution of their fourth order differential equation.
     Usually, it will not be necessary for the user to call it. Instead,
-    `ConformalBlockTable` calls it automatically for `m_max = 3`. Note that there
-    is no `n_max` for this method.
+    `ConformalBlockTable` calls it automatically for `m_max = 3`. `n_max` must
+    be set to None for compatibility with the ConformalBlockTableCommon class,
+    but it won't actually be used.
     """
 
-    def __init__(self, dim, k_max, l_max, m_max, delta_12=0, delta_34=0, odd_spins=False):
-        self.dim = dim
-        self.k_max = k_max
-        self.l_max = l_max
-        self.m_max = m_max
-        self.delta_12 = delta_12
-        self.delta_34 = delta_34
-        self.odd_spins = odd_spins
-        self.m_order = []
-        self.n_order = []
-        self.table = []
+    def _compute_table(self, dim, k_max, l_max, m_max, n_max, delta_12, delta_34, odd_spins):
+        if n_max is not None:
+            raise ValueError(f"n_max = {n_max} is not None but it won't be used")
+
+        m_order = []
+        n_order = []
+        table = []
 
         if odd_spins:
             step = 1
@@ -55,7 +54,7 @@ class ConformalBlockTableSeed2:
         while l <= l_max and effective_power == 1:
             frob_coeffs = [1]
             conformal_blocks.append([])
-            self.table.append(PolynomialVector([], [l, 0], pole_set[l // step]))
+            table.append(PolynomialVector([], [l, 0], pole_set[l // step]))
 
             for k in range(1, k_max + 1):
                 # A good check is to force this code to run for identical scalars too
@@ -129,7 +128,7 @@ class ConformalBlockTableSeed2:
         while l <= l_max and effective_power == 2:
             frob_coeffs = [1]
             conformal_blocks.append([])
-            self.table.append(PolynomialVector([], [l, 0], pole_set[l // step]))
+            table.append(PolynomialVector([], [l, 0], pole_set[l // step]))
 
             for k in range(2, k_max + 1, 2):
                 recursion_coeffs = [0, 0, 0]
@@ -171,9 +170,11 @@ class ConformalBlockTableSeed2:
                     prod *= (delta + 2 * k - m)
             l += step
 
-        (rules1, rules2, self.m_order, self.n_order) = rules(m_max, 0)
-        chain_rule_single(self.m_order, rules1, self.table, conformal_blocks, lambda l, i: conformal_blocks[l][i])
+        (rules1, rules2, m_order, n_order) = rules(m_max, 0)
+        chain_rule_single(m_order, rules1, table, conformal_blocks, lambda l, i: conformal_blocks[l][i])
 
         # Find the superfluous poles (including possible triple poles) to cancel
-        for l in range(0, len(self.table)):
-            self.table[l].cacel_poles()
+        for l in range(0, len(table)):
+            table[l].cancel_poles()
+
+        return (m_order, n_order, table)

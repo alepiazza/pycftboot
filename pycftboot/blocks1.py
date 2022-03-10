@@ -1,81 +1,16 @@
 from symengine.lib.symengine_wrapper import factorial, Integer, DenseMatrix
 
+from .cbt_common import ConformalBlockTableCommon
 from .polynomial_vector import PolynomialVector
-from .block_vector import LeadingBlockVector, MeromorphicBlockVector, ConformalBlockVector
-from .common import rf, chain_rule_single, chain_rule_double, rules
+from .block_vector import (
+    LeadingBlockVector, MeromorphicBlockVector, ConformalBlockVector
+)
+from .chain_rule import chain_rule_single, chain_rule_double
+from .common import rf, rules, delta_pole
 from .constants import prec, two, r_cross, delta
 
 
-def delta_pole(nu, k, l, series):
-    """
-    Returns the pole of a meromorphic global conformal block given by the
-    parameters in arXiv:1406.4858 by Kos, Poland and Simmons-Duffin.
-
-    Parameters
-    ----------
-    nu:     `(d - 2) / 2` where d is the spatial dimension.
-    k:      The parameter k indexing the various poles. As described in
-            arXiv:1406.4858, it may be any positive integer unless `series` is 3.
-    l:      The spin.
-    series: The parameter i desribing the three types of poles in arXiv:1406.4858.
-    """
-    if series == 1:
-        pole = 1 - l - k
-    elif series == 2:
-        pole = 1 + nu - k
-    else:
-        pole = 1 + l + 2 * nu - k
-
-    return pole.evalf(prec)
-
-
-def delta_residue(nu, k, l, delta_12, delta_34, series):
-    """
-    Returns the residue of a meromorphic global conformal block at a particular
-    pole in `delta`. These residues were found by Kos, Poland and Simmons-Duffin
-    in arXiv:1406.4858.
-
-    Parameters
-    ----------
-    nu:       `(d - 2) / 2` where d is the spatial dimension. This must be
-              different from an integer.
-    k:        The parameter k indexing the various poles. As described in
-              arXiv:1406.4858, it may be any positive integer unless `series`
-              is 3.
-    l:        The spin.
-    delta_12: The difference between the external scaling dimensions of operator
-              1 and operator 2.
-    delta_34: The difference between the external scaling dimensions of operator
-              3 and operator 4.
-    series:   The parameter i desribing the three types of poles in
-              arXiv:1406.4858.
-    """
-    # Time saving special case
-    if series != 2 and k % 2 != 0 and delta_12 == 0 and delta_34 == 0:
-        return 0
-
-    if series == 1:
-        ret = - ((k * (-4) ** k) / (factorial(k) ** 2)) * rf((1 - k + delta_12) / two, k) * rf((1 - k + delta_34) / two, k)
-        if ret == 0:
-            return ret
-        elif l == 0 and nu == 0:
-            # Take l to 0, then nu
-            return ret * 2
-        else:
-            return ret * (rf(l + 2 * nu, k) / rf(l + nu, k))
-    elif series == 2:
-        factors = [l + nu + 1 - delta_12, l + nu + 1 + delta_12, l + nu + 1 - delta_34, l + nu + 1 + delta_34]
-        ret = ((k * rf(nu + 1, k - 1)) / (factorial(k) ** 2)) * ((l + nu - k) / (l + nu + k))
-        ret *= rf(-nu, k + 1) / ((rf((l + nu - k + 1) / 2, k) * rf((l + nu - k) / 2, k)) ** 2)
-
-        for f in factors:
-            ret *= rf((f - k) / two, k)
-        return ret
-    else:
-        return - ((k * (-4) ** k) / (factorial(k) ** 2)) * (rf(1 + l - k, k) * rf((1 - k + delta_12) / two, k) * rf((1 - k + delta_34) / two, k) / rf(1 + nu + l - k, k))
-
-
-class ConformalBlockTableSeed:
+class ConformalBlockTableSeed1(ConformalBlockTableCommon):
     """
     A class which calculates tables of conformal block derivatives from scratch
     using the recursion relations with meromorphic versions of the blocks.
@@ -86,18 +21,10 @@ class ConformalBlockTableSeed:
     It also supports the `dump` method.
     """
 
-    def __init__(self, dim, k_max, l_max, m_max, n_max, delta_12=0, delta_34=0, odd_spins=False):
-        self.dim = dim
-        self.k_max = k_max
-        self.l_max = l_max
-        self.m_max = m_max
-        self.n_max = n_max
-        self.delta_12 = delta_12
-        self.delta_34 = delta_34
-        self.odd_spins = odd_spins
-        self.m_order = []
-        self.n_order = []
-        self.table = []
+    def _compute_table(self, dim, k_max, l_max, m_max, n_max, delta_12, delta_34, odd_spins):
+        m_order = []
+        n_order = []
+        table = []
 
         if odd_spins:
             step = 1
@@ -222,14 +149,16 @@ class ConformalBlockTableSeed:
         for l in range(0, l_max + 1, step):
             conformal_block = ConformalBlockVector(dim, l, delta_12, delta_34, m_max + 2 * n_max, k_max, s_matrix, leading_blocks[l], pol_list[l], res_list[l])
             conformal_blocks.append(conformal_block)
-            self.table.append(PolynomialVector([], [l, 0], conformal_block.large_poles))
+            table.append(PolynomialVector([], [l, 0], conformal_block.large_poles))
 
-        (rules1, rules2, self.m_order, self.n_order) = rules(m_max, n_max)
+        (rules1, rules2, m_order, n_order) = rules(m_max, n_max)
         # If b is always 0, then eta is always 1
         if n_max == 0:
-            chain_rule_single(self.m_order, rules1, self.table, conformal_blocks, lambda l, i: conformal_blocks[l].chunks[0].get(i, 0))
+            chain_rule_single(m_order, rules1, table, conformal_blocks, lambda l, i: conformal_blocks[l].chunks[0].get(i, 0))
         else:
-            chain_rule_double(self.m_order, self.n_order, rules1, rules2, self.table, conformal_blocks)
+            chain_rule_double(m_order, n_order, rules1, rules2, table, conformal_blocks)
+
+        return (m_order, n_order, table)
 
     # def dump(self, name, form=None):
     #     if form == "juliboots":
@@ -238,3 +167,49 @@ class ConformalBlockTableSeed:
     #         scalar_blocks_write(self, name)
     #     else:
     #         dump_table_contents(self, name)
+
+
+def delta_residue(nu, k, l, delta_12, delta_34, series):
+    """
+    Returns the residue of a meromorphic global conformal block at a particular
+    pole in `delta`. These residues were found by Kos, Poland and Simmons-Duffin
+    in arXiv:1406.4858.
+
+    Parameters
+    ----------
+    nu:       `(d - 2) / 2` where d is the spatial dimension. This must be
+              different from an integer.
+    k:        The parameter k indexing the various poles. As described in
+              arXiv:1406.4858, it may be any positive integer unless `series`
+              is 3.
+    l:        The spin.
+    delta_12: The difference between the external scaling dimensions of operator
+              1 and operator 2.
+    delta_34: The difference between the external scaling dimensions of operator
+              3 and operator 4.
+    series:   The parameter i desribing the three types of poles in
+              arXiv:1406.4858.
+    """
+    # Time saving special case
+    if series != 2 and k % 2 != 0 and delta_12 == 0 and delta_34 == 0:
+        return 0
+
+    if series == 1:
+        ret = - ((k * (-4) ** k) / (factorial(k) ** 2)) * rf((1 - k + delta_12) / two, k) * rf((1 - k + delta_34) / two, k)
+        if ret == 0:
+            return ret
+        elif l == 0 and nu == 0:
+            # Take l to 0, then nu
+            return ret * 2
+        else:
+            return ret * (rf(l + 2 * nu, k) / rf(l + nu, k))
+    elif series == 2:
+        factors = [l + nu + 1 - delta_12, l + nu + 1 + delta_12, l + nu + 1 - delta_34, l + nu + 1 + delta_34]
+        ret = ((k * rf(nu + 1, k - 1)) / (factorial(k) ** 2)) * ((l + nu - k) / (l + nu + k))
+        ret *= rf(-nu, k + 1) / ((rf((l + nu - k + 1) / 2, k) * rf((l + nu - k) / 2, k)) ** 2)
+
+        for f in factors:
+            ret *= rf((f - k) / two, k)
+        return ret
+    else:
+        return - ((k * (-4) ** k) / (factorial(k) ** 2)) * (rf(1 + l - k, k) * rf((1 - k + delta_12) / two, k) * rf((1 - k + delta_34) / two, k) / rf(1 + nu + l - k, k))
