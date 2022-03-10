@@ -1,81 +1,8 @@
 from symengine.lib.symengine_wrapper import Integer, RealMPFR
 
 from .polynomial_vector import PolynomialVector
-from .common import (
-    get_index_approx, coefficients, build_polynomial, chain_rule_single, rules
-)
-from .constants import delta, tiny, prec, ell, r_cross, two
-
-
-def convert_table(tab_short, tab_long):
-    """
-    Converts a table with few poles into an equivalent table with many poles.
-    When tables produced by different methods fail to look the same, it is often
-    because their polynomials are being multiplied by different positive
-    prefactors. This adjusts the prefactors so that they are the same.
-
-    Parameters
-    ----------
-    tab_short: A `ConformalBlockTable` where the blocks have a certain number of
-               poles which is hopefully optimal.
-    tab_long:  A `ConformalBlockTable` with all of the poles that `tab_short` has
-               plus more.
-    """
-    for l in range(0, len(tab_short.table)):
-        pole_prod = 1
-        small_list = tab_short.table[l].poles[:]
-
-        for p in tab_long.table[l].poles:
-            index = get_index_approx(small_list, p)
-
-            if index == -1:
-                pole_prod *= delta - p
-                tab_short.table[l].poles.append(p)
-            else:
-                small_list.remove(small_list[index])
-
-        for n in range(0, len(tab_short.table[l].vector)):
-            tab_short.table[l].vector[n] = tab_short.table[l].vector[n] * pole_prod
-            tab_short.table[l].vector[n] = tab_short.table[l].vector[n].expand()
-
-
-def cancel_poles(polynomial_vector):
-    """
-    Checks which roots of a conformal block denominator are also roots of the
-    numerator. Whenever one is found, a simple factoring is applied.
-
-    Parameters
-    ----------
-    polynomial_vector: The `PolynomialVector` that will be modified in place if
-                       it has superfluous poles.
-    """
-    poles = []
-    zero_poles = []
-    for p in polynomial_vector.poles:
-        if abs(float(p)) > tiny:
-            poles.append(p)
-        else:
-            zero_poles.append(p)
-    poles = zero_poles + poles
-
-    for p in poles:
-        # We should really make sure the pole is a root of all numerators
-        # However, this is automatic if it is a root before differentiating
-        if abs(polynomial_vector.vector[0].subs(delta, p)) < tiny:
-            polynomial_vector.poles.remove(p)
-
-            # A factoring algorithm which works if the zeros are first
-            for n in range(0, len(polynomial_vector.vector)):
-                coeffs = coefficients(polynomial_vector.vector[n])
-                if abs(p) > tiny:
-                    new_coeffs = [coeffs[0] / (-p).evalf(prec)]
-                    for i in range(1, len(coeffs) - 1):
-                        new_coeffs.append((new_coeffs[i - 1] - coeffs[i]) / p.evalf(prec))
-                else:
-                    coeffs.remove(coeffs[0])
-                    new_coeffs = coeffs
-
-                polynomial_vector.vector[n] = build_polynomial(new_coeffs)
+from .common import chain_rule_single, rules
+from .constants import delta, prec, ell, r_cross, two
 
 
 class ConformalBlockTableSeed2:
@@ -249,4 +176,4 @@ class ConformalBlockTableSeed2:
 
         # Find the superfluous poles (including possible triple poles) to cancel
         for l in range(0, len(self.table)):
-            cancel_poles(self.table[l])
+            self.table[l].cacel_poles()

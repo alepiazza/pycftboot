@@ -2,6 +2,7 @@ from symengine.lib.symengine_wrapper import Symbol, RealMPFR
 
 from .blocks1 import ConformalBlockTableSeed
 from .blocks2 import ConformalBlockTableSeed2
+from .common import get_index_approx
 from .constants import ell, prec, delta, two, one
 
 
@@ -85,6 +86,38 @@ class ConformalBlockTable:
         self.n_order, self.m_order, self.table = compute_conformal_block_table(
             self.dim, self.k_max, self.l_max, self.m_max, self.n_max, self.delta_12, self.delta_34, self.odd_spins
         )
+
+    def convert_table(self, tab_long):
+        """
+        Converts the table attribute having few poles into an equivalent table with many poles.
+        When tables produced by different methods fail to look the same, it is often
+        because their polynomials are being multiplied by different positive
+        prefactors. This adjusts the prefactors so that they are the same.
+
+        Parameters
+        ----------
+        tab_long:  A `ConformalBlockTable` with all of the poles that `self.table` has
+                   plus more.
+        """
+        if not isinstance(tab_long, ConformalBlockTable):
+            raise TypeError(f"{tab_long} is not a ConformalBlockTable")
+
+        for l in range(0, len(self.table)):
+            pole_prod = 1
+            small_list = self.table[l].poles[:]
+
+            for p in tab_long.table[l].poles:
+                index = get_index_approx(small_list, p)
+
+                if index == -1:
+                    pole_prod *= delta - p
+                    self.table[l].poles.append(p)
+                else:
+                    small_list.remove(small_list[index])
+
+            for n in range(0, len(self.table[l].vector)):
+                self.table[l].vector[n] = self.table[l].vector[n] * pole_prod
+                self.table[l].vector[n] = self.table[l].vector[n].expand()
 
 
 def compute_conformal_block_table(dim, k_max, l_max, m_max, n_max, delta_12, delta_34, odd_spins):
