@@ -77,6 +77,12 @@ class ConformalBlockTable:
         if compute is True:
             self.compute_table()
 
+    def __eq__(self, other):
+        if not isinstance(other, ConformalBlockTable):
+            # don't attempt to compare against unrelated types
+            return NotImplemented
+        return self.__dict__ == other.__dict__
+
     def compute_table(self):
         self.n_order, self.m_order, self.table = compute_conformal_block_table(
             self.dim, self.k_max, self.l_max, self.m_max, self.n_max, self.delta_12, self.delta_34, self.odd_spins

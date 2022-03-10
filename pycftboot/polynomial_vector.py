@@ -16,8 +16,15 @@ class PolynomialVector:
     """
 
     def __init__(self, derivatives, spin_irrep, poles):
-        if type(spin_irrep) == type(1):
+        if isinstance(spin_irrep, int):
             spin_irrep = [spin_irrep, 0]
+
         self.vector = derivatives
         self.label = spin_irrep
         self.poles = poles
+
+    def __eq__(self, other):
+        if not isinstance(other, PolynomialVector):
+            # don't attempt to compare against unrelated types
+            return NotImplemented
+        return self.__dict__ == other.__dict__
