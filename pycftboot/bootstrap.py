@@ -27,11 +27,9 @@ from .polynomial_vector import PolynomialVector
 from .conformal_block_table import ConformalBlockTable
 from .convolved_block_table import ConvolvedBlockTable
 from .common import (
-    ell, prec, delta, one, delta_ext, gather, r_cross, rf, deepcopy,
-    unitarity_bound, sdpb_options, sdpb_defaults, coefficients, zero,
-    tiny, get_index,
+    rf, gather, deepcopy, unitarity_bound, coefficients, get_index,
 )
-from .sdpb import sdpb_version, sdpb_path, mpirun_path, find_executable
+from .constants import ell, prec, delta, one, delta_ext, r_cross, zero, tiny
 
 
 if have_mpfr is False:

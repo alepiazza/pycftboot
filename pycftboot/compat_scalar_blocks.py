@@ -3,7 +3,8 @@ import re
 from symengine.lib.symengine_wrapper import RealMPFR
 
 from .polynomial_vector import PolynomialVector
-from .common import prec, delta, tiny, coefficients, gather
+from .common import coefficients, gather
+from .constants import prec, delta, tiny
 
 
 def scalar_blocks_read(block_table, name):

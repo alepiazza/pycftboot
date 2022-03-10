@@ -2,9 +2,7 @@ from symengine.lib.symengine_wrapper import Symbol, RealMPFR
 
 from .blocks1 import ConformalBlockTableSeed
 from .blocks2 import ConformalBlockTableSeed2
-from .common import (
-    ell, prec, delta, two, one
-)
+from .constants import ell, prec, delta, two, one
 
 
 class ConformalBlockTable:

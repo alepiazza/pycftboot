@@ -1,10 +1,8 @@
 from symengine.lib.symengine_wrapper import RealMPFR, Integer
 
 from .polynomial_vector import PolynomialVector
-from .common import (
-    delta, two, prec, extract_power, build_polynomial, coefficients, gather,
-    omit_all
-)
+from .common import extract_power, build_polynomial, coefficients, gather, omit_all
+from .constants import delta, two, prec
 
 
 def juliboots_read(block_table, name):

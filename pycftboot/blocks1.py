@@ -5,15 +5,9 @@ from symengine.lib.symengine_wrapper import (
 )
 import sympy
 
-from .common import (
-    prec, one, two, rf, r_cross, cutoff, unitarity_bound, tiny, delta,
-    chain_rule_single, chain_rule_double, dump_table_contents, rules
-)
-
 from .polynomial_vector import PolynomialVector
-
-from .compat_juliboots import juliboots_write
-from .compat_scalar_blocks import scalar_blocks_write
+from .common import rf, unitarity_bound, chain_rule_single, chain_rule_double, rules
+from .constants import prec, one, two, r_cross, cutoff, tiny, delta
 
 
 def delta_pole(nu, k, l, series):
@@ -374,10 +368,10 @@ class ConformalBlockTableSeed:
         else:
             chain_rule_double(self.m_order, self.n_order, rules1, rules2, self.table, conformal_blocks)
 
-    def dump(self, name, form=None):
-        if form == "juliboots":
-            juliboots_write(self, name)
-        elif form == "scalar_blocks":
-            scalar_blocks_write(self, name)
-        else:
-            dump_table_contents(self, name)
+    # def dump(self, name, form=None):
+    #     if form == "juliboots":
+    #         juliboots_write(self, name)
+    #     elif form == "scalar_blocks":
+    #         scalar_blocks_write(self, name)
+    #     else:
+    #         dump_table_contents(self, name)

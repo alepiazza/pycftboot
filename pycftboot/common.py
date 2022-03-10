@@ -1,71 +1,9 @@
-import os
-import subprocess
-import re
 import itertools
-
 from symengine.lib.symengine_wrapper import (
-    RealMPFR, zero, one, sqrt, Symbol, function_symbol, Derivative, Subs,
-    Integer
+    RealMPFR, Symbol, sqrt, function_symbol, Derivative, Subs, Integer
 )
 
-cutoff = 0
-prec = 660
-dec_prec = int((3.0 / 10.0) * prec)
-tiny = RealMPFR("1e-" + str(dec_prec // 2), prec)
-
-zero = zero.n(prec)
-one = one.n(prec)
-two = 2 * one
-r_cross = 3 - 2 * sqrt(2).n(prec)
-
-ell = Symbol('ell')
-delta = Symbol('delta')
-delta_ext = Symbol('delta_ext')
-
-# Default paths, used as first priority if they exists
-sdpb_path = "/usr/bin/sdpb"
-mpirun_path = "/usr/bin/mpirun"
-
-
-def find_executable(name):
-    if os.path.isfile(name):
-        return name
-    else:
-        for path in os.environ["PATH"].split(os.pathsep):
-            test = os.path.join(path, name)
-            if os.path.isfile(test):
-                return test
-        else:
-            raise EnvironmentError("%s was not found on path." % name)
-
-
-# If default path doesn't apply, look for SDPB on user's PATH
-if not os.path.isfile(sdpb_path):
-    sdpb_path = find_executable("sdpb")
-
-# Determine (major) version of SDPB
-proc = subprocess.Popen([sdpb_path, "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-(stdout, _) = proc.communicate()
-if proc.returncode != 0:
-    # Assume that this is version 1.x, which didn't support --version
-    sdpb_version = 1
-else:
-    # Otherwise parse the output of --version
-    m = re.search(r"SDPB ([0-9])", str(stdout))
-    if m is None:
-        raise RuntimeError("Failed to retrieve SDPB version.")
-    sdpb_version = int(m.group(1))
-
-sdpb_options = ["checkpointInterval", "maxIterations", "maxRuntime", "dualityGapThreshold", "primalErrorThreshold", "dualErrorThreshold", "initialMatrixScalePrimal", "initialMatrixScaleDual", "feasibleCenteringParameter", "infeasibleCenteringParameter", "stepLengthReduction", "maxComplementarity"]
-sdpb_defaults = ["3600", "500", "86400", "1e-30", "1e-30", "1e-30", "1e+20", "1e+20", "0.1", "0.3", "0.7", "1e+100"]
-if sdpb_version == 1:
-    sdpb_options = ["maxThreads", "choleskyStabilizeThreshold"] + sdpb_options
-    sdpb_defaults = ["4", "1e-40"] + sdpb_defaults
-else:
-    sdpb_options = ["procsPerNode", "procGranularity", "verbosity"] + sdpb_options
-    sdpb_defaults = ["0", "1", "1"] + sdpb_defaults
-    if not os.path.isfile(mpirun_path):
-        mpirun_path = find_executable("mpirun")
+from .constants import tiny, prec, delta
 
 
 def rf(x, n):
@@ -223,37 +161,6 @@ def omit_all(poles, special_poles, var, shift=0):
             power = gathered0[index_iter(gathered0.keys(), ind)]
         expression *= (var - p) ** (gathered1[p] - power)
     return expression
-
-
-def dump_table_contents(block_table, name):
-    """
-    This is called by `ConformalBlockTable` and `ConformalBlockTableSeed`. It
-    writes executable Python code to a file designed to recreate the full set of
-    the table's attributes as quickly as possible.
-    """
-    dump_file = open(name, 'w')
-
-    dump_file.write("self.dim = " + block_table.dim.__str__() + "\n")
-    dump_file.write("self.k_max = " + block_table.k_max.__str__() + "\n")
-    dump_file.write("self.l_max = " + block_table.l_max.__str__() + "\n")
-    dump_file.write("self.m_max = " + block_table.m_max.__str__() + "\n")
-    dump_file.write("self.n_max = " + block_table.n_max.__str__() + "\n")
-    dump_file.write("self.delta_12 = " + block_table.delta_12.__str__() + "\n")
-    dump_file.write("self.delta_34 = " + block_table.delta_34.__str__() + "\n")
-    dump_file.write("self.odd_spins = " + block_table.odd_spins.__str__() + "\n")
-    dump_file.write("self.m_order = " + block_table.m_order.__str__() + "\n")
-    dump_file.write("self.n_order = " + block_table.n_order.__str__() + "\n")
-    dump_file.write("self.table = []\n")
-
-    for l in range(0, len(block_table.table)):
-        dump_file.write("derivatives = []\n")
-        for i in range(0, len(block_table.table[0].vector)):
-            poly_string = block_table.table[l].vector[i].__str__()
-            poly_string = re.sub("([0-9]+\.[0-9]+e?-?[0-9]+)", r"RealMPFR('\1', prec)", poly_string)
-            dump_file.write("derivatives.append(" + poly_string + ")\n")
-        dump_file.write("self.table.append(PolynomialVector(derivatives, " + block_table.table[l].label.__str__() + ", " + block_table.table[l].poles.__str__() + "))\n")
-
-    dump_file.close()
 
 
 def rules(m_max, n_max):

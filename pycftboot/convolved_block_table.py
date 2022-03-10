@@ -1,10 +1,8 @@
 from symengine.lib.symengine_wrapper import Symbol, RealMPFR, factorial
 
 from .polynomial_vector import PolynomialVector
-from .common import (
-    ell, prec, delta, get_index_approx, index_iter, r_cross, omit_all,
-    delta_ext, gather
-)
+from .common import get_index_approx, index_iter, omit_all, gather
+from .constants import ell, prec, delta, r_cross, delta_ext
 
 
 class ConvolvedBlockTable:
