@@ -148,11 +148,11 @@ class ConformalBlockTableSeed2(ConformalBlockTableCommon):
 
                 pole_prod = one
                 frob_coeffs.append(0)
-                for i in range(0, min(k / 2, 3)):
-                    frob_coeffs[k / 2] += recursion_coeffs[i] * pole_prod * frob_coeffs[(k / 2) - i - 1] / eval_mpfr(2 * k, prec)
-                    frob_coeffs[k / 2] = frob_coeffs[k / 2].expand()
-                    if i + 1 < min(k / 2, 3):
-                        pole_prod *= (delta - pole_set[l // step][3 * ((k / 2) - i - 2)]) * (delta - pole_set[l // step][3 * ((k / 2) - i - 2) + 1]) * (delta - pole_set[l // step][3 * ((k / 2) - i - 2) + 2])
+                for i in range(0, min(k // 2, 3)):
+                    frob_coeffs[k // 2] += recursion_coeffs[i] * pole_prod * frob_coeffs[(k // 2) - i - 1] / eval_mpfr(2 * k, prec)
+                    frob_coeffs[k // 2] = frob_coeffs[k // 2].expand()
+                    if i + 1 < min(k // 2, 3):
+                        pole_prod *= (delta - pole_set[l // step][3 * ((k // 2) - i - 2)]) * (delta - pole_set[l // step][3 * ((k // 2) - i - 2) + 1]) * (delta - pole_set[l // step][3 * ((k // 2) - i - 2) + 2])
 
             pole_prod = one
             for k in range(k_max // 2, -1, -1):
