@@ -1,5 +1,6 @@
 from symengine.lib.symengine_wrapper import Symbol, RealMPFR, factorial
 
+from .conformal_block_table import ConformalBlockTable
 from .polynomial_vector import PolynomialVector
 from .common import get_index_approx, index_iter, omit_all, gather
 from .constants import ell, prec, delta, r_cross, delta_ext
@@ -63,7 +64,10 @@ class ConvolvedBlockTable:
                  corresponding entry in a `PolynomialVector` in `table`.
     """
 
-    def __init__(self, block_table, odd_spins=True, symmetric=False, spins=[], content=[[1, 0, 0]]):
+    def __init__(self, block_table: ConformalBlockTable, odd_spins=True, symmetric=False, spins=[], content=[[1, 0, 0]]):
+        if not isinstance(block_table, ConformalBlockTable):
+            raise TypeError(f"block_table = {block_table} must be a ConformalBlockTable")
+
         # Copying everything but the unconvolved table is fine from a memory standpoint
         self.dim = block_table.dim
         self.k_max = block_table.k_max
@@ -83,14 +87,16 @@ class ConvolvedBlockTable:
         self.l_max -= max_spin_shift
 
         # We can restrict to even spin when the provided table has odd spin but not vice-versa
-        if odd_spins == False and block_table.odd_spins == True:
+        if odd_spins is False and block_table.odd_spins is True:
             self.odd_spins = False
         else:
             self.odd_spins = block_table.odd_spins
-        if block_table.odd_spins == True:
+
+        if block_table.odd_spins is True:
             step = 1
         else:
             step = 2
+
         if len(spins) > 0:
             spin_list = spins
         elif self.odd_spins:
@@ -109,7 +115,7 @@ class ConvolvedBlockTable:
         for n in range(0, block_table.n_max + 1):
             for m in range(0, 2 * (block_table.n_max - n) + block_table.m_max + 1):
                 # Skip the ones that will vanish
-                if (symmetric == False and m % 2 == 0) or (symmetric == True and m % 2 == 1):
+                if (symmetric is False and m % 2 == 0) or (symmetric is True and m % 2 == 1):
                     continue
 
                 self.m_order.append(m)

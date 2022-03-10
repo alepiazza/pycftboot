@@ -60,7 +60,7 @@ class LeadingBlockVector:
 
 
 class MeromorphicBlockVector:
-    def __init__(self, leading_block):
+    def __init__(self, leading_block: LeadingBlockVector):
         # A chunk is a set of r derivatives for one eta derivative
         # The matrix that should multiply a chunk is just R restricted to the right length
         self.chunks = []
@@ -73,7 +73,7 @@ class MeromorphicBlockVector:
 
 
 class ConformalBlockVector:
-    def __init__(self, dim, l, delta_12, delta_34, derivative_order, kept_pole_order, s_matrix, leading_block, pol_list, res_list):
+    def __init__(self, dim, l, delta_12, delta_34, derivative_order, kept_pole_order, s_matrix, leading_block: LeadingBlockVector, pol_list, res_list):
         self.large_poles = []
         self.small_poles = []
         self.chunks = []

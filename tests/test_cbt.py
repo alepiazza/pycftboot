@@ -1,6 +1,7 @@
 import unittest
+import itertools
 
-from pycftboot import ConformalBlockTable
+from pycftboot import ConformalBlockTable, ConvolvedBlockTable
 from pycftboot.cbt_seed1 import ConformalBlockTableSeed1
 from pycftboot.cbt_seed2 import ConformalBlockTableSeed2
 
@@ -46,3 +47,16 @@ class TestCBT(unittest.TestCase):
             cbt1.convert_table('')
 
         cbt1.convert_table(cbt2)
+
+
+class TestConvolvedBlockTable(unittest.TestCase):
+    def test_ConvBT(self):
+        for conformal_spin, convolved_spin in itertools.product((True, False), repeat=2):
+            cbt = ConformalBlockTable(3, 2, 2, 1, 1, odd_spins=conformal_spin)
+            ConvolvedBlockTable(cbt, odd_spins=convolved_spin)
+
+        cbt = ConformalBlockTable(3, 2, 2, 1, 1)
+        ConvolvedBlockTable(cbt, spins=[1, 2], symmetric=True)
+
+        with self.assertRaises(TypeError):
+            ConvolvedBlockTable('')

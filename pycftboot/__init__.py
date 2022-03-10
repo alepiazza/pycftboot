@@ -6,8 +6,9 @@ from .bootstrap import SDP
 from .sdpb import SdpbBinary, SdpbDocker
 
 __all__ = [
-    'ConformalBlockTable', 'ConvolvedBlockTable', 'SDP',
-    'PolynomialVector'
+    'PolynomialVector',
+    'ConformalBlockTable', 'ConvolvedBlockTable',
+    'SDP',
     'SdpbBinary', 'SdpbDocker',
     'read_table', 'write_table'
 ]
