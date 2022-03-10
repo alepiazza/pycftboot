@@ -786,6 +786,13 @@ instead of the more convenient polynomials.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.polynomial_vector.PolynomialVector.cancel_poles">
+<span class="sig-name descname"><span class="pre">cancel_poles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.polynomial_vector.PolynomialVector.cancel_poles" title="Permalink to this definition"></a></dt>
+<dd><p>Checks which roots of a conformal block denominator are also roots of the
+numerator. Whenever one is found, a simple factoring is applied.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -794,87 +801,10 @@ instead of the more convenient polynomials.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pycftboot.conformal_block_table.ConformalBlockTable">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.conformal_block_table.</span></span><span class="sig-name descname"><span class="pre">ConformalBlockTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_12</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_34</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odd_spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.conformal_block_table.ConformalBlockTable" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>A class which calculates tables of conformal block derivatives when initialized.
-This uses recursion relations on the diagonal found by Hogervorst, Osborn and
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pycftboot.cbt_common.ConformalBlockTableCommon</span></code></p>
+<p>This uses recursion relations on the diagonal found by Hogervorst, Osborn and
 Rychkov in arXiv:1305.1321.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dim</strong> (<em>The spatial dimension. If even dimensions are of interest</em><em>, </em><em>floating</em>) – point numbers with small fractional parts are recommended.</p></li>
-<li><p><strong>k_max</strong> (<em>Number controlling the accuracy of the rational approximation.</em>) – Specifically, it is the maximum power of the crossing symmetric value
-of the radial co-ordinate as described in arXiv:1406.4858.</p></li>
-<li><p><strong>l_max</strong> (<em>The maximum spin to include in the table.</em>) – </p></li>
-<li><p><strong>m_max</strong> (Number controlling how many <cite>a</cite> derivatives to include where the) – standard co-ordinates are expressed as <cite>(a + sqrt(b)) / 2</cite> and
-<cite>(a - sqrt(b)) / 2</cite>. As explained in arXiv:1412.4127, a value of 0
-does not necessarily eliminate all <cite>a</cite> derivatives.</p></li>
-<li><p><strong>n_max</strong> (The number of <cite>b</cite> derivatives to include where the standard) – co-ordinates are expressed as <cite>(a + sqrt(b)) / 2</cite> and
-<cite>(a - sqrt(b)) / 2</cite>.</p></li>
-<li><p><strong>delta_12</strong> (<em>[</em><em>Optional</em><em>] </em><em>The difference between the external scaling dimensions of</em>) – operator 1 and operator 2. Defaults to 0.</p></li>
-<li><p><strong>delta_34</strong> (<em>[</em><em>Optional</em><em>] </em><em>The difference between the external scaling dimensions of</em>) – operator 3 and operator 4. Defaults to 0.</p></li>
-<li><p><strong>odd_spins</strong> ([Optional] Whether to include 0, 1, 2, 3, …, <cite>l_max</cite> instead of) – just 0, 2, 4, …, <cite>l_max</cite>. Defaults to <cite>False</cite>.</p></li>
-<li><p><strong>name</strong> (<em>[</em><em>Optional</em><em>] </em><em>The name of a file containing conformal blocks that have</em>) – already been calculated. If this is specified and refers to a file
-produced by PyCFTBoot, all other parameters passed to the class are
-overwritten by the ones in the table. If it refers to one produced
-by JuliBoots, all parameters passed to the class except delta_12 and
-delta_34 are overwritten. If it refers to a directory, the contents
-will be treated as scalar_blocks output files. Parameters will be
-only be overwritten in this case if they can easily be parsed from
-the filenames.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pycftboot.conformal_block_table.ConformalBlockTable.table">
-<span class="sig-name descname"><span class="pre">table</span></span><a class="headerlink" href="#pycftboot.conformal_block_table.ConformalBlockTable.table" title="Permalink to this definition"></a></dt>
-<dd><p>equal to its spin if <cite>odd_spins</cite> is True. Otherwise it is equal to
-half of the spin.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>A list of <a href="#id9"><span class="problematic" id="id10">`</span></a>PolynomialVector`s. A block’s position in the table is</p>
-</dd>
-</dl>
 </dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pycftboot.conformal_block_table.ConformalBlockTable.m_order">
-<span class="sig-name descname"><span class="pre">m_order</span></span><a class="headerlink" href="#pycftboot.conformal_block_table.ConformalBlockTable.m_order" title="Permalink to this definition"></a></dt>
-<dd><p>in <cite>table</cite>. Any <cite>i</cite>-th entry in a <cite>PolynomialVector</cite> is a particular
-derivative of a conformal block, but to remember which one, just look
-at the <cite>i</cite>-th entry of <cite>m_order</cite> which is the number of <cite>a</cite>
-derivatives.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>A list with the same number of components as the <a href="#id11"><span class="problematic" id="id12">`</span></a>PolynomialVector`s</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pycftboot.conformal_block_table.ConformalBlockTable.n_order">
-<span class="sig-name descname"><span class="pre">n_order</span></span><a class="headerlink" href="#pycftboot.conformal_block_table.ConformalBlockTable.n_order" title="Permalink to this definition"></a></dt>
-<dd><p>in <cite>table</cite>. Any <cite>i</cite>-th entry in a <cite>PolynomialVector</cite> is a particular
-derivative of a conformal block, but to remember which one, just look
-at the <cite>i</cite>-th entry of <cite>n_order</cite> which is the number of <cite>b</cite>
-derivatives.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>A list with the same number of components as the <a href="#id13"><span class="problematic" id="id14">`</span></a>PolynomialVector`s</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pycftboot.conformal_block_table.ConformalBlockTable.compute_table">
-<span class="sig-name descname"><span class="pre">compute_table</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.conformal_block_table.ConformalBlockTable.compute_table" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pycftboot.conformal_block_table.compute_conformal_block_table">
-<span class="sig-prename descclassname"><span class="pre">pycftboot.conformal_block_table.</span></span><span class="sig-name descname"><span class="pre">compute_conformal_block_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_34</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odd_spins</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.conformal_block_table.compute_conformal_block_table" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 </section>
 <section id="module-pycftboot.convolved_block_table">
@@ -995,7 +925,7 @@ on <cite>ell</cite>.</p></li>
 to half of the spin.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>A list of <a href="#id15"><span class="problematic" id="id16">`</span></a>PolynomialVector`s. A block’s position in the table is</p>
+<dd class="field-odd"><p>A list of <a href="#id9"><span class="problematic" id="id10">`</span></a>PolynomialVector`s. A block’s position in the table is</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1037,40 +967,6 @@ expected to be the constant term.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pycftboot.common.chain_rule_double">
-<span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">chain_rule_double</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m_order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rules1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rules2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conformal_blocks</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.chain_rule_double" title="Permalink to this definition"></a></dt>
-<dd><p>This implements the same thing except in Python which should not be faster
-but it is.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pycftboot.common.chain_rule_double_symengine">
-<span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">chain_rule_double_symengine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m_order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rules1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rules2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conformal_blocks</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.chain_rule_double_symengine" title="Permalink to this definition"></a></dt>
-<dd><p>This reads a conformal block list where each spin has a chunk for a given
-number of angular derivatives and different radial derivatives within each
-chunk. It converts these to diagonal and off-diagonal <cite>a</cite> and <cite>b</cite> derivatives
-using the two sets of rules given. Once these are calculated, the passed
-<cite>table</cite> is populated.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pycftboot.common.chain_rule_single">
-<span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">chain_rule_single</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m_order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rules</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conformal_blocks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accessor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.chain_rule_single" title="Permalink to this definition"></a></dt>
-<dd><p>This implements the same thing except in Python which should not be faster
-but it is.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pycftboot.common.chain_rule_single_symengine">
-<span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">chain_rule_single_symengine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m_order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rules</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conformal_blocks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accessor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.chain_rule_single_symengine" title="Permalink to this definition"></a></dt>
-<dd><p>This reads a conformal block list where each spin’s entry is a list of radial
-derivatives. It converts these to diagonal <cite>a</cite> derivatives using the rules
-given. Once these are calculated, the passed <cite>table</cite> is populated. Here,
-<cite>accessor</cite> is a hack to get around the fact that different parts of the code
-like to index in different ways.</p>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="pycftboot.common.coefficients">
 <span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polynomial</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.coefficients" title="Permalink to this definition"></a></dt>
 <dd><p>Returns a sorted list of all coefficients in a polynomial starting with the
@@ -1082,6 +978,23 @@ is always one more than the degree.</p>
 <dt class="sig sig-object py" id="pycftboot.common.deepcopy">
 <span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">deepcopy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.deepcopy" title="Permalink to this definition"></a></dt>
 <dd><p>Copies a list of a list so that entries can be changed non-destructively.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.common.delta_pole">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">delta_pole</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">symengine.lib.symengine_wrapper.RealMPFR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.delta_pole" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the pole of a meromorphic global conformal block given by the
+parameters in arXiv:1406.4858 by Kos, Poland and Simmons-Duffin.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nu</strong> (<cite>(d - 2) / 2</cite> where d is the spatial dimension.) – </p></li>
+<li><p><strong>k</strong> (<em>The parameter k indexing the various poles. As described in</em>) – arXiv:1406.4858, it may be any positive integer unless <cite>series</cite> is 3.</p></li>
+<li><p><strong>l</strong> (<em>The spin.</em>) – </p></li>
+<li><p><strong>series</strong> (<em>The parameter i desribing the three types of poles in arXiv:1406.4858.</em>) – </p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -1154,9 +1067,9 @@ given spatial dimension and spin.</p>
 <section id="module-pycftboot.blocks1">
 <span id="pycftboot-blocks1"></span><h2>pycftboot.blocks1<a class="headerlink" href="#module-pycftboot.blocks1" title="Permalink to this headline"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="pycftboot.blocks1.ConformalBlockTableSeed">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.blocks1.</span></span><span class="sig-name descname"><span class="pre">ConformalBlockTableSeed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_12</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_34</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odd_spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.blocks1.ConformalBlockTableSeed" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dt class="sig sig-object py" id="pycftboot.blocks1.ConformalBlockTableSeed1">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.blocks1.</span></span><span class="sig-name descname"><span class="pre">ConformalBlockTableSeed1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_12</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_34</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odd_spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.blocks1.ConformalBlockTableSeed1" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pycftboot.cbt_common.ConformalBlockTableCommon</span></code></p>
 <p>A class which calculates tables of conformal block derivatives from scratch
 using the recursion relations with meromorphic versions of the blocks.
 Usually, it will not be necessary for the user to call it. Instead,
@@ -1164,51 +1077,6 @@ Usually, it will not be necessary for the user to call it. Instead,
 For people wanting to call it with different values of <cite>m_max</cite> and <cite>n_max</cite>,
 the parameters and attributes are the same as those of <cite>ConformalBlockTable</cite>.
 It also supports the <cite>dump</cite> method.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pycftboot.blocks1.ConformalBlockVector">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.blocks1.</span></span><span class="sig-name descname"><span class="pre">ConformalBlockVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_34</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">derivative_order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kept_pole_order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">leading_block</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.blocks1.ConformalBlockVector" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pycftboot.blocks1.ConformalBlockVector.get_pole_index">
-<span class="sig-name descname"><span class="pre">get_pole_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.blocks1.ConformalBlockVector.get_pole_index" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pycftboot.blocks1.LeadingBlockVector">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.blocks1.</span></span><span class="sig-name descname"><span class="pre">LeadingBlockVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_34</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.blocks1.LeadingBlockVector" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pycftboot.blocks1.LeadingBlockVector.leading_block">
-<span class="sig-name descname"><span class="pre">leading_block</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_34</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.blocks1.LeadingBlockVector.leading_block" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pycftboot.blocks1.MeromorphicBlockVector">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.blocks1.</span></span><span class="sig-name descname"><span class="pre">MeromorphicBlockVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">leading_block</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.blocks1.MeromorphicBlockVector" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pycftboot.blocks1.delta_pole">
-<span class="sig-prename descclassname"><span class="pre">pycftboot.blocks1.</span></span><span class="sig-name descname"><span class="pre">delta_pole</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.blocks1.delta_pole" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the pole of a meromorphic global conformal block given by the
-parameters in arXiv:1406.4858 by Kos, Poland and Simmons-Duffin.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>nu</strong> (<cite>(d - 2) / 2</cite> where d is the spatial dimension.) – </p></li>
-<li><p><strong>k</strong> (<em>The parameter k indexing the various poles. As described in</em>) – arXiv:1406.4858, it may be any positive integer unless <cite>series</cite> is 3.</p></li>
-<li><p><strong>l</strong> (<em>The spin.</em>) – </p></li>
-<li><p><strong>series</strong> (<em>The parameter i desribing the three types of poles in arXiv:1406.4858.</em>) – </p></li>
-</ul>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -1237,42 +1105,14 @@ is 3.</p></li>
 <span id="pycftboot-blocks2"></span><h2>pycftboot.blocks2<a class="headerlink" href="#module-pycftboot.blocks2" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pycftboot.blocks2.ConformalBlockTableSeed2">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.blocks2.</span></span><span class="sig-name descname"><span class="pre">ConformalBlockTableSeed2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_12</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_34</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odd_spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.blocks2.ConformalBlockTableSeed2" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.blocks2.</span></span><span class="sig-name descname"><span class="pre">ConformalBlockTableSeed2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_12</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_34</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odd_spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.blocks2.ConformalBlockTableSeed2" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pycftboot.cbt_common.ConformalBlockTableCommon</span></code></p>
 <p>A class which calculates tables of conformal block derivatives from scratch
 using a power series solution of their fourth order differential equation.
 Usually, it will not be necessary for the user to call it. Instead,
-<cite>ConformalBlockTable</cite> calls it automatically for <cite>m_max = 3</cite>. Note that there
-is no <cite>n_max</cite> for this method.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pycftboot.blocks2.cancel_poles">
-<span class="sig-prename descclassname"><span class="pre">pycftboot.blocks2.</span></span><span class="sig-name descname"><span class="pre">cancel_poles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polynomial_vector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.blocks2.cancel_poles" title="Permalink to this definition"></a></dt>
-<dd><p>Checks which roots of a conformal block denominator are also roots of the
-numerator. Whenever one is found, a simple factoring is applied.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>polynomial_vector</strong> (The <cite>PolynomialVector</cite> that will be modified in place if) – it has superfluous poles.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pycftboot.blocks2.convert_table">
-<span class="sig-prename descclassname"><span class="pre">pycftboot.blocks2.</span></span><span class="sig-name descname"><span class="pre">convert_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tab_short</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tab_long</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.blocks2.convert_table" title="Permalink to this definition"></a></dt>
-<dd><p>Converts a table with few poles into an equivalent table with many poles.
-When tables produced by different methods fail to look the same, it is often
-because their polynomials are being multiplied by different positive
-prefactors. This adjusts the prefactors so that they are the same.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>tab_short</strong> (A <cite>ConformalBlockTable</cite> where the blocks have a certain number of) – poles which is hopefully optimal.</p></li>
-<li><p><strong>tab_long</strong> (A <cite>ConformalBlockTable</cite> with all of the poles that <cite>tab_short</cite> has) – plus more.</p></li>
-</ul>
-</dd>
-</dl>
+<cite>ConformalBlockTable</cite> calls it automatically for <cite>m_max = 3</cite>. <cite>n_max</cite> must
+be set to None for compatibility with the ConformalBlockTableCommon class,
+but it won’t actually be used.</p>
 </dd></dl>
 
 </section>
