@@ -1,4 +1,4 @@
-from symengine.lib.symengine_wrapper import Integer, RealMPFR
+from symengine.lib.symengine_wrapper import Integer, eval_mpfr
 
 from .cbt_common import ConformalBlockTableCommon
 from .polynomial_vector import PolynomialVector
@@ -32,11 +32,11 @@ class ConformalBlockTableSeed2(ConformalBlockTableCommon):
 
         pole_set = []
         conformal_blocks = []
-        nu = ((dim / Integer(2)) - 1).evalf(prec)
+        nu = eval_mpfr((dim / Integer(2)) - 1, prec)
         c_2 = (ell * (ell + 2 * nu) + delta * (delta - 2 * nu - 2)) / 2
         c_4 = ell * (ell + 2 * nu) * (delta - 1) * (delta - 2 * nu - 1)
-        delta_prod = - delta_12 * delta_34 / two.evalf(prec)
-        delta_sum = - (delta_12 - delta_34) / two.evalf(prec)
+        delta_prod = delta_12 * delta_34 / (eval_mpfr(-2, prec))
+        delta_sum = (delta_12 - delta_34) / (eval_mpfr(-2, prec))
         if delta_12 == 0 and delta_34 == 0:
             effective_power = 2
         else:
@@ -45,8 +45,8 @@ class ConformalBlockTableSeed2(ConformalBlockTableCommon):
         for l in range(0, l_max + 1, step):
             poles = []
             for k in range(effective_power, k_max + 1, effective_power):
-                poles.append(RealMPFR(1 - k - l, prec).evalf(prec))
-                poles.append((2 + 2 * nu - k) / two.evalf(prec))
+                poles.append(eval_mpfr(1 - k - l, prec))
+                poles.append((2 + 2 * nu - k) / eval_mpfr(2, prec))
                 poles.append(1 - k + l + 2 * nu)
             pole_set.append(poles)
 
@@ -101,7 +101,7 @@ class ConformalBlockTableSeed2(ConformalBlockTableCommon):
                 pole_prod = 1
                 frob_coeffs.append(0)
                 for i in range(0, min(k, 7)):
-                    frob_coeffs[k] += recursion_coeffs[i] * pole_prod * frob_coeffs[k - i - 1] / RealMPFR(2 * k, prec).evalf(prec)
+                    frob_coeffs[k] += recursion_coeffs[i] * pole_prod * frob_coeffs[k - i - 1] / eval_mpfr(2 * k, prec)
                     frob_coeffs[k] = frob_coeffs[k].expand()
                     if i + 1 < min(k, 7):
                         pole_prod *= (delta - pole_set[l // step][3 * (k - i - 2)]) * (delta - pole_set[l // step][3 * (k - i - 2) + 1]) * (delta - pole_set[l // step][3 * (k - i - 2) + 2])
@@ -149,7 +149,7 @@ class ConformalBlockTableSeed2(ConformalBlockTableCommon):
                 pole_prod = 1
                 frob_coeffs.append(0)
                 for i in range(0, min(k / 2, 3)):
-                    frob_coeffs[k / 2] += recursion_coeffs[i] * pole_prod * frob_coeffs[(k / 2) - i - 1] / RealMPFR(2 * k, prec).evalf(prec)
+                    frob_coeffs[k / 2] += recursion_coeffs[i] * pole_prod * frob_coeffs[(k / 2) - i - 1] / eval_mpfr(2 * k, prec)
                     frob_coeffs[k / 2] = frob_coeffs[k / 2].expand()
                     if i + 1 < min(k / 2, 3):
                         pole_prod *= (delta - pole_set[l // step][3 * ((k / 2) - i - 2)]) * (delta - pole_set[l // step][3 * ((k / 2) - i - 2) + 1]) * (delta - pole_set[l // step][3 * ((k / 2) - i - 2) + 2])

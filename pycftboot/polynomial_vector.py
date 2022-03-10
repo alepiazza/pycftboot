@@ -1,3 +1,5 @@
+from symengine.lib.symengine_wrapper import eval_mpfr
+
 from .common import coefficients, build_polynomial
 from .constants import prec, tiny, delta
 
@@ -56,9 +58,9 @@ class PolynomialVector:
                 for n in range(0, len(self.vector)):
                     coeffs = coefficients(self.vector[n])
                     if abs(p) > tiny:
-                        new_coeffs = [coeffs[0] / (-p).evalf(prec)]
+                        new_coeffs = [coeffs[0] / eval_mpfr(-p, prec)]
                         for i in range(1, len(coeffs) - 1):
-                            new_coeffs.append((new_coeffs[i - 1] - coeffs[i]) / p.evalf(prec))
+                            new_coeffs.append((new_coeffs[i - 1] - coeffs[i]) / eval_mpfr(p, prec))
                     else:
                         coeffs.remove(coeffs[0])
                         new_coeffs = coeffs

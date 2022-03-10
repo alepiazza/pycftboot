@@ -1,7 +1,5 @@
 import itertools
-from symengine.lib.symengine_wrapper import (
-    RealMPFR, Symbol, sqrt, function_symbol, Derivative, Subs, Integer
-)
+from symengine.lib.symengine_wrapper import RealMPFR, Symbol, sqrt, Integer, eval_mpfr
 
 from .constants import tiny, prec, delta
 
@@ -230,4 +228,4 @@ def delta_pole(nu: RealMPFR, k, l, series):
     else:
         pole = 1 + l + 2 * nu - k
 
-    return pole.evalf(prec)
+    return eval_mpfr(pole, prec)
