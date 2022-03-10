@@ -6,7 +6,7 @@ from symengine.lib.symengine_wrapper import (
 import sympy
 
 from .common import rf, delta_pole, unitarity_bound
-from .constants import r_cross, one, two, cutoff, tiny
+from .constants import r_cross, one, two, cutoff, tiny, delta
 
 
 class LeadingBlockVector:
