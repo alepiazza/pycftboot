@@ -14,11 +14,15 @@ class TestSerializer(unittest.TestCase):
 
 class TestJsonSerializer(unittest.TestCase):
     def test_read_write_table_json(self):
+        out_file = 'tests/test_write_table.json'
         cbt = ConformalBlockTable(3, 1, 1, 1, 1)
-        write_table(cbt, 'tests/test_write_table.json', 'json')
-        read_table('tests/test_write_table.json')
+        write_table(cbt, out_file, 'json')
 
-        os.remove('tests/test_write_table.json')
+        self.assertTrue(os.path.isfile(out_file))
+
+        read_table(out_file)
+
+        os.remove(out_file)
 
     def test_json_errors(self):
         with self.assertRaises(TypeError):
