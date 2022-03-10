@@ -17,10 +17,43 @@ pycftboot.polynomial\_vector
    :undoc-members:
    :show-inheritance:
 
+pycftboot.block\_vector
+-----------------------------------
+
+.. automodule:: pycftboot.block_vector
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+pycftboot.cbt\_common
+-----------------------------------
+
+.. automodule:: pycftboot.cbt_common
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pycftboot.conformal\_block\_table
 -----------------------------------
 
 .. automodule:: pycftboot.conformal_block_table
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pycftboot.cbt\_seed1
+-----------------------------------
+
+.. automodule:: pycftboot.cbt_seed1
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pycftboot.cbt\_seed2
+-----------------------------------
+
+.. automodule:: pycftboot.cbt_seed2
    :members:
    :undoc-members:
    :show-inheritance:
@@ -41,22 +74,6 @@ pycftboot.common
    :undoc-members:
    :show-inheritance:
 
-pycftboot.blocks1
-------------------------
-
-.. automodule:: pycftboot.blocks1
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pycftboot.blocks2
-------------------------
-
-.. automodule:: pycftboot.blocks2
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 pycftboot.sdpb
 --------------------------
 
@@ -69,7 +86,7 @@ pycftboot.sdpb
 pycftboot.serialize
 ----------------------------------
 
-.. automodule:: pyftboot.serialize
+.. automodule:: pycftboot.serialize
    :members:
    :undoc-members:
    :show-inheritance:
