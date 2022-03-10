@@ -4,7 +4,7 @@ from .cbt_common import ConformalBlockTableCommon
 from .polynomial_vector import PolynomialVector
 from .chain_rule import chain_rule_single
 from .common import rules
-from .constants import delta, prec, ell, r_cross
+from .constants import delta, prec, ell, r_cross, one
 
 
 class ConformalBlockTableSeed2(ConformalBlockTableCommon):
@@ -98,7 +98,7 @@ class ConformalBlockTableSeed2(ConformalBlockTableCommon):
                 recursion_coeffs[1] = recursion_coeffs[1].subs(ell, l)
                 recursion_coeffs[0] = recursion_coeffs[0].subs(ell, l)
 
-                pole_prod = 1
+                pole_prod = one
                 frob_coeffs.append(0)
                 for i in range(0, min(k, 7)):
                     frob_coeffs[k] += recursion_coeffs[i] * pole_prod * frob_coeffs[k - i - 1] / eval_mpfr(2 * k, prec)
@@ -108,7 +108,7 @@ class ConformalBlockTableSeed2(ConformalBlockTableCommon):
 
             # We have solved for the Frobenius coefficients times products of poles
             # Fix them so that they all carry the same product
-            pole_prod = 1
+            pole_prod = one
             for k in range(k_max, -1, -1):
                 frob_coeffs[k] *= pole_prod
                 frob_coeffs[k] = frob_coeffs[k].expand()
@@ -146,7 +146,7 @@ class ConformalBlockTableSeed2(ConformalBlockTableCommon):
                 recursion_coeffs[1] = recursion_coeffs[1].subs(ell, l)
                 recursion_coeffs[0] = recursion_coeffs[0].subs(ell, l)
 
-                pole_prod = 1
+                pole_prod = one
                 frob_coeffs.append(0)
                 for i in range(0, min(k / 2, 3)):
                     frob_coeffs[k / 2] += recursion_coeffs[i] * pole_prod * frob_coeffs[(k / 2) - i - 1] / eval_mpfr(2 * k, prec)
@@ -154,7 +154,7 @@ class ConformalBlockTableSeed2(ConformalBlockTableCommon):
                     if i + 1 < min(k / 2, 3):
                         pole_prod *= (delta - pole_set[l // step][3 * ((k / 2) - i - 2)]) * (delta - pole_set[l // step][3 * ((k / 2) - i - 2) + 1]) * (delta - pole_set[l // step][3 * ((k / 2) - i - 2) + 2])
 
-            pole_prod = 1
+            pole_prod = one
             for k in range(k_max // 2, -1, -1):
                 frob_coeffs[k] *= pole_prod
                 frob_coeffs[k] = frob_coeffs[k].expand()

@@ -20,7 +20,7 @@ class TestCBT(unittest.TestCase):
     def test_CBT_oddspins(self):
         ConformalBlockTable(3, 3, 4, 3, 1, odd_spins=True)
 
-    # def test_CBT_even_dimension(self):
-    #     ConformalBlockTable(2, 2, 2, 2, 2, 0.1, -0.1)
-    #     ConformalBlockTable(4, 1, 2, 1, 1)
-    #     ConformalBlockTable(6, 1, 2, 1, 1)
+    def test_CBT_even_dimension(self):
+        ConformalBlockTable(2, 2, 2, 2, 2, 0.1, -0.1)
+        ConformalBlockTable(4, 1, 2, 1, 1)
+        ConformalBlockTable(6, 1, 2, 1, 1)
