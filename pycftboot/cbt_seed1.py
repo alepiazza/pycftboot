@@ -137,6 +137,7 @@ class ConformalBlockTableSeed1(ConformalBlockTableCommon):
                     for j in range(0, len(res_list[l][i].chunks)):
                         res_list[l][i].chunks[j] = new_res_list[l][i].chunks[j]
 
+
         # Perhaps poorly named, S keeps track of a linear combination of derivatives
         # We get this by including the essential singularity, then stripping it off again
         s_matrix = DenseMatrix(derivative_order + 1, derivative_order + 1, [0] * ((derivative_order + 1) ** 2))

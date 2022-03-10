@@ -1,8 +1,8 @@
 from symengine.lib.symengine_wrapper import Symbol, RealMPFR
 
 from .cbt_common import ConformalBlockTableCommon
-from .blocks1 import ConformalBlockTableSeed1
-from .blocks2 import ConformalBlockTableSeed2
+from .cbt_seed1 import ConformalBlockTableSeed1
+from .cbt_seed2 import ConformalBlockTableSeed2
 from .constants import ell, prec, delta, two, one
 
 
