@@ -12,6 +12,7 @@ the space of scaling dimensions for various CFT operators. All operators used in
 the explicit correlators must be scalars, but they may have different scaling
 dimensions and transform in arbitrary representations of a global symmetry.
 """
+from typing import Union
 from __future__ import print_function
 import xml.dom.minidom
 import time
@@ -30,7 +31,7 @@ from .common import (
     rf, gather, deepcopy, unitarity_bound, coefficients, get_index,
 )
 from .constants import ell, prec, delta, one, delta_ext, r_cross, zero, tiny
-
+from .sdpb import SdpbBinary, SdpbDocker
 
 if have_mpfr is False:
     print("Symengine must be compiled with MPFR support")
@@ -139,13 +140,25 @@ class SDP:
                      this.
     """
 
-    def __init__(self, dim_list, conv_table_list, vector_types=[[[[[[1, 0, 0, 0]]]], 0, 0]], prototype=None):
+    def __init__(
+            self, dim_list: Union[float, [float]], conv_table_list: Union[ConformalBlockTable, [ConformalBlockTable]],
+            vector_types=[[[[[[1, 0, 0, 0]]]], 0, 0]], prototype=None,
+            sdpb_mode: str = 'binary', sdpb_kwargs={}
+    ):
         # If a user is looking at single correlators, we will not punish
         # her for only passing one dimension
-        if type(dim_list) != type([]):
+        if not isinstance(dim_list, list):
             dim_list = [dim_list]
-        if type(conv_table_list) != type([]):
+        if not isinstance(conv_table_list, list):
             conv_table_list = [conv_table_list]
+
+        # Type checking
+        if all([isinstance(tab, ConvolvedBlockTable) for tab in conv_table_list]):
+            TypeError(f"conv_table_list = {conv_table_list} must be a ConvolvedBlockTable of a list of ConvolvedBlockTable")
+
+        if prototype is not None:
+            if not isinstance(prototype, SDP):
+                TypeError(f"prototype = {prototype} must be a SDP object")
 
         # Same story here
         self.dim = 0
@@ -173,7 +186,7 @@ class SDP:
         # Turn any "raw elements" from the vectorial sum rule into 1x1 matrices
         for i in range(0, len(vector_types)):
             for j in range(0, len(vector_types[i][0])):
-                if type(vector_types[i][0][j][0]) != type([]):
+                if not isinstance(vector_types[i][0][j][0], list):
                     vector_types[i][0][j] = [[vector_types[i][0][j]]]
 
         # Again, fill in arguments that need not be specified for single correlators
@@ -210,7 +223,7 @@ class SDP:
         # Looping over types and spins gives "0 - S", "0 - T", "1 - A" and so on
         for vec in vector_types:
             # Instead of specifying even or odd spins, the user can specify a list of spins
-            if type(vec[1]) == type([]):
+            if isinstance(vec[1], list):
                 spin_list = vec[1]
             elif (vec[1] % 2) == 1:
                 self.odd_spins = True
@@ -260,7 +273,7 @@ class SDP:
         self.bounds = [0.0] * len(self.table)
         self.options = []
 
-        if prototype == None:
+        if prototype is None:
             self.basis = [0] * len(self.table)
             self.set_bound(reset_basis=True)
         else:
@@ -269,7 +282,16 @@ class SDP:
                 self.basis.append(mat)
             self.set_bound(reset_basis=False)
 
-    def add_point(self, spin_irrep=-1, dimension = -1, extra = []):
+        # Initialize sdpb object based on `sdpb_mode`
+        if sdpb_mode == 'binary':
+            self.sdpb = SdpbBinary(**sdpb_kwargs)
+        elif sdpb_mode == 'docker':
+            self.sdpb = SdpbDocker(**sdpb_kwargs)
+        else:
+            raise ValueError(f"sdpb_mode = {sdpb_mode} must be either 'binary' or 'docker'")
+
+
+    def add_point(self, spin_irrep: Union[int, (int, Union[int, str])] = None, dimension: float = None, extra: list = []):
         """
         Tells the `SDP` that a particular fixed operator should be included in the
         sum rule. If called with one argument, all points with that label will be
@@ -281,9 +303,9 @@ class SDP:
         spin_irrep: [Optional] An ordered pair used to label the `PolynomialVector`
                     for the operator. The first entry is the spin, the second is the
                     label which must be found in `vector_types` or 0 if not present.
-                    Defaults to -1 which means all operators.
+                    Defaults to None which means all operators.
         dimension:  [Optional] The scaling dimension of the operator being added.
-                    Defaults to -1 which means the point should be removed.
+                    Defaults to None which means the point should be removed.
         extra:      [Optional] A list of quintuples specifying information about
                     other operators that should be packaged with this operator. The
                     first two elements of a quintuple are the `spin_irrep` and
@@ -299,20 +321,19 @@ class SDP:
                     added. The purpose of this is to enforce OPE coefficient
                     relations as in arXiv:1603.04436.
         """
-        if spin_irrep == -1:
+        if spin_irrep is None:
             self.points = []
-            return
-
-        if type(spin_irrep) == type(1):
-            spin_irrep = [spin_irrep, 0]
-        if dimension != -1:
-            self.points.append((spin_irrep, dimension, extra))
         else:
-            for p in self.points:
-                if p[0] == spin_irrep:
-                    self.points.remove(p)
+            if isinstance(spin_irrep, int):
+                spin_irrep = [spin_irrep, 0]
+            if dimension is not None:
+                self.points.append((spin_irrep, dimension, extra))
+            else:
+                for p in self.points:
+                    if p[0] == spin_irrep:
+                        self.points.remove(p)
 
-    def get_bound(self, gapped_spin_irrep):
+    def get_bound(self, gapped_spin_irrep: Union[int, (int, Union[int, str])]):
         """
         Returns the minimum scaling dimension of a given operator in this `SDP`.
         This will return the unitarity bound until the user starts calling
@@ -325,13 +346,13 @@ class SDP:
                            and the second is the label found in `vector_types` or
                            0 if not present.
         """
-        if type(gapped_spin_irrep) == type(1):
+        if isinstance(gapped_spin_irrep, int):
             gapped_spin_irrep = [gapped_spin_irrep, 0]
         for l in range(0, len(self.table)):
             if self.table[l][0][0].label == gapped_spin_irrep:
                 return self.bounds[l]
 
-    def set_bound(self, gapped_spin_irrep=-1, delta_min=-1, reset_basis=True):
+    def set_bound(self, gapped_spin_irrep: Union[int, (int, Union[int, str])] = None, delta_min: float = None, reset_basis=True):
         """
         Sets the minimum scaling dimension of a given operator in the sum rule. If
         called with one argument, the operator with that label will be assigned the
@@ -343,17 +364,17 @@ class SDP:
         gapped_spin_irrep: [Optional] An ordered pair used to label the
                            `PolynomialVector` whose bound should be set. The first
                            entry is the spin and the second is the label found in
-                           `vector_types` or 0 if not present. Defaults to -1 which
+                           `vector_types` or 0 if not present. Defaults to None which
                            means all operators.
         delta_min:         [Optional] The minimum scaling dimension to set. Also
                            accepts oo to indicate that a continuum should not be
-                           included. Defaults to -1 which means unitarity.
+                           included. Defaults to None which means unitarity.
         reset_basis:       [Optional] An internal parameter which may be used to
                            prevent the orthogonal polynomials which improve the
                            numerical stability of `SDPB` from being recalculated.
                            Defaults to `True`.
         """
-        if gapped_spin_irrep == -1:
+        if gapped_spin_irrep is None:
             for l in range(0, len(self.table)):
                 spin = self.table[l][0][0].label[0]
                 self.bounds[l] = unitarity_bound(self.dim, spin)
@@ -361,13 +382,13 @@ class SDP:
                 if reset_basis:
                     self.set_basis(l)
         else:
-            if type(gapped_spin_irrep) == type(1):
+            if isinstance(gapped_spin_irrep, int):
                 gapped_spin_irrep = [gapped_spin_irrep, 0]
 
             l = self.get_table_index(gapped_spin_irrep)
             spin = gapped_spin_irrep[0]
 
-            if delta_min == -1:
+            if delta_min is None:
                 self.bounds[l] = unitarity_bound(self.dim, spin)
             else:
                 self.bounds[l] = delta_min
@@ -375,7 +396,7 @@ class SDP:
             if reset_basis and delta_min != oo:
                 self.set_basis(l)
 
-    def get_option(self, key):
+    def get_option(self, key: str):
         """
         Returns the string representation of a value that `SDPB` will use, whether
         or not it has been explicitly set.
@@ -385,8 +406,8 @@ class SDP:
         key: The name of the `SDPB` parameter without any "--" at the beginning or
         "=" at the end.
         """
-        if key in sdpb_options:
-            ret = sdpb_defaults[sdpb_options.index(key)]
+        if key in self.sdpb.options:
+            ret = self.sdpb.options[self.sdpb.options.index(key)]
             opt_string = "--" + key + "="
             for i in range(0, len(self.options)):
                 if self.options[i][:len(opt_string)] == opt_string:
@@ -394,7 +415,7 @@ class SDP:
                     break
             return ret
 
-    def set_option(self, key= None, value = None):
+    def set_option(self, key: str = None, value: Union[float, str] = None):
         """
         Sets the value of a switch that should be passed to `SDPB` on the command
         line. `SDPB` options that do not take a parameter are handled by other
@@ -411,23 +432,23 @@ class SDP:
         """
         if key == None:
             self.options = []
-        elif key in sdpb_options:
+        elif key in self.sdpb.options:
             found = False
             opt_string = "--" + key + "="
             for i in range(0, len(self.options)):
                 if self.options[i][:len(opt_string)] == opt_string:
                     found = True
                     break
-            if found == True and value == None:
+            if found is True and value is None:
                 self.options = self.options[:i] + self.options[i + 1:]
-            elif found == True and value != None:
+            elif found is True and value is not None:
                 self.options[i] = opt_string + str(value)
-            elif found == False and value != None:
+            elif found is False and value is not None:
                 self.options.append(opt_string + str(value))
         else:
-            print("Unknown option")
+            raise ValueError(f"key = {key} is not a sdpb valid option")
 
-    def get_table_index(self, spin_irrep):
+    def get_table_index(self, spin_irrep: Union[int, (int, Union[int, str])]):
         """
         Searches for the label of a `PolynomialVector` and returns its position in
         `table` or -1 if not found.
@@ -437,14 +458,14 @@ class SDP:
         spin_irrep: An ordered pair of the type passed to `set_bound`. Used to
                     label the spin and representation being searched.
         """
-        if type(spin_irrep) == type(1):
+        if isinstance(spin_irrep, int):
             spin_irrep = [spin_irrep, 0]
         for l in range(0, len(self.table)):
             if self.table[l][0][0].label == spin_irrep:
                 return l
         return -1
 
-    def set_basis(self, index):
+    def set_basis(self, index: int):
         """
         Calculates a basis of polynomials that are orthogonal with respect to the
         positive measure prefactor that turns a `PolynomialVector` into a rational
