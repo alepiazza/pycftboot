@@ -40,13 +40,20 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="readme.html">PyCFTBoot</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#pycftboot-bootstrap">pycftboot.bootstrap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pycftboot.bootstrap">pycftboot.bootstrap</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pycftboot.polynomial_vector">pycftboot.polynomial_vector</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#pycftboot-common">pycftboot.common</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#pycftboot-blocks1">pycftboot.blocks1</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#pycftboot-blocks2">pycftboot.blocks2</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#pycftboot-compat-juliboots">pycftboot.compat_juliboots</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#pycftboot-compat-scalar-blocks">pycftboot.compat_scalar_blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pycftboot.block_vector">pycftboot.block_vector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pycftboot.cbt_common">pycftboot.cbt_common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pycftboot.conformal_block_table">pycftboot.conformal_block_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pycftboot.cbt_seed1">pycftboot.cbt_seed1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pycftboot.cbt_seed2">pycftboot.cbt_seed2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pycftboot.convolved_block_table">pycftboot.convolved_block_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pycftboot.common">pycftboot.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pycftboot.sdpb">pycftboot.sdpb</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pycftboot.serialize">pycftboot.serialize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pycftboot.compat_json">pycftboot.compat_json</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pycftboot.compat_juliboots">pycftboot.compat_juliboots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pycftboot.compat_scalar_blocks">pycftboot.compat_scalar_blocks</a></li>
 </ul>
 </li>
 </ul>
@@ -77,8 +84,654 @@
              
   <section id="api">
 <h1>API<a class="headerlink" href="#api" title="Permalink to this headline"></a></h1>
-<section id="pycftboot-bootstrap">
-<h2>pycftboot.bootstrap<a class="headerlink" href="#pycftboot-bootstrap" title="Permalink to this headline"></a></h2>
+<section id="module-pycftboot.bootstrap">
+<span id="pycftboot-bootstrap"></span><h2>pycftboot.bootstrap<a class="headerlink" href="#module-pycftboot.bootstrap" title="Permalink to this headline"></a></h2>
+<p>PyCFTBoot is an interface for the numerical bootstrap in arbitrary dimension,
+a field that was initiated in 2008 by Rattazzi, Rychkov, Tonni and Vichi in
+arXiv:0807.0004. Starting from the analytic structure of conformal blocks, the
+code formulates semidefinite programs without any proprietary software. The
+actual optimization step must be performed by David Simmons-Duffin’s program
+SDPB available at https://github.com/davidsd/sdpb.</p>
+<p>PyCFTBoot may be used to find bounds on OPE coefficients and allowed regions in
+the space of scaling dimensions for various CFT operators. All operators used in
+the explicit correlators must be scalars, but they may have different scaling
+dimensions and transform in arbitrary representations of a global symmetry.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.bootstrap.</span></span><span class="sig-name descname"><span class="pre">SDP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conv_table_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pycftboot.conformal_block_table.ConformalBlockTable" title="pycftboot.conformal_block_table.ConformalBlockTable"><span class="pre">pycftboot.conformal_block_table.ConformalBlockTable</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pycftboot.conformal_block_table.ConformalBlockTable" title="pycftboot.conformal_block_table.ConformalBlockTable"><span class="pre">pycftboot.conformal_block_table.ConformalBlockTable</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[[[[[[1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0]]]],</span> <span class="pre">0,</span> <span class="pre">0]]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prototype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sdpb_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'binary'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sdpb_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class where convolved conformal blocks are augmented by crossing equations
+which allow numerical bounds to be derived. All calls to <cite>SDPB</cite> happen through
+this class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dim_list</strong> (<em>A list of all scaling dimensions that appear in the external</em>) – operators of the four-point functions being considered. If
+there is only one, this may be a float instead of a list.</p></li>
+<li><p><strong>conv_table_list</strong> (<em>A list of all types of convolved conformal block tables that</em>) – appear in the crossing equations. If there is only one type,
+this may be a <cite>ConvolvedBlockTable</cite> instance instead of a list.</p></li>
+<li><p><strong>vector_types</strong> (<em>[</em><em>Optional</em><em>] </em><em>A list of triples</em><em>, </em><em>one for each type of operator in</em>) – the sum rule. The third element of each triple is the arbitrary
+label for that representation (something used to label
+<cite>PolynomialVector`s that are generated). The second element is
+an even integer for even spin operators and an odd integer for
+odd spin operators. The first element is everything else.
+Specifically, it is a list of matrices of ordered quadruples
+where a matrix is a list of lists. If the sum rule involves no
+matrices, it may simply be a list of ordered quadruples. In a
+quadruple, the first entry is a numerical coefficient and the
+second entry is an index stating which element of
+`conv_table_list</cite> that coefficient should multiply. The third
+and fourth entries (which may be omitted if <cite>dim_list</cite> has only
+one entry) specify the external dimensions that should replace
+<cite>delta_ext</cite> in a <cite>ConvolvedConformalBlockTable</cite> as positions in
+<cite>dim_list</cite>. They are the “inner two” dimensions <cite>j</cite> and <cite>k</cite> if
+convolved conformal blocks are given <cite>i</cite>, <cite>j</cite>, <cite>k</cite>, <cite>l</cite> labels
+as in arXiv:1406.4858. The first triple must describe the even
+spin singlet channel (where the identity can be found). After
+this, the order of the triples is not important.</p></li>
+<li><p><strong>prototype</strong> ([Optional] A previous instance of <cite>SDP</cite> which may speed up the) – allocation of this one. The idea is that if a bound on any
+operator does not need to change from one table to the next,
+the bilinear basis corresponding to it (which requires a
+Cholesky decomposition and a matrix inversion to calculate)
+might simply be copied.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.dim">
+<span class="sig-name descname"><span class="pre">dim</span></span><a class="headerlink" href="#pycftboot.bootstrap.SDP.dim" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>The spatial dimension, inherited from <cite>conv_block_table_list</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.k_max">
+<span class="sig-name descname"><span class="pre">k_max</span></span><a class="headerlink" href="#pycftboot.bootstrap.SDP.k_max" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>The corresponding attribute from <cite>conv_block_table_list</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.l_max">
+<span class="sig-name descname"><span class="pre">l_max</span></span><a class="headerlink" href="#pycftboot.bootstrap.SDP.l_max" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>The corresponding attribute from <cite>conv_block_table_list</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.m_max">
+<span class="sig-name descname"><span class="pre">m_max</span></span><a class="headerlink" href="#pycftboot.bootstrap.SDP.m_max" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>The corresponding attribute from <cite>conv_block_table_list</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.n_max">
+<span class="sig-name descname"><span class="pre">n_max</span></span><a class="headerlink" href="#pycftboot.bootstrap.SDP.n_max" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>The corresponding attribute from <cite>conv_block_table_list</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.odd_spins">
+<span class="sig-name descname"><span class="pre">odd_spins</span></span><a class="headerlink" href="#pycftboot.bootstrap.SDP.odd_spins" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Whether any element of <cite>conv_block_table_list</cite> has odd spins.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.table">
+<span class="sig-name descname"><span class="pre">table</span></span><a class="headerlink" href="#pycftboot.bootstrap.SDP.table" title="Permalink to this definition"></a></dt>
+<dd><p>rows and columns is determined from <cite>vector_types</cite>. They are
+ordered first by the type of representation and then by spin.
+Each <cite>PolynomialVector</cite> may be longer than a <cite>PolynomialVector</cite>
+from a single entry of <cite>conv_block_table_list</cite>. They represent
+the concatenation of several such <cite>PolynomialVectors</cite>, one for
+each row of a vectorial sum rule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>A list of matrices of <a href="#id1"><span class="problematic" id="id2">`</span></a>PolynomialVector`s where the number of</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.m_order">
+<span class="sig-name descname"><span class="pre">m_order</span></span><a class="headerlink" href="#pycftboot.bootstrap.SDP.m_order" title="Permalink to this definition"></a></dt>
+<dd><p><cite>ConvolvedBlockTable</cite>, this keeps track of the number of <cite>a</cite>
+derivatives in these longer <a href="#id3"><span class="problematic" id="id4">`</span></a>PolynomialVector`s.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Analogous to <cite>m_order</cite> in <cite>ConformalBlockTable</cite> or</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">m_order</span></span><a class="headerlink" href="#id0" title="Permalink to this definition"></a></dt>
+<dd><p><cite>ConvolvedBlockTable</cite>, this keeps track of the number of <cite>b</cite>
+derivatives in these longer <a href="#id5"><span class="problematic" id="id6">`</span></a>PolynomialVector`s.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Analogous to <cite>n_order</cite> in <cite>ConformalBlockTable</cite> or</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.options">
+<span class="sig-name descname"><span class="pre">options</span></span><a class="headerlink" href="#pycftboot.bootstrap.SDP.options" title="Permalink to this definition"></a></dt>
+<dd><p>that will be passed when <cite>SDPB</cite> is run from this <cite>SDP</cite>. This
+list should be touched with <cite>set_option</cite> and not directly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>A list of strings where each string is a command line option</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.points">
+<span class="sig-name descname"><span class="pre">points</span></span><a class="headerlink" href="#pycftboot.bootstrap.SDP.points" title="Permalink to this definition"></a></dt>
+<dd><p>to take any positive value, the user may also include in the
+sum rule <cite>PolynomialVector`s whose entries are pure numbers.
+In other words, she may evaluate some of them once and for all
+at particular values of `delta</cite> to force certain operators to
+appear in the spectrum. This list should be touched with
+<cite>add_point</cite> and not directly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>In addition to <cite>PolynomialVector`s whose entries allow `delta</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.unit">
+<span class="sig-name descname"><span class="pre">unit</span></span><a class="headerlink" href="#pycftboot.bootstrap.SDP.unit" title="Permalink to this definition"></a></dt>
+<dd><p>identity. This is obtained simply by plugging <cite>delta = 0</cite> into
+the zero spin singlet channel. If such a channel involves
+matrices, the sum of all elements is taken since the conformal
+blocks are normalized under the convention that all OPE
+coefficients involving the identity are 1. It should not be
+necessary to change this.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>A list which gives the <cite>PolynomialVector</cite> corresponding to the</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.irrep_set">
+<span class="sig-name descname"><span class="pre">irrep_set</span></span><a class="headerlink" href="#pycftboot.bootstrap.SDP.irrep_set" title="Permalink to this definition"></a></dt>
+<dd><p><cite>vector_types</cite>. The second element of each is a label for the
+representation. The first is a modified version of the first
+matrix. The ordered quadruples do not correspond to the
+prefactors and list positions anymore but to the four external
+operator dimensions that couple to the block in this position.
+It should not be necessary to change this.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>A list of ordered pairs, one for each type of operator in</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.basis">
+<span class="sig-name descname"><span class="pre">basis</span></span><a class="headerlink" href="#pycftboot.bootstrap.SDP.basis" title="Permalink to this definition"></a></dt>
+<dd><p>Each triangular matrix stores a set of orthogonal polynomials
+in the monomial basis. It should not be necessary to change
+this.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>A list of matrices which has as many matrices as <cite>table</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.add_point">
+<span class="sig-name descname"><span class="pre">add_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spin_irrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.add_point" title="Permalink to this definition"></a></dt>
+<dd><p>Tells the <cite>SDP</cite> that a particular fixed operator should be included in the
+sum rule. If called with one argument, all points with that label will be
+removed. If called with no arguments, all points with any label will be
+removed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spin_irrep</strong> ([Optional] An ordered pair used to label the <cite>PolynomialVector</cite>) – for the operator. The first entry is the spin, the second is the
+label which must be found in <cite>vector_types</cite> or 0 if not present.
+Defaults to None which means all operators.</p></li>
+<li><p><strong>dimension</strong> (<em>[</em><em>Optional</em><em>] </em><em>The scaling dimension of the operator being added.</em>) – Defaults to None which means the point should be removed.</p></li>
+<li><p><strong>extra</strong> (<em>[</em><em>Optional</em><em>] </em><em>A list of quintuples specifying information about</em>) – other operators that should be packaged with this operator. The
+first two elements of a quintuple are the <cite>spin_irrep</cite> and
+<cite>dimension</cite> except for the operator which is not being added
+separately because its presence is tied to this one. The next
+two elements of a quintuple are ordered pairs giving positions
+in the crossing equation matrices. The operator described by the
+first two quintuple elements should have its contribution in the
+position given by the first ordered pair added to that of the
+operator described by <cite>spin_irrep</cite> and <cite>dimension</cite> in the
+position given by the second ordered pair. The final element of
+the quintuple is a coefficient that should multiply whatever is
+added. The purpose of this is to enforce OPE coefficient
+relations as in arXiv:1603.04436.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.basic_integral">
+<span class="sig-name descname"><span class="pre">basic_integral</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pole</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma_val</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.basic_integral" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the inner product of two monic monomials with respect to a more
+basic positive measure prefactor which has just a single pole.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pos</strong> (<em>The sum of the degrees of the two monomials.</em>) – </p></li>
+<li><p><strong>pole</strong> (<em>The root of the prefactor's denominator.</em>) – </p></li>
+<li><p><strong>order</strong> (<em>The multiplicity of this root.</em>) – </p></li>
+<li><p><strong>gamma_val</strong> (<em>The associated incomplete gamma function. Note that it is no</em>) – longer uppergamma(0, pole * log(r_cross)) because we are
+performing a change of variables.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.bisect">
+<span class="sig-name descname"><span class="pre">bisect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_irrep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isolated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mySDP'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.bisect" title="Permalink to this definition"></a></dt>
+<dd><p>Uses a binary search to find the maximum allowed gap in a particular type
+of operator before the CFT stops existing. The allowed value closest to the
+boundary is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lower</strong> (<em>A scaling dimension for the operator known to be allowed.</em>) – </p></li>
+<li><p><strong>upper</strong> (<em>A scaling dimension for the operator known to be disallowed.</em>) – </p></li>
+<li><p><strong>threshold</strong> (<em>How accurate the bisection needs to be before returning.</em>) – </p></li>
+<li><p><strong>spin_irrep</strong> (An ordered pair of the type passed to <cite>set_bound</cite>. Used to) – label the spin and representation of the operator whose
+dimension is being bounded.</p></li>
+<li><p><strong>isolated</strong> (<em>[</em><em>Optional</em><em>] </em><em>Whether to bisect the position of an isolated</em>) – operator rather than the gap where the continuum starts.
+Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>reverse</strong> (<em>[</em><em>Optional</em><em>] </em><em>Whether we are looking for a lower bound instead of</em>) – an upper bound. This should only be used when <cite>isolated</cite> is
+<cite>True</cite>. Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>bias</strong> (<em>[</em><em>Optional</em><em>] </em><em>The ratio between the expected time needed to rule</em>) – out a CFT and the expected time needed to conclude that it
+cannot be. Defaults to <cite>None</cite> which means that this will be
+measured as the binary search progresses.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.convert_spectrum_file">
+<span class="sig-name descname"><span class="pre">convert_spectrum_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rescaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span> <span class="pre">**</span> <span class="pre">delta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.convert_spectrum_file" title="Permalink to this definition"></a></dt>
+<dd><p>Reads a spectrum produced by the arXiv:1603.04444 script and outputs a file
+with physical dimensions and OPE coefficients. Instead of a scaling
+dimension, the original file reports the difference between the scaling
+dimension and the gap. Instead of an OPE coefficient, the original file
+reports the factor relating the OPE coefficient to the positive prefactor.
+Note that this only works if <cite>set_bound</cite> has not been called since the
+XML file was generated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_path</strong> (<em>The path to the spectrum in Mathematica-like format.</em>) – </p></li>
+<li><p><strong>output_path</strong> (<em>The path desired for the file after the additive and</em>) – multiplicative corrections have been performed.</p></li>
+<li><p><strong>rescaling</strong> ([Optional] An expression, which may depend on <cite>delta</cite> and) – <cite>ell</cite>, for changing the convention used for OPE coefficients.
+Defaults to 4 ** delta.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.extremal_coefficients">
+<span class="sig-name descname"><span class="pre">extremal_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_irreps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nullity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.extremal_coefficients" title="Permalink to this definition"></a></dt>
+<dd><p>Once the full extremal spectrum is known, one can reconstruct the OPE
+coefficients that cause those convolved conformal blocks to sum to the
+<cite>SDP</cite>’s <cite>unit</cite>. This outputs a vector of squared OPE coefficients
+determined in this way.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimensions</strong> (<em>A list of dimensions in the spectrum as returned by</em>) – <cite>extremal_dimensions</cite>. However, it must be the union of such
+scaling dimensions over all possible <cite>spin_irrep</cite> inputs to
+<cite>extremal_dimensions</cite>.</p></li>
+<li><p><strong>spin_irreps</strong> (<em>A list of ordered pairs of the type passed to</em>) – <cite>extremal_dimensions</cite> used to label the spin and global
+symmetry representations of all operators that
+<cite>extremal_dimensions</cite> can find. This list must be in the same
+order used for <cite>dimensions</cite>.</p></li>
+<li><p><strong>nullity</strong> (<em>[</em><em>Optional</em><em>] </em><em>The number of extra equations to use beyond the</em>) – number of unknown variables. If this is non-zero, a positivity
+constraint will be placed on the optimal OPE coefficients.
+Defaults to 1.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.extremal_dimensions">
+<span class="sig-name descname"><span class="pre">extremal_dimensions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">functional</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_irrep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_threshold</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.extremal_dimensions" title="Permalink to this definition"></a></dt>
+<dd><p>When a functional acts on <cite>PolynomialVector`s, this finds approximate zeros
+of the resulting expression with the `unisolve</cite> executable. When the sum
+rule has matrices of <a href="#id7"><span class="problematic" id="id8">`</span></a>PolynomialVector`s, sufficiently small local minima
+of their determinants are returned. The list consists of dimensions for a
+given spin and representation. The logic is a subset of that used in the
+arXiv:1603.04444 script.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>functional</strong> (<em>A list of functional components of the type returned by</em>) – <cite>solution_functional</cite>.</p></li>
+<li><p><strong>spin_irrep</strong> (<em>An ordered pair used to label the type of operator whose</em>) – extremal dimensions are being found. The first entry is the
+spin and the second entry is the representation label found
+in <cite>vector_types</cite>.</p></li>
+<li><p><strong>zero_threshold</strong> (<em>The threshold for identifying a real zero. The determinant</em>) – over its second derivative must be less than this value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.get_bound">
+<span class="sig-name descname"><span class="pre">get_bound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gapped_spin_irrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.get_bound" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the minimum scaling dimension of a given operator in this <cite>SDP</cite>.
+This will return the unitarity bound until the user starts calling
+<cite>set_bound</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>gapped_spin_irrep</strong> (An ordered pair used to label the <cite>PolynomialVector</cite>) – whose bound should be read. The first entry is the spin
+and the second is the label found in <cite>vector_types</cite> or
+0 if not present.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.get_option">
+<span class="sig-name descname"><span class="pre">get_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.get_option" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the string representation of a value that <cite>SDPB</cite> will use, whether
+or not it has been explicitly set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (The name of the <cite>SDPB</cite> parameter without any “–” at the beginning or) – </p></li>
+<li><p><strong>end.</strong> (<em>&quot;=&quot; at the</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.get_table_index">
+<span class="sig-name descname"><span class="pre">get_table_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spin_irrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.get_table_index" title="Permalink to this definition"></a></dt>
+<dd><p>Searches for the label of a <cite>PolynomialVector</cite> and returns its position in
+<cite>table</cite> or -1 if not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>spin_irrep</strong> (An ordered pair of the type passed to <cite>set_bound</cite>. Used to) – label the spin and representation being searched.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.integral">
+<span class="sig-name descname"><span class="pre">integral</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orders</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gammas</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.integral" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the inner product of two monic monomials with respect to the
+positive measure prefactor that turns a <cite>PolynomialVector</cite> into a rational
+approximation to a conformal block.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pos</strong> (<em>The sum of the degrees of the two monomials.</em>) – </p></li>
+<li><p><strong>poles</strong> (<em>A list of the roots of the prefactor's denominator.</em>) – </p></li>
+<li><p><strong>orders</strong> (<em>The multiplicities of those poles.</em>) – </p></li>
+<li><p><strong>gammas</strong> (A list representing the image of <cite>poles</cite> under the map which sends) – x to uppergamma(0, x * log(r_cross)).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.iterate">
+<span class="sig-name descname"><span class="pre">iterate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mySDP'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.iterate" title="Permalink to this definition"></a></dt>
+<dd><p>Returns <cite>True</cite> if this <cite>SDP</cite> with its current gaps represents an allowed CFT
+and <cite>False</cite> otherwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>[</em><em>Optional</em><em>] </em><em>The name of the XML file generated in the process</em>) – without any “.xml” at the end. Defaults to “mySDP”.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.least_absolute_distance">
+<span class="sig-name descname"><span class="pre">least_absolute_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.least_absolute_distance" title="Permalink to this definition"></a></dt>
+<dd><p>This returns the vector which is closest in the 1-norm to being a solution
+of an inhomogeneous linear system. It is convenient to overload <cite>SDPB</cite> as a
+linear program solver here.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matrix</strong> (<em>A matrix having more rows than columns.</em>) – </p></li>
+<li><p><strong>vector</strong> (A vector whose length is the row dimension of <cite>matrix</cite>.) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.make_laguerre_points">
+<span class="sig-name descname"><span class="pre">make_laguerre_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.make_laguerre_points" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a list of convenient sample points for the XML files of <cite>SDPB</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>degree</strong> (The maximum degree of all polynomials in a <cite>PolynomialVector</cite>.) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.opemax">
+<span class="sig-name descname"><span class="pre">opemax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_irrep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mySDP'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.opemax" title="Permalink to this definition"></a></dt>
+<dd><p>Minimizes or maximizes the squared length of the vector of OPE coefficients
+involving an operator with a prescribed scaling dimension, spin and global
+symmetry representation. This results in a matrix produced by the action of
+the functional found by <cite>SDPB</cite>. If a direction in OPE space has been passed
+then the corresponding matrix element is returned. Otherwise, the matrix is
+returned and it is up to the user to find the unconstrained minimum or
+maximum value by diagonalizing it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimension</strong> (<em>The scaling dimension of the operator whose OPE coefficients</em>) – are having their length being bounded.</p></li>
+<li><p><strong>spin_irrep</strong> (An ordered pair of the type passed to <cite>set_bound</cite>. Used to label) – the spin and representation of the operator whose OPE
+coefficients have their length being bounded.</p></li>
+<li><p><strong>reverse</strong> (<em>[</em><em>Optional</em><em>] </em><em>Whether to minimize a squared OPE coefficient vector</em>) – instead of maximizing it. This only has a chance of working if
+the bounds are such that the specified operator is isolated.
+Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>vector</strong> (<em>[</em><em>Optional</em><em>] </em><em>A unit vector specifying the direction in OPE space</em>) – being scanned if applicable. In a 2x2 scan, for instance, which
+is specified by one angle, the components of this vector will
+be the sine and the cosine. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>name</strong> (<em>[</em><em>Optional</em><em>] </em><em>Name of the XML file generated in the process without</em>) – any “.xml” at the end. Defaults to “mySDP”.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.reshuffle_with_normalization">
+<span class="sig-name descname"><span class="pre">reshuffle_with_normalization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.reshuffle_with_normalization" title="Permalink to this definition"></a></dt>
+<dd><p>Converts between the Mathematica definition and the bootstrap definition of
+an SDP. As explained in arXiv:1502.02033, it is natural to normalize the
+functionals being found by demanding that they give 1 when acting on a
+particular <cite>PolynomialVector</cite>. <cite>SDPB</cite> on the other hand works with
+functionals that have a fixed leading component. This is an equivalent
+problem after a trivial reshuffling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vector</strong> (The <cite>vector</cite> part of the <cite>PolynomialVector</cite> needing to be shuffled.) – </p></li>
+<li><p><strong>norm</strong> (The <cite>vector</cite> part of the <cite>PolynomialVector</cite> constrained to have) – unit action under the functional before the reshuffling.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.set_basis">
+<span class="sig-name descname"><span class="pre">set_basis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.set_basis" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates a basis of polynomials that are orthogonal with respect to the
+positive measure prefactor that turns a <cite>PolynomialVector</cite> into a rational
+approximation to a conformal block. It should not be necessary to explicitly
+call this.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>index</strong> (The position of the matrix in <cite>table</cite> whose basis needs updating.) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.set_bound">
+<span class="sig-name descname"><span class="pre">set_bound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gapped_spin_irrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset_basis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.set_bound" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the minimum scaling dimension of a given operator in the sum rule. If
+called with one argument, the operator with that label will be assigned the
+unitarity bound. If called with no arguments, all operators will be assigned
+the unitarity bound.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gapped_spin_irrep</strong> (<em>[</em><em>Optional</em><em>] </em><em>An ordered pair used to label the</em>) – <cite>PolynomialVector</cite> whose bound should be set. The first
+entry is the spin and the second is the label found in
+<cite>vector_types</cite> or 0 if not present. Defaults to None which
+means all operators.</p></li>
+<li><p><strong>delta_min</strong> (<em>[</em><em>Optional</em><em>] </em><em>The minimum scaling dimension to set. Also</em>) – accepts oo to indicate that a continuum should not be
+included. Defaults to None which means unitarity.</p></li>
+<li><p><strong>reset_basis</strong> (<em>[</em><em>Optional</em><em>] </em><em>An internal parameter which may be used to</em>) – prevent the orthogonal polynomials which improve the
+numerical stability of <cite>SDPB</cite> from being recalculated.
+Defaults to <cite>True</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.set_option">
+<span class="sig-name descname"><span class="pre">set_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.set_option" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the value of a switch that should be passed to <cite>SDPB</cite> on the command
+line. <cite>SDPB</cite> options that do not take a parameter are handled by other
+methods so it should not be necessary to pass them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> ([Optional] The name of the <cite>SDPB</cite> parameter being set without any) – “–” at the beginning or “=” at the end. Defaults to <cite>None</cite> which
+means all parameters will be reset to their default values.</p></li>
+<li><p><strong>value</strong> ([Optional] The string or numerical value that should accompany <cite>key</cite>.) – Defaults to <cite>None</cite> which means that the parameter for <cite>key</cite> will be
+reset to its default value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.shifted_prefactor">
+<span class="sig-name descname"><span class="pre">shifted_prefactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.shifted_prefactor" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the positive measure prefactor that turns a <cite>PolynomialVector</cite> into
+a rational approximation to a conformal block. Evaluating this at a sample
+point produces a sample scaling needed by the XML files of <cite>SDPB</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>poles</strong> (The roots of the prefactor’s denominator, often from the <cite>poles</cite>) – attribute of a <cite>PolynomialVector</cite>.</p></li>
+<li><p><strong>base</strong> (<em>The base of the exponential in the numerator</em><em>, </em><em>often the crossing</em>) – symmetric value of the radial co-ordinate.</p></li>
+<li><p><strong>x</strong> (The argument of the function, often <cite>delta</cite>.) – </p></li>
+<li><p><strong>shift</strong> (An amount by which to shift <cite>x</cite>. This should match one of the minimal) – values assigned by <cite>set_bound</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.short_string">
+<span class="sig-name descname"><span class="pre">short_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.short_string" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the string representation of a number except with an attempt to trim
+superfluous zeros if the number is too small.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>num</strong> (<em>The number.</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.solution_functional">
+<span class="sig-name descname"><span class="pre">solution_functional</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_irrep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mySDP'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.solution_functional" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a functional (list of numerical components) that serves as a
+solution to the <cite>SDP</cite>. Like <cite>iterate</cite>, this sets a bound, generates an XML
+file and calls <cite>SDPB</cite>. However, rather than stopping after it determines
+that the <cite>SDP</cite> is indeed solvable, it will finish the computation to find
+the actual functional.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimension</strong> (<em>The minimum value of the scaling dimension to test.</em>) – </p></li>
+<li><p><strong>spin_irrep</strong> (An ordered pair of the type passed to <cite>set_bound</cite>. Used to label) – the spin / representation of the operator being given a minimum
+scaling dimension of <cite>dimension</cite>.</p></li>
+<li><p><strong>obj</strong> (<em>[</em><em>Optional</em><em>] </em><em>The objective vector whose action under the found</em>) – functional should be maximized. Defaults to <cite>None</cite> which means
+it will be determined automatically just like it is in
+<cite>iterate</cite>.</p></li>
+<li><p><strong>norm</strong> (<em>[</em><em>Optional</em><em>] </em><em>Normalization vector which should have unit action</em>) – under the functional. Defaults to <cite>None</cite> which means it will be
+determined automatically just like it is in <cite>iterate</cite>.</p></li>
+<li><p><strong>name</strong> (<em>[</em><em>Optional</em><em>] </em><em>The name of the XML file generated in the process</em>) – without any “.xml” at the end. Defaults to “mySDP”.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.write_xml">
+<span class="sig-name descname"><span class="pre">write_xml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mySDP'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.write_xml" title="Permalink to this definition"></a></dt>
+<dd><p>Outputs an XML file describing the <cite>table</cite>, <cite>bounds</cite>, <cite>points</cite> and <cite>basis</cite>
+for this <cite>SDP</cite> in a format that <cite>SDPB</cite> can use to check for solvability.
+If the user has the Elemental version of <cite>SDPB</cite> then the <cite>pvm2sdb</cite> utility
+(assumed to be in the same directory) is also run.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (Objective vector (often the <cite>vector</cite> part of a <cite>PolynomialVector</cite>)) – whose action under the found functional should be maximized.</p></li>
+<li><p><strong>norm</strong> (Normalization vector (often the <cite>vector</cite> part of a <cite>PolynomialVector</cite>)) – which should have unit action under the functionals.</p></li>
+<li><p><strong>name</strong> (<em>[</em><em>Optional</em><em>] </em><em>Name of the XML file to produce without any &quot;.xml&quot; at the</em>) – end. Defaults to “mySDP”.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="module-pycftboot.polynomial_vector">
 <span id="pycftboot-polynomial-vector"></span><h2>pycftboot.polynomial_vector<a class="headerlink" href="#module-pycftboot.polynomial_vector" title="Permalink to this headline"></a></h2>
@@ -123,23 +776,675 @@ instead of the more convenient polynomials.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.polynomial_vector.PolynomialVector.cancel_poles">
+<span class="sig-name descname"><span class="pre">cancel_poles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.polynomial_vector.PolynomialVector.cancel_poles" title="Permalink to this definition"></a></dt>
+<dd><p>Checks which roots of a conformal block denominator are also roots of the
+numerator. Whenever one is found, a simple factoring is applied.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
-<section id="pycftboot-common">
-<h2>pycftboot.common<a class="headerlink" href="#pycftboot-common" title="Permalink to this headline"></a></h2>
+<section id="module-pycftboot.block_vector">
+<span id="pycftboot-block-vector"></span><h2>pycftboot.block_vector<a class="headerlink" href="#module-pycftboot.block_vector" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pycftboot.block_vector.ConformalBlockVector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.block_vector.</span></span><span class="sig-name descname"><span class="pre">ConformalBlockVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_34</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">derivative_order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kept_pole_order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">leading_block</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pycftboot.block_vector.LeadingBlockVector" title="pycftboot.block_vector.LeadingBlockVector"><span class="pre">pycftboot.block_vector.LeadingBlockVector</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.block_vector.ConformalBlockVector" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.block_vector.ConformalBlockVector.get_pole_index">
+<span class="sig-name descname"><span class="pre">get_pole_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.block_vector.ConformalBlockVector.get_pole_index" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pycftboot.block_vector.LeadingBlockVector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.block_vector.</span></span><span class="sig-name descname"><span class="pre">LeadingBlockVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_34</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.block_vector.LeadingBlockVector" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.block_vector.LeadingBlockVector.leading_block">
+<span class="sig-name descname"><span class="pre">leading_block</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_34</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.block_vector.LeadingBlockVector.leading_block" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pycftboot.block_vector.MeromorphicBlockVector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.block_vector.</span></span><span class="sig-name descname"><span class="pre">MeromorphicBlockVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">leading_block</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pycftboot.block_vector.LeadingBlockVector" title="pycftboot.block_vector.LeadingBlockVector"><span class="pre">pycftboot.block_vector.LeadingBlockVector</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.block_vector.MeromorphicBlockVector" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
 </section>
-<section id="pycftboot-blocks1">
-<h2>pycftboot.blocks1<a class="headerlink" href="#pycftboot-blocks1" title="Permalink to this headline"></a></h2>
+<section id="module-pycftboot.cbt_common">
+<span id="pycftboot-cbt-common"></span><h2>pycftboot.cbt_common<a class="headerlink" href="#module-pycftboot.cbt_common" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pycftboot.cbt_common.ConformalBlockTableCommon">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.cbt_common.</span></span><span class="sig-name descname"><span class="pre">ConformalBlockTableCommon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_12</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_34</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odd_spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.cbt_common.ConformalBlockTableCommon" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>A meta class which calculates tables of conformal block derivatives from scratch</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dim</strong> (<em>The spatial dimension. If even dimensions are of interest</em><em>, </em><em>floating</em>) – point numbers with small fractional parts are recommended.</p></li>
+<li><p><strong>k_max</strong> (<em>Number controlling the accuracy of the rational approximation.</em>) – Specifically, it is the maximum power of the crossing symmetric value
+of the radial co-ordinate as described in arXiv:1406.4858.</p></li>
+<li><p><strong>l_max</strong> (<em>The maximum spin to include in the table.</em>) – </p></li>
+<li><p><strong>m_max</strong> (Number controlling how many <cite>a</cite> derivatives to include where the) – standard co-ordinates are expressed as <cite>(a + sqrt(b)) / 2</cite> and
+<cite>(a - sqrt(b)) / 2</cite>. As explained in arXiv:1412.4127, a value of 0
+does not necessarily eliminate all <cite>a</cite> derivatives.</p></li>
+<li><p><strong>n_max</strong> (The number of <cite>b</cite> derivatives to include where the standard) – co-ordinates are expressed as <cite>(a + sqrt(b)) / 2</cite> and
+<cite>(a - sqrt(b)) / 2</cite>.</p></li>
+<li><p><strong>delta_12</strong> (<em>[</em><em>Optional</em><em>] </em><em>The difference between the external scaling dimensions of</em>) – operator 1 and operator 2. Defaults to 0.</p></li>
+<li><p><strong>delta_34</strong> (<em>[</em><em>Optional</em><em>] </em><em>The difference between the external scaling dimensions of</em>) – operator 3 and operator 4. Defaults to 0.</p></li>
+<li><p><strong>odd_spins</strong> ([Optional] Whether to include 0, 1, 2, 3, …, <cite>l_max</cite> instead of) – just 0, 2, 4, …, <cite>l_max</cite>. Defaults to <cite>False</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.cbt_common.ConformalBlockTableCommon.table">
+<span class="sig-name descname"><span class="pre">table</span></span><a class="headerlink" href="#pycftboot.cbt_common.ConformalBlockTableCommon.table" title="Permalink to this definition"></a></dt>
+<dd><p>equal to its spin if <cite>odd_spins</cite> is True. Otherwise it is equal to
+half of the spin.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>A list of <a href="#id9"><span class="problematic" id="id10">`</span></a>PolynomialVector`s. A block’s position in the table is</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.cbt_common.ConformalBlockTableCommon.m_order">
+<span class="sig-name descname"><span class="pre">m_order</span></span><a class="headerlink" href="#pycftboot.cbt_common.ConformalBlockTableCommon.m_order" title="Permalink to this definition"></a></dt>
+<dd><p>in <cite>table</cite>. Any <cite>i</cite>-th entry in a <cite>PolynomialVector</cite> is a particular
+derivative of a conformal block, but to remember which one, just look
+at the <cite>i</cite>-th entry of <cite>m_order</cite> which is the number of <cite>a</cite>
+derivatives.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>A list with the same number of components as the <a href="#id11"><span class="problematic" id="id12">`</span></a>PolynomialVector`s</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.cbt_common.ConformalBlockTableCommon.n_order">
+<span class="sig-name descname"><span class="pre">n_order</span></span><a class="headerlink" href="#pycftboot.cbt_common.ConformalBlockTableCommon.n_order" title="Permalink to this definition"></a></dt>
+<dd><p>in <cite>table</cite>. Any <cite>i</cite>-th entry in a <cite>PolynomialVector</cite> is a particular
+derivative of a conformal block, but to remember which one, just look
+at the <cite>i</cite>-th entry of <cite>n_order</cite> which is the number of <cite>b</cite>
+derivatives.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>A list with the same number of components as the <a href="#id13"><span class="problematic" id="id14">`</span></a>PolynomialVector`s</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.cbt_common.ConformalBlockTableCommon.compute_table">
+<span class="sig-name descname"><span class="pre">compute_table</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.cbt_common.ConformalBlockTableCommon.compute_table" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.cbt_common.ConformalBlockTableCommon.convert_table">
+<span class="sig-name descname"><span class="pre">convert_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tab_long</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.cbt_common.ConformalBlockTableCommon.convert_table" title="Permalink to this definition"></a></dt>
+<dd><p>Converts the table attribute having few poles into an equivalent table with many poles.
+When tables produced by different methods fail to look the same, it is often
+because their polynomials are being multiplied by different positive
+prefactors. This adjusts the prefactors so that they are the same.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>tab_long</strong> (A <cite>ConformalBlockTable</cite> with all of the poles that <cite>self.table</cite> has) – plus more.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="pycftboot-blocks2">
-<h2>pycftboot.blocks2<a class="headerlink" href="#pycftboot-blocks2" title="Permalink to this headline"></a></h2>
+<section id="module-pycftboot.conformal_block_table">
+<span id="pycftboot-conformal-block-table"></span><h2>pycftboot.conformal_block_table<a class="headerlink" href="#module-pycftboot.conformal_block_table" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pycftboot.conformal_block_table.ConformalBlockTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.conformal_block_table.</span></span><span class="sig-name descname"><span class="pre">ConformalBlockTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_12</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_34</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odd_spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.conformal_block_table.ConformalBlockTable" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pycftboot.cbt_common.ConformalBlockTableCommon" title="pycftboot.cbt_common.ConformalBlockTableCommon"><code class="xref py py-class docutils literal notranslate"><span class="pre">pycftboot.cbt_common.ConformalBlockTableCommon</span></code></a></p>
+<p>This uses recursion relations on the diagonal found by Hogervorst, Osborn and
+Rychkov in arXiv:1305.1321.</p>
+</dd></dl>
+
 </section>
-<section id="pycftboot-compat-juliboots">
-<h2>pycftboot.compat_juliboots<a class="headerlink" href="#pycftboot-compat-juliboots" title="Permalink to this headline"></a></h2>
+<section id="module-pycftboot.cbt_seed1">
+<span id="pycftboot-cbt-seed1"></span><h2>pycftboot.cbt_seed1<a class="headerlink" href="#module-pycftboot.cbt_seed1" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pycftboot.cbt_seed1.ConformalBlockTableSeed1">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.cbt_seed1.</span></span><span class="sig-name descname"><span class="pre">ConformalBlockTableSeed1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_12</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_34</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odd_spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.cbt_seed1.ConformalBlockTableSeed1" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pycftboot.cbt_common.ConformalBlockTableCommon" title="pycftboot.cbt_common.ConformalBlockTableCommon"><code class="xref py py-class docutils literal notranslate"><span class="pre">pycftboot.cbt_common.ConformalBlockTableCommon</span></code></a></p>
+<p>A class which calculates tables of conformal block derivatives from scratch
+using the recursion relations with meromorphic versions of the blocks.
+Usually, it will not be necessary for the user to call it. Instead,
+<cite>ConformalBlockTable</cite> calls it automatically for <cite>m_max = 3</cite> and <cite>n_max = 0</cite>.
+For people wanting to call it with different values of <cite>m_max</cite> and <cite>n_max</cite>,
+the parameters and attributes are the same as those of <cite>ConformalBlockTable</cite>.
+It also supports the <cite>dump</cite> method.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.cbt_seed1.delta_residue">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.cbt_seed1.</span></span><span class="sig-name descname"><span class="pre">delta_residue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_34</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.cbt_seed1.delta_residue" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the residue of a meromorphic global conformal block at a particular
+pole in <cite>delta</cite>. These residues were found by Kos, Poland and Simmons-Duffin
+in arXiv:1406.4858.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nu</strong> (<cite>(d - 2) / 2</cite> where d is the spatial dimension. This must be) – different from an integer.</p></li>
+<li><p><strong>k</strong> (<em>The parameter k indexing the various poles. As described in</em>) – arXiv:1406.4858, it may be any positive integer unless <cite>series</cite>
+is 3.</p></li>
+<li><p><strong>l</strong> (<em>The spin.</em>) – </p></li>
+<li><p><strong>delta_12</strong> (<em>The difference between the external scaling dimensions of operator</em>) – 1 and operator 2.</p></li>
+<li><p><strong>delta_34</strong> (<em>The difference between the external scaling dimensions of operator</em>) – 3 and operator 4.</p></li>
+<li><p><strong>series</strong> (<em>The parameter i desribing the three types of poles in</em>) – arXiv:1406.4858.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="pycftboot-compat-scalar-blocks">
-<h2>pycftboot.compat_scalar_blocks<a class="headerlink" href="#pycftboot-compat-scalar-blocks" title="Permalink to this headline"></a></h2>
+<section id="module-pycftboot.cbt_seed2">
+<span id="pycftboot-cbt-seed2"></span><h2>pycftboot.cbt_seed2<a class="headerlink" href="#module-pycftboot.cbt_seed2" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pycftboot.cbt_seed2.ConformalBlockTableSeed2">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.cbt_seed2.</span></span><span class="sig-name descname"><span class="pre">ConformalBlockTableSeed2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_12</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_34</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odd_spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.cbt_seed2.ConformalBlockTableSeed2" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pycftboot.cbt_common.ConformalBlockTableCommon" title="pycftboot.cbt_common.ConformalBlockTableCommon"><code class="xref py py-class docutils literal notranslate"><span class="pre">pycftboot.cbt_common.ConformalBlockTableCommon</span></code></a></p>
+<p>A class which calculates tables of conformal block derivatives from scratch
+using a power series solution of their fourth order differential equation.
+Usually, it will not be necessary for the user to call it. Instead,
+<cite>ConformalBlockTable</cite> calls it automatically for <cite>m_max = 3</cite>. <cite>n_max</cite> must
+be set to None for compatibility with the ConformalBlockTableCommon class,
+but it won’t actually be used.</p>
+</dd></dl>
+
+</section>
+<section id="module-pycftboot.convolved_block_table">
+<span id="pycftboot-convolved-block-table"></span><h2>pycftboot.convolved_block_table<a class="headerlink" href="#module-pycftboot.convolved_block_table" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pycftboot.convolved_block_table.ConvolvedBlockTable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.convolved_block_table.</span></span><span class="sig-name descname"><span class="pre">ConvolvedBlockTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block_table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pycftboot.conformal_block_table.ConformalBlockTable" title="pycftboot.conformal_block_table.ConformalBlockTable"><span class="pre">pycftboot.conformal_block_table.ConformalBlockTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">odd_spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[[1,</span> <span class="pre">0,</span> <span class="pre">0]]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.convolved_block_table.ConvolvedBlockTable" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class which produces the functions that need to be linearly dependent in a
+crossing symmetric CFT. If a <cite>ConformalBlockTable</cite> does not need to be changed
+after a change to the external dimensions, a <cite>ConvolvedBlockTable</cite> does not
+either. This is because external dimensions only appear symbolically through a
+symbol called <cite>delta_ext</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>block_table</strong> (A <cite>ConformalBlockTable</cite> from which to produce the convolved blocks.) – </p></li>
+<li><p><strong>odd_spins</strong> (<em>[</em><em>Optional</em><em>] </em><em>A parameter telling the class to keep odd spins which is</em>) – only used if <cite>odd_spins</cite> is True for <cite>block_table</cite>. Defaults to
+<cite>True</cite>.</p></li>
+<li><p><strong>symmetric</strong> (<em>[</em><em>Optional</em><em>] </em><em>Whether to add blocks in two different channels instead</em>) – of subtract them. Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>content</strong> (<em>[</em><em>Optional</em><em>] </em><em>A list of ordered triples that are used to produce</em>) – user-defined linear combinations of convolved conformal blocks
+instead of just individual convolved conformal blocks where all the
+coefficients are 1. Elements of a triple are taken to be the
+coefficient, the dimension shift and the spin shift respectively.
+It should always make sense to include a triple whose second and
+third entries are 0 and 0 since this corresponds to a convolved
+conformal block with scaling dimension <cite>delta</cite> and spin <cite>ell</cite>.
+However, if other blocks in the multiplet have <cite>delta + 1</cite> and
+<cite>ell - 1</cite> relative to this, another triple should be included whose
+second and third entries are 1 and -1. The coefficient (first
+entry) may be a polynomial in <cite>delta</cite> with coefficients depending
+on <cite>ell</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.convolved_block_table.ConvolvedBlockTable.dim">
+<span class="sig-name descname"><span class="pre">dim</span></span><a class="headerlink" href="#pycftboot.convolved_block_table.ConvolvedBlockTable.dim" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>The spatial dimension, inherited from <cite>block_table</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.convolved_block_table.ConvolvedBlockTable.k_max">
+<span class="sig-name descname"><span class="pre">k_max</span></span><a class="headerlink" href="#pycftboot.convolved_block_table.ConvolvedBlockTable.k_max" title="Permalink to this definition"></a></dt>
+<dd><p>inherited from <cite>block_table</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Numer controlling the accuracy of the rational approximation,</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.convolved_block_table.ConvolvedBlockTable.l_max">
+<span class="sig-name descname"><span class="pre">l_max</span></span><a class="headerlink" href="#pycftboot.convolved_block_table.ConvolvedBlockTable.l_max" title="Permalink to this definition"></a></dt>
+<dd><p>the <cite>l_max</cite> of <cite>block_table</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>The highest spin kept in the convolved block table. This is at most</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.convolved_block_table.ConvolvedBlockTable.m_max">
+<span class="sig-name descname"><span class="pre">m_max</span></span><a class="headerlink" href="#pycftboot.convolved_block_table.ConvolvedBlockTable.m_max" title="Permalink to this definition"></a></dt>
+<dd><p>standard co-ordinates are expressed as <cite>(a + sqrt(b)) / 2</cite> and
+<cite>(a - sqrt(b)) / 2</cite>. This is at most the <cite>m_max</cite> of <cite>block_table</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Number controlling how many <cite>a</cite> derivatives there are where the</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.convolved_block_table.ConvolvedBlockTable.n_max">
+<span class="sig-name descname"><span class="pre">n_max</span></span><a class="headerlink" href="#pycftboot.convolved_block_table.ConvolvedBlockTable.n_max" title="Permalink to this definition"></a></dt>
+<dd><p>co-ordinates are expressed as <cite>(a + sqrt(b)) / 2</cite> and
+<cite>(a - sqrt(b)) / 2</cite>. This is at most the <cite>n_max</cite> of <cite>block_table</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>The number of <cite>b</cite> derivatives there are where the standard</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.convolved_block_table.ConvolvedBlockTable.delta_12">
+<span class="sig-name descname"><span class="pre">delta_12</span></span><a class="headerlink" href="#pycftboot.convolved_block_table.ConvolvedBlockTable.delta_12" title="Permalink to this definition"></a></dt>
+<dd><p>1 and operator 2, inherited from <cite>block_table</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>The difference between the external scaling dimensions of operator</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.convolved_block_table.ConvolvedBlockTable.delta_32">
+<span class="sig-name descname"><span class="pre">delta_32</span></span><a class="headerlink" href="#pycftboot.convolved_block_table.ConvolvedBlockTable.delta_32" title="Permalink to this definition"></a></dt>
+<dd><p>3 and operator 4, inherited from <cite>block_table</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>The difference between the external scaling dimensions of operator</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.convolved_block_table.ConvolvedBlockTable.table">
+<span class="sig-name descname"><span class="pre">table</span></span><a class="headerlink" href="#pycftboot.convolved_block_table.ConvolvedBlockTable.table" title="Permalink to this definition"></a></dt>
+<dd><p>equal to its spin if <cite>odd_spins</cite> is <cite>True</cite>. Otherwise it is equal
+to half of the spin.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>A list of <a href="#id15"><span class="problematic" id="id16">`</span></a>PolynomialVector`s. A block’s position in the table is</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.convolved_block_table.ConvolvedBlockTable.m_order">
+<span class="sig-name descname"><span class="pre">m_order</span></span><a class="headerlink" href="#pycftboot.convolved_block_table.ConvolvedBlockTable.m_order" title="Permalink to this definition"></a></dt>
+<dd><p>corresponding entry in a <cite>PolynomialVector</cite> in <cite>table</cite>. Different
+from the <cite>m_order</cite> of <cite>block_table</cite> because some derivatives vanish
+by symmetry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>A list stating how many <cite>a</cite> derivatives are being described by the</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.convolved_block_table.ConvolvedBlockTable.n_order">
+<span class="sig-name descname"><span class="pre">n_order</span></span><a class="headerlink" href="#pycftboot.convolved_block_table.ConvolvedBlockTable.n_order" title="Permalink to this definition"></a></dt>
+<dd><p>corresponding entry in a <cite>PolynomialVector</cite> in <cite>table</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>A list stating how many <cite>b</cite> derivatives are being described by the</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pycftboot.common">
+<span id="pycftboot-common"></span><h2>pycftboot.common<a class="headerlink" href="#module-pycftboot.common" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.common.build_polynomial">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">build_polynomial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coefficients</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.build_polynomial" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a polynomial in <cite>delta</cite> from a list of coefficients. The first one is
+expected to be the constant term.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.common.coefficients">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polynomial</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.coefficients" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a sorted list of all coefficients in a polynomial starting with the
+constant term. Zeros are automatically added so that the length of the list
+is always one more than the degree.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.common.deepcopy">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">deepcopy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.deepcopy" title="Permalink to this definition"></a></dt>
+<dd><p>Copies a list of a list so that entries can be changed non-destructively.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.common.delta_pole">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">delta_pole</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">symengine.lib.symengine_wrapper.RealMPFR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.delta_pole" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the pole of a meromorphic global conformal block given by the
+parameters in arXiv:1406.4858 by Kos, Poland and Simmons-Duffin.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nu</strong> (<cite>(d - 2) / 2</cite> where d is the spatial dimension.) – </p></li>
+<li><p><strong>k</strong> (<em>The parameter k indexing the various poles. As described in</em>) – arXiv:1406.4858, it may be any positive integer unless <cite>series</cite> is 3.</p></li>
+<li><p><strong>l</strong> (<em>The spin.</em>) – </p></li>
+<li><p><strong>series</strong> (<em>The parameter i desribing the three types of poles in arXiv:1406.4858.</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.common.extract_power">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">extract_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.extract_power" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the degree of a single term in a polynomial. Symengine stores these
+as (coefficient, (delta, exponent)). This is helpful for sorting polynomials
+which are not sorted by default.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.common.gather">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">gather</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.gather" title="Permalink to this definition"></a></dt>
+<dd><p>Finds (approximate) duplicates in a list and returns a dictionary that counts
+the number of appearances.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.common.get_index">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">get_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.get_index" title="Permalink to this definition"></a></dt>
+<dd><p>Finds where an element occurs in an array or -1 if not present.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.common.get_index_approx">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">get_index_approx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.get_index_approx" title="Permalink to this definition"></a></dt>
+<dd><p>Finds where an element numerically close to the one given occurs in an array
+or -1 if not present.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.common.index_iter">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">index_iter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.index_iter" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the nth element of an iterator.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.common.omit_all">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">omit_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">special_poles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.omit_all" title="Permalink to this definition"></a></dt>
+<dd><p>Instead of returning a product of poles where each pole is not in a special
+list, this returns a product where each pole is subtracted from some variable.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.common.rf">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">rf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.rf" title="Permalink to this definition"></a></dt>
+<dd><p>Implements the rising factorial or Pochhammer symbol.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.common.rules">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">rules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_max</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.rules" title="Permalink to this definition"></a></dt>
+<dd><p>This takes the radial and angular co-ordinates, defined by Hogervorst and
+Rychkov in arXiv:1303.1111, and differentiates them with respect to the
+diagonal <cite>a</cite> and off-diagonal <cite>b</cite>. It returns a quadruple where the first
+two entries store radial and angular derivatives respectively evaluated at
+the crossing symmetric point. The third entry is a list stating the number of
+<cite>a</cite> derivatives to which a given position corresponds and the fourth entry
+does the same for <cite>b</cite> derivatives.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.common.unitarity_bound">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.common.</span></span><span class="sig-name descname"><span class="pre">unitarity_bound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.common.unitarity_bound" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the lower bound for conformal dimensions in a unitary theory for a
+given spatial dimension and spin.</p>
+</dd></dl>
+
+</section>
+<section id="module-pycftboot.sdpb">
+<span id="pycftboot-sdpb"></span><h2>pycftboot.sdpb<a class="headerlink" href="#module-pycftboot.sdpb" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.sdpb.</span></span><span class="sig-name descname"><span class="pre">Sdpb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">procs_per_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Abstract class for SDPB</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.version">
+<span class="sig-name descname"><span class="pre">version</span></span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.version" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>version of the sdpb program</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.options">
+<span class="sig-name descname"><span class="pre">options</span></span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.options" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>available options</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.defaults">
+<span class="sig-name descname"><span class="pre">defaults</span></span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.defaults" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>default values of sdpb</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.get_defaults">
+<span class="sig-name descname"><span class="pre">get_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.get_defaults" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.get_options">
+<span class="sig-name descname"><span class="pre">get_options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.get_options" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.get_version">
+<span class="sig-name descname"><span class="pre">get_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.get_version" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.pvm2sdp_run">
+<span class="sig-name descname"><span class="pre">pvm2sdp_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.pvm2sdp_run" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.read_output">
+<span class="sig-name descname"><span class="pre">read_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mySDP'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.read_output" title="Permalink to this definition"></a></dt>
+<dd><p>Reads an <cite>SDPB</cite> output file and returns a dictionary in which all entries
+have been converted to their respective Python types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>[</em><em>Optional</em><em>] </em><em>The name of the file without any &quot;.out&quot; at the end.</em>) – Defaults to “mySDP”.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.run" title="Permalink to this definition"></a></dt>
+<dd><p>Runs an sdpb command</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>sdpb options</em>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>returns a subprocess.CompletedProcess object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.run_command">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.run_command" title="Permalink to this definition"></a></dt>
+<dd><p>Abstract function to run an arbitrary command</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>command</strong> (<em>command as a list</em>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>returns a subprocess.CompletedProcess object</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pycftboot.serialize">
+<span id="pycftboot-serialize"></span><h2>pycftboot.serialize<a class="headerlink" href="#module-pycftboot.serialize" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.serialize.dump_table_contents">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.serialize.</span></span><span class="sig-name descname"><span class="pre">dump_table_contents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.serialize.dump_table_contents" title="Permalink to this definition"></a></dt>
+<dd><p>This is called by <cite>ConformalBlockTable</cite> and <cite>ConformalBlockTableSeed</cite>. It
+writes executable Python code to a file designed to recreate the full set of
+the table’s attributes as quickly as possible.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.serialize.read_table">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.serialize.</span></span><span class="sig-name descname"><span class="pre">read_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">form</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.serialize.read_table" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.serialize.write_table">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.serialize.</span></span><span class="sig-name descname"><span class="pre">write_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">form</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.serialize.write_table" title="Permalink to this definition"></a></dt>
+<dd><p>Saves a table of conformal block derivatives to a file. Unless overridden,
+the file is valid Python code which manually populates the entries of
+<cite>table</cite> when executed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>The path to use for output.</em>) – </p></li>
+<li><p><strong>form</strong> (<em>[</em><em>Optional</em><em>] </em><em>A string indicating that the file should be saved in</em>) – another program’s format if it is equal to “scalar_blocks” or
+“juliboots”. Any other value will be ignored. Defaults to <cite>None</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pycftboot.compat_json">
+<span id="pycftboot-compat-json"></span><h2>pycftboot.compat_json<a class="headerlink" href="#module-pycftboot.compat_json" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pycftboot.compat_json.CustomDecoder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.compat_json.</span></span><span class="sig-name descname"><span class="pre">CustomDecoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.compat_json.CustomDecoder" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">json.decoder.JSONDecoder</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.compat_json.CustomDecoder.object_hook">
+<span class="sig-name descname"><span class="pre">object_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.compat_json.CustomDecoder.object_hook" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pycftboot.compat_json.CustomEncoder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.compat_json.</span></span><span class="sig-name descname"><span class="pre">CustomEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipkeys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensure_ascii</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_circular</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_nan</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">separators</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.compat_json.CustomEncoder" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">json.encoder.JSONEncoder</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.compat_json.CustomEncoder.default">
+<span class="sig-name descname"><span class="pre">default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.compat_json.CustomEncoder.default" title="Permalink to this definition"></a></dt>
+<dd><p>Implement this method in a subclass such that it returns
+a serializable object for <code class="docutils literal notranslate"><span class="pre">o</span></code>, or calls the base implementation
+(to raise a <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>).</p>
+<p>For example, to support arbitrary iterators, you could
+implement default like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">iterable</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">iterable</span><span class="p">)</span>
+    <span class="c1"># Let the base class default method raise the TypeError</span>
+    <span class="k">return</span> <span class="n">JSONEncoder</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.compat_json.json_read">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.compat_json.</span></span><span class="sig-name descname"><span class="pre">json_read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.compat_json.json_read" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.compat_json.json_write">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.compat_json.</span></span><span class="sig-name descname"><span class="pre">json_write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.compat_json.json_write" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-pycftboot.compat_juliboots">
+<span id="pycftboot-compat-juliboots"></span><h2>pycftboot.compat_juliboots<a class="headerlink" href="#module-pycftboot.compat_juliboots" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.compat_juliboots.juliboots_read">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.compat_juliboots.</span></span><span class="sig-name descname"><span class="pre">juliboots_read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.compat_juliboots.juliboots_read" title="Permalink to this definition"></a></dt>
+<dd><p>This reads in a block table produced by JuliBoots, the program by Miguel
+Paulos. Whether to call it is determined by <cite>ConformalBlockTable</cite>
+automatically. The two attributes of <cite>ConformalBlockTable</cite> that do not appear
+in the JuliBoots specification are delta_12 and delta_34. The user just has to
+remember them.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.compat_juliboots.juliboots_write">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.compat_juliboots.</span></span><span class="sig-name descname"><span class="pre">juliboots_write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.compat_juliboots.juliboots_write" title="Permalink to this definition"></a></dt>
+<dd><p>This writes out a block table in the format expected by JuliBoots. It is
+triggered when a <cite>ConformalBlockTable</cite> is dumped with the right format string.</p>
+</dd></dl>
+
+</section>
+<section id="module-pycftboot.compat_scalar_blocks">
+<span id="pycftboot-compat-scalar-blocks"></span><h2>pycftboot.compat_scalar_blocks<a class="headerlink" href="#module-pycftboot.compat_scalar_blocks" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.compat_scalar_blocks.scalar_blocks_read">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.compat_scalar_blocks.</span></span><span class="sig-name descname"><span class="pre">scalar_blocks_read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.compat_scalar_blocks.scalar_blocks_read" title="Permalink to this definition"></a></dt>
+<dd><p>This reads in a block table produced by scalar_blocks, the program by Walter
+Landry. Whether to call it is determined by <cite>ConformalBlockTable</cite>
+automatically.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pycftboot.compat_scalar_blocks.scalar_blocks_write">
+<span class="sig-prename descclassname"><span class="pre">pycftboot.compat_scalar_blocks.</span></span><span class="sig-name descname"><span class="pre">scalar_blocks_write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.compat_scalar_blocks.scalar_blocks_write" title="Permalink to this definition"></a></dt>
+<dd><p>This writes out a block table in the format that scalar_blocks uses. It is
+triggered when a <cite>ConformalBlockTable</cite> is dumped with the right format string.</p>
+</dd></dl>
+
 </section>
 </section>
 
