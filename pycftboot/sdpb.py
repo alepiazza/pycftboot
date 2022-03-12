@@ -111,10 +111,11 @@ class Sdpb(ABC):
         for line in lines:
             (key, value) = line.strip(';').split(' = ')
 
+            key = key.strip()
             if key == "terminateReason":
-                ret[key] = str(value)
+                ret[key] = value.strip('"')
             elif key == "Solver runtime":
-                ret[key] = float(key)
+                ret[key] = float(value)
             else:
                 ret[key] = RealMPFR(value, prec)
 
@@ -124,7 +125,7 @@ class Sdpb(ABC):
                 lines = out_file.read().splitlines()[1:]
 
             for value in lines:
-                y.append(RealMPFR(line, prec))
+                y.append(RealMPFR(value, prec))
 
             ret["y"] = y
 

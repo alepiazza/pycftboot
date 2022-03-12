@@ -25,12 +25,6 @@ class SdpbDocker(Sdpb):
 
         super().__init__(procs_per_node)
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
-
     def close(self):
         self.__client.close()
 
@@ -46,7 +40,6 @@ class SdpbDocker(Sdpb):
         object with at stdout, stderr, returncode attributes of the command
         """
         # Initialize docker client
-        print(command)
         client = docker.from_env()
 
         container = client.containers.run(
