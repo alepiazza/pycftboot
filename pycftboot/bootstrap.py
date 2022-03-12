@@ -31,7 +31,8 @@ from .common import (
     rf, gather, deepcopy, unitarity_bound, coefficients, get_index,
 )
 from .constants import ell, prec, delta, one, delta_ext, r_cross, zero, tiny
-from .sdpb import SdpbBinary, SdpbDocker
+from .sdpb_binary import SdpbBinary
+from .sdpb_docker import SdpbDocker
 
 if have_mpfr is False:
     print("Symengine must be compiled with MPFR support")
@@ -824,57 +825,19 @@ class SDP:
 
         # Recognize an SDP that looks overdetermined
         if degree_sum < len(self.unit):
-            print("Crossing equations have too many derivative components")
+            raise RuntimeWarning("Crossing equations have too many derivative components")
 
         self.table = self.table[:len(self.bounds)]
-        xml_file = open(name + ".xml", 'w')
-        doc.writexml(xml_file, addindent="    ", newl='\n')
-        xml_file.close()
+
+        with open(f"{name}.xml", "w") as xml_file:
+            doc.writexml(xml_file, addindent="    ", newl='\n')
+
         doc.unlink()
 
-        if sdpb_version == 2:
-            pvm2sdp_path = os.path.dirname(sdpb_path) + "/pvm2sdp"
-            subprocess.check_call([mpirun_path, "-n", "1", pvm2sdp_path, str(prec), name + ".xml", name])
+        if self.sdpb.version == 2:
+            self.sdpb.pvm2sdp_run([str(prec), f"{name}.xml", name])
 
-    def read_output(self, name= "mySDP"):
-        """
-        Reads an `SDPB` output file and returns a dictionary in which all entries
-        have been converted to their respective Python types.
-
-        Parameters
-        ----------
-        name:       [Optional] The name of the file without any ".out" at the end.
-                    Defaults to "mySDP".
-        """
-        ret = {}
-        if sdpb_version == 1:
-            out_file = open(name + ".out", 'r')
-        else:
-            out_file = open(name + "_out/out.txt", 'r')
-        for line in out_file:
-            (key, delimiter, value) = line.partition(" = ")
-            value = value.replace('\n', '')
-            value = value.replace(';', '')
-            value = value.replace('{', '[')
-            value = value.replace('}', ']')
-            value = re.sub("([0-9]+\.[0-9]+e?-?[0-9]+)", r"RealMPFR('\1', prec)", value)
-            command = "ret['" + key.strip() + "'] = " + value
-            exec(command)
-        out_file.close()
-
-        if sdpb_version == 2:
-            y = []
-            outfile = open(name + "_out/y.txt", 'r')
-            lines = outfile.readlines()
-            for i in range(1, len(lines)):
-                value = lines[i].replace('\n', '')
-                value = re.sub("([0-9]+\.[0-9]+e?-?[0-9]+)", r"RealMPFR('\1', prec)", value)
-                exec("y.append(" + value + ")")
-            outfile.close()
-            ret["y"] = y
-        return ret
-
-    def iterate(self, name= "mySDP"):
+    def iterate(self, name="mySDP"):
         """
         Returns `True` if this `SDP` with its current gaps represents an allowed CFT
         and `False` otherwise.

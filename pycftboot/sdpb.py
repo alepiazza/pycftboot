@@ -1,11 +1,8 @@
 from abc import ABC, abstractmethod
-
-import os
-import subprocess
-import shutil
 import re
-import warnings
-import docker
+from symengine.lib.symengine_wrapper import RealMPFR
+
+from .constants import prec
 
 
 class Sdpb(ABC):
@@ -19,13 +16,52 @@ class Sdpb(ABC):
 
     """
 
-    def __init__(self):
+    def __init__(self, procs_per_node: int = 1):
         self.version = self.get_version()
         self.option = self.get_options()
         self.defaults = self.get_defaults()
+        self.procs_per_node = procs_per_node
+
+        if self.version not in (1, 2):
+            raise ValueError(f"Unkwon sdpb version = {self.version}")
+
+    @abstractmethod
+    def run_command(self, command: list):
+        """Abstract function to run an arbitrary command
+
+        Parameters
+        ----------
+        command: command as a list
+
+        Returns
+        -------
+        returns a subprocess.CompletedProcess object
+        """
+        pass
+
+    def run(self, args: list):
+        """Runs an sdpb command
+
+        Parameters
+        ----------
+        args: sdpb options
+
+        Returns
+        -------
+        returns a subprocess.CompletedProcess object
+        """
+        if self.version == 1:
+            self.run_command([self.path] + args)
+        elif self.version == 2:
+            self.run_command([self.mpirun_path] + ["-n", f"{self.procs_per_node}"] + [self.path] + args)
+
+    def pvm2sdp_run(self, args: list):
+        if self.version == 1:
+            raise RuntimeError(f"Sdpb version {self.version} is not meant to be used with pvm2sdp")
+        self.run_command([self.mpirun_path] + ["-n", f"{self.procs_per_node}"] + [self.pvm2sdp_path] + args)
 
     def get_version(self):
-        proc = self.run('--version')
+        proc = self.run_command([self.path] + ["--version"])
 
         # Assume that this is version 1.x, which didn't support --version
         # Otherwise parse the output of --version
@@ -36,20 +72,6 @@ class Sdpb(ABC):
             if m is None:
                 raise RuntimeError("Failed to retrieve SDPB version.")
             return int(m.group(1))
-
-    @abstractmethod
-    def run(self, args):
-        """Run sdpb command with arguments given
-
-        Parameters
-        ----------
-        args: sdpb arguments
-
-        Returns
-        -------
-        returns a subprocess.CompletedProcess object
-        """
-        pass
 
     def get_options(self):
         COMMON_OPTIONS = ["checkpointInterval", "maxIterations", "maxRuntime", "dualityGapThreshold", "primalErrorThreshold", "dualErrorThreshold", "initialMatrixScalePrimal", "initialMatrixScaleDual", "feasibleCenteringParameter", "infeasibleCenteringParameter", "stepLengthReduction", "maxComplementarity"]
@@ -67,79 +89,43 @@ class Sdpb(ABC):
             defaults_extra = ["0", "1", "1"]
         return defaults_extra + COMMON_DEFAULTS
 
-
-class SdpbBinary(Sdpb):
-    """ Class for SDPB when installed as a binary
-    """
-    def __init__(self, sdpb_bin='/usr/bin/sdpb', mpirun_bin='/usr/bin/mpirun'):
-        self.path = self.__find_executable(sdpb_bin)
-
-        super().__init__()
-
-        if self.version > 1:
-            self.mpirun_path = self.__find_executable(mpirun_bin)
-
-    def __find_executable(self, name):
-        """Searches for the executable given by `name`. If not found we try to
-        find the executable in path
+    def read_output(self, name="mySDP"):
         """
-        if os.path.isfile(name):
-            return name
-        else:
-            bin_name = os.path.basename(name)
-            bin_in_path = shutil.which(bin_name)
-            if bin_in_path is None:
-                raise EnvironmentError(f"{bin_name} not found or not in PATH")
-            elif not os.path.isfile(bin_in_path):
-                raise EnvironmentError(f"{bin_in_path} is in PATH but was not found")
-            warnings.warn(f"{name} was not found, but found {bin_in_path} in PATH")
-            return bin_in_path
+        Reads an `SDPB` output file and returns a dictionary in which all entries
+        have been converted to their respective Python types.
 
-    def run(self, *args):
-        return subprocess.run([self.path] + list(args), capture_output=True, check=True, text=True)
-
-
-class SdpbDocker(Sdpb):
-    """ Class for SDPB when running in docker
-    """
-
-    def __init__(self, image="wlandry/sdpb:2.5.1"):
-        self.image = image
-        self.__client = docker.from_env()
-
-        super().__init__()
-
-    def run_in_docker(self, command):
-        """Run command in a docker image specified by `image`
-
-        Attributes
+        Parameters
         ----------
-        command: string or list commnad
-
-        Returns
-        -------
-        object with at stdout, stderr, returncode attributes of the command
+        name:       [Optional] The name of the file without any ".out" at the end.
+                    Defaults to "mySDP".
         """
-        container = self.__client.containers.run(self.image, command=command, detach=True)
+        ret = {}
+        if self.version == 1:
+            out_file_name = f"{name}.out"
+        else:
+            out_file_name = f"{name}_out/out.txt"
 
-        result = container.wait()
-        stdout = container.logs(stdout=True, stderr=False).decode("utf-8")
-        stderr = container.logs(stdout=False, stderr=True).decode("utf-8")
+        with open(out_file_name, "r") as out_file:
+            lines = out_file.read().splitlines()
 
-        if result["StatusCode"] != 0:
-            raise RuntimeError(stderr)
+        for line in lines:
+            (key, value) = line.strip(';').split(' = ')
 
-        container.remove()
+            if key == "terminateReason":
+                ret[key] = str(value)
+            elif key == "Solver runtime":
+                ret[key] = float(key)
+            else:
+                ret[key] = RealMPFR(value, prec)
 
-        completed_process = subprocess.CompletedProcess(
-            args=command,
-            returncode=result["StatusCode"],
-            stdout=stdout,
-            stderr=stderr
-        )
-        completed_process.check_returncode()
+        if self.version == 2:
+            y = []
+            with open(f"{name}_out/y.txt", "r") as out_file:
+                lines = out_file.read().splitlines()[1:]
 
-        return completed_process
+            for value in lines:
+                y.append(RealMPFR(line, prec))
 
-    def run(self, *args):
-        return self.run_in_docker(["/usr/local/bin/sdpb"] + list(args))
+            ret["y"] = y
+
+        return ret
