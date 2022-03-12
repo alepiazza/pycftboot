@@ -34,3 +34,7 @@ class TestJsonSerializer(unittest.TestCase):
             read_table('not_cbt')
 
         os.remove('not_cbt')
+
+
+if __name__ == '__main__':
+    unittest.main()

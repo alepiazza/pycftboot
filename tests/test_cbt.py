@@ -60,3 +60,7 @@ class TestConvolvedBlockTable(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             ConvolvedBlockTable('')
+
+
+if __name__ == '__main__':
+    unittest.main()
