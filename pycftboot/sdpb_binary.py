@@ -13,7 +13,7 @@ class SdpbBinary(Sdpb):
 
         super().__init__(procs_per_node)
 
-        if self.version == 1:
+        if self.version == 2:
             self.pvm2sdp_path = self.__find_executable(pvm2sdp_bin)
             self.mpirun_path = self.__find_executable(mpirun_bin)
 
