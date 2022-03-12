@@ -12,11 +12,10 @@ the space of scaling dimensions for various CFT operators. All operators used in
 the explicit correlators must be scalars, but they may have different scaling
 dimensions and transform in arbitrary representations of a global symmetry.
 """
-from typing import Union
 from __future__ import print_function
+from typing import Union, List, Tuple
 import xml.dom.minidom
 import time
-import os
 import subprocess
 import re
 from symengine.lib.symengine_wrapper import (
@@ -47,6 +46,8 @@ mpmath.mp.dps = dec_prec
 def uppergamma(x, a):
     return RealMPFR(str(mpmath.gammainc(mpmath.mpf(str(x)), a = mpmath.mpf(str(a)))), prec)
 """
+
+SpinIrrep = Union[None, int, Tuple[int, Union[int, str]]]
 
 
 class SDP:
@@ -142,7 +143,7 @@ class SDP:
     """
 
     def __init__(
-            self, dim_list: Union[float, [float]], conv_table_list: Union[ConformalBlockTable, [ConformalBlockTable]],
+            self, dim_list: Union[float, List[float]], conv_table_list: Union[ConformalBlockTable, List[ConformalBlockTable]],
             vector_types=[[[[[[1, 0, 0, 0]]]], 0, 0]], prototype=None,
             sdpb_mode: str = 'binary', sdpb_kwargs={}
     ):
@@ -291,8 +292,7 @@ class SDP:
         else:
             raise ValueError(f"sdpb_mode = {sdpb_mode} must be either 'binary' or 'docker'")
 
-
-    def add_point(self, spin_irrep: Union[int, (int, Union[int, str])] = None, dimension: float = None, extra: list = []):
+    def add_point(self, spin_irrep: SpinIrrep = None, dimension: float = None, extra: list = []):
         """
         Tells the `SDP` that a particular fixed operator should be included in the
         sum rule. If called with one argument, all points with that label will be
@@ -334,7 +334,7 @@ class SDP:
                     if p[0] == spin_irrep:
                         self.points.remove(p)
 
-    def get_bound(self, gapped_spin_irrep: Union[int, (int, Union[int, str])]):
+    def get_bound(self, gapped_spin_irrep: SpinIrrep):
         """
         Returns the minimum scaling dimension of a given operator in this `SDP`.
         This will return the unitarity bound until the user starts calling
@@ -353,7 +353,7 @@ class SDP:
             if self.table[l][0][0].label == gapped_spin_irrep:
                 return self.bounds[l]
 
-    def set_bound(self, gapped_spin_irrep: Union[int, (int, Union[int, str])] = None, delta_min: float = None, reset_basis=True):
+    def set_bound(self, gapped_spin_irrep: SpinIrrep = None, delta_min: float = None, reset_basis=True):
         """
         Sets the minimum scaling dimension of a given operator in the sum rule. If
         called with one argument, the operator with that label will be assigned the
@@ -431,7 +431,7 @@ class SDP:
                Defaults to `None` which means that the parameter for `key` will be
                reset to its default value.
         """
-        if key == None:
+        if key is None:
             self.options = []
         elif key in self.sdpb.options:
             found = False
@@ -449,7 +449,7 @@ class SDP:
         else:
             raise ValueError(f"key = {key} is not a sdpb valid option")
 
-    def get_table_index(self, spin_irrep: Union[int, (int, Union[int, str])]):
+    def get_table_index(self, spin_irrep: SpinIrrep):
         """
         Searches for the label of a `PolynomialVector` and returns its position in
         `table` or -1 if not found.
