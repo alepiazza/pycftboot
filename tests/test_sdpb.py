@@ -11,6 +11,7 @@ from pycftboot.constants import prec
 
 DIR = 'test_output'
 
+
 def have_binary(bin_name):
     bin_in_path = shutil.which(bin_name)
     return bin_in_path is not None and os.path.isfile(bin_in_path)
