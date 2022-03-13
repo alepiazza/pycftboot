@@ -33,7 +33,12 @@ class PolynomialVector:
         if not isinstance(other, PolynomialVector):
             # don't attempt to compare against unrelated types
             return NotImplemented
-        return self.__dict__ == other.__dict__
+        pv_dict = self.__dict__
+        other_dict = other.__dict__
+
+        pv_dict["vector"] = [poly.__str__ for poly in pv_dict["vector"]]
+        other_dict["vector"] = [poly.__str__ for poly in pv_dict["vector"]]
+        return pv_dict == other_dict
 
     def cancel_poles(self):
         """Checks which roots of a conformal block denominator are also roots of the
