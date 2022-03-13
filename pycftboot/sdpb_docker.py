@@ -1,7 +1,6 @@
 import os
 import subprocess
 import docker
-import atexit
 
 from .sdpb import Sdpb
 
@@ -10,12 +9,13 @@ class SdpbDocker(Sdpb):
     """ Class for SDPB when running in docker
     """
 
-    def __init__(self, procs_per_node=1, volume='output', user=None, image="wlandry/sdpb:2.5.1", sdpb_path="/usr/local/bin/sdpb", pvm2sdp_path="/usr/local/bin/pvm2sdp", mpirun_path="/usr/bin/mpirun"):
+    def __init__(self, volume='output', user=None, image="wlandry/sdpb:2.5.1", sdpb_path="/usr/local/bin/sdpb", pvm2sdp_path="/usr/local/bin/pvm2sdp", mpirun_path="/usr/bin/mpirun"):
         # User and docker volume stuff
         if user is None:
             user = os.getuid()
             self.user = f'{user}:{user}'
-        self.volume = os.path.abspath(volume)
+        self.volume = volume
+        self.volume_abs = os.path.abspath(volume)
 
         self.image = image
 
@@ -23,7 +23,7 @@ class SdpbDocker(Sdpb):
         self.pvm2sdp_path = pvm2sdp_path
         self.mpirun_path = mpirun_path
 
-        super().__init__(procs_per_node)
+        super().__init__()
 
     def close(self):
         self.__client.close()
@@ -47,7 +47,7 @@ class SdpbDocker(Sdpb):
             command=command,
             user=self.user,
             environment={'OMPI_ALLOW_RUN_AS_ROOT': '1', 'OMPI_ALLOW_RUN_AS_ROOT_CONFIRM': '1'},
-            volumes={self.volume: {'bind': '/work', 'mode': 'rw'}},
+            volumes={self.volume_abs: {'bind': f'/work/{self.volume}', 'mode': 'rw'}},
             working_dir='/work',
             detach=True
         )

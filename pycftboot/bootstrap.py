@@ -397,58 +397,6 @@ class SDP:
             if reset_basis and delta_min != oo:
                 self.set_basis(l)
 
-    def get_option(self, key: str):
-        """
-        Returns the string representation of a value that `SDPB` will use, whether
-        or not it has been explicitly set.
-
-        Parameters
-        ----------
-        key: The name of the `SDPB` parameter without any "--" at the beginning or
-        "=" at the end.
-        """
-        if key in self.sdpb.options:
-            ret = self.sdpb.options[self.sdpb.options.index(key)]
-            opt_string = "--" + key + "="
-            for i in range(0, len(self.options)):
-                if self.options[i][:len(opt_string)] == opt_string:
-                    ret = self.options[i][len(opt_string):]
-                    break
-            return ret
-
-    def set_option(self, key: str = None, value: Union[float, str] = None):
-        """
-        Sets the value of a switch that should be passed to `SDPB` on the command
-        line. `SDPB` options that do not take a parameter are handled by other
-        methods so it should not be necessary to pass them.
-
-        Parameters
-        ----------
-        key:   [Optional] The name of the `SDPB` parameter being set without any
-               "--" at the beginning or "=" at the end. Defaults to `None` which
-               means all parameters will be reset to their default values.
-        value: [Optional] The string or numerical value that should accompany `key`.
-               Defaults to `None` which means that the parameter for `key` will be
-               reset to its default value.
-        """
-        if key is None:
-            self.options = []
-        elif key in self.sdpb.options:
-            found = False
-            opt_string = "--" + key + "="
-            for i in range(0, len(self.options)):
-                if self.options[i][:len(opt_string)] == opt_string:
-                    found = True
-                    break
-            if found is True and value is None:
-                self.options = self.options[:i] + self.options[i + 1:]
-            elif found is True and value is not None:
-                self.options[i] = opt_string + str(value)
-            elif found is False and value is not None:
-                self.options.append(opt_string + str(value))
-        else:
-            raise ValueError(f"key = {key} is not a sdpb valid option")
-
     def get_table_index(self, spin_irrep: SpinIrrep):
         """
         Searches for the label of a `PolynomialVector` and returns its position in

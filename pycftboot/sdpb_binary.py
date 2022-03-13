@@ -8,10 +8,10 @@ from .sdpb import Sdpb
 class SdpbBinary(Sdpb):
     """ Class for SDPB when installed as a binary
     """
-    def __init__(self, procs_per_node=1, sdpb_bin='/usr/bin/sdpb', pvm2sdp_bin='/usr/bin/pvm2sdp', mpirun_bin='/usr/bin/mpirun'):
+    def __init__(self, sdpb_bin='/usr/bin/sdpb', pvm2sdp_bin='/usr/bin/pvm2sdp', mpirun_bin='/usr/bin/mpirun'):
         self.path = self.__find_executable(sdpb_bin)
 
-        super().__init__(procs_per_node)
+        super().__init__()
 
         if self.version == 2:
             self.pvm2sdp_path = self.__find_executable(pvm2sdp_bin)
