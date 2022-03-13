@@ -9,7 +9,7 @@ class SdpbDocker(Sdpb):
     """ Class for SDPB when running in docker
     """
 
-    def __init__(self, volume='output', user=None, image="wlandry/sdpb:2.5.1", sdpb_path="/usr/local/bin/sdpb", pvm2sdp_path="/usr/local/bin/pvm2sdp", mpirun_path="/usr/bin/mpirun"):
+    def __init__(self, volume='.', user=None, image="wlandry/sdpb:2.5.1", sdpb_path="/usr/local/bin/sdpb", pvm2sdp_path="/usr/local/bin/pvm2sdp", mpirun_path="/usr/bin/mpirun", unisolve_path="/usr/local/bin/unisolve"):
         # User and docker volume stuff
         if user is None:
             user = os.getuid()
@@ -22,6 +22,7 @@ class SdpbDocker(Sdpb):
         self.path = sdpb_path
         self.pvm2sdp_path = pvm2sdp_path
         self.mpirun_path = mpirun_path
+        self.unisovle_path = unisolve_path
 
         super().__init__()
 

@@ -8,7 +8,7 @@ from .sdpb import Sdpb
 class SdpbBinary(Sdpb):
     """ Class for SDPB when installed as a binary
     """
-    def __init__(self, sdpb_bin='/usr/bin/sdpb', pvm2sdp_bin='/usr/bin/pvm2sdp', mpirun_bin='/usr/bin/mpirun'):
+    def __init__(self, sdpb_bin='/usr/bin/sdpb', pvm2sdp_bin='/usr/bin/pvm2sdp', mpirun_bin='/usr/bin/mpirun', unisolve_bin='/usr/bin/unisolve'):
         self.path = self.__find_executable(sdpb_bin)
 
         super().__init__()
@@ -16,6 +16,7 @@ class SdpbBinary(Sdpb):
         if self.version == 2:
             self.pvm2sdp_path = self.__find_executable(pvm2sdp_bin)
             self.mpirun_path = self.__find_executable(mpirun_bin)
+        self.unisovle_path = self.__find_executable(unisolve_bin)
 
     def __find_executable(self, name):
         """Searches for the executable given by `name`. If not found we try to

@@ -84,6 +84,9 @@ class Sdpb(ABC):
             [self.pvm2sdp_path, str(self.options["precision"]), input_xml, output_file]
         )
 
+    def unisovle_run(self, precision, input_file):
+        return self.run_command([self.unisolve_path, "-H1", "-o" + str(prec), "-Oc", "-Ga", input_file])
+
     def get_version(self):
         proc = self.run_command([self.path] + ["--version"])
 
