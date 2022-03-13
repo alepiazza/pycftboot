@@ -12,12 +12,9 @@ the space of scaling dimensions for various CFT operators. All operators used in
 the explicit correlators must be scalars, but they may have different scaling
 dimensions and transform in arbitrary representations of a global symmetry.
 """
-from __future__ import print_function
 from typing import Union, List, Tuple
 import xml.dom.minidom
 import time
-import subprocess
-import re
 from symengine.lib.symengine_wrapper import (
     have_mpfr, RealMPFR, factorial, oo, uppergamma, log, DenseMatrix,
     pi, exp, sqrt
@@ -29,7 +26,7 @@ from .convolved_block_table import ConvolvedBlockTable
 from .common import (
     rf, gather, deepcopy, unitarity_bound, coefficients, get_index,
 )
-from .constants import ell, prec, delta, one, delta_ext, r_cross, zero, tiny
+from .constants import prec, delta, one, delta_ext, r_cross, zero, tiny
 from .sdpb_binary import SdpbBinary
 from .sdpb_docker import SdpbDocker
 
@@ -291,8 +288,10 @@ class SDP:
             self.sdpb = SdpbDocker(**sdpb_kwargs)
         else:
             raise ValueError(f"sdpb_mode = {sdpb_mode} must be either 'binary' or 'docker'")
+        self.sdpb_mode = sdpb_mode
+        self.sdpb_kwargs = sdpb_kwargs
 
-    def add_point(self, spin_irrep: SpinIrrep = None, dimension: float = None, extra: list = []):
+    def add_point(self, spin_irrep: SpinIrrep = -1, dimension: float = -1, extra: list = []):
         """
         Tells the `SDP` that a particular fixed operator should be included in the
         sum rule. If called with one argument, all points with that label will be
@@ -783,9 +782,9 @@ class SDP:
         doc.unlink()
 
         if self.sdpb.version == 2:
-            self.sdpb.pvm2sdp_run([str(prec), f"{name}.xml", name])
+            self.sdpb.pvm2sdp_run(f"{name}.xml", name)
 
-    def iterate(self, name="mySDP"):
+    def iterate(self):
         """
         Returns `True` if this `SDP` with its current gaps represents an allowed CFT
         and `False` otherwise.
@@ -796,21 +795,22 @@ class SDP:
                     without any ".xml" at the end. Defaults to "mySDP".
         """
         obj = [0.0] * len(self.table[0][0][0].vector)
-        self.write_xml(obj, self.unit, name)
+        self.write_xml(obj, self.unit, self.sdpb.get_option("sdpDir"))
 
-        if sdpb_version == 1:
-            subprocess.check_call([sdpb_path, "-s", name + ".xml", "--precision=" + str(prec), "--findPrimalFeasible", "--findDualFeasible", "--noFinalCheckpoint"] + self.options)
-        else:
-            ppn = self.get_option("procsPerNode")
-            ppn = str(max(1, int(ppn)))
-            self.set_option("procsPerNode", ppn)
-            subprocess.check_call([mpirun_path, "-n", ppn, sdpb_path, "-s", name, "--precision=" + str(prec), "--findPrimalFeasible", "--findDualFeasible"] + self.options)
-        output = self.read_output(name= name)
+        if self.sdpb.version == 1:
+            self.sdpb.set_option("noFinalCheckpoint", True)
+
+        self.sdpb.run({'findPrimalFeasible': True, 'findDualFeasible': True})
+
+        if self.sdpb.version == 1:
+            self.sdpb.set_default_option("noFinalCheckpoint")
+
+        output = self.sdpb.read_output(self.sdpb.get_option("outDir"))
 
         terminate_reason = output["terminateReason"]
         return terminate_reason == "found primal feasible solution"
 
-    def bisect(self, lower, upper, threshold, spin_irrep, isolated= False, reverse = False, bias = None, name = "mySDP"):
+    def bisect(self, lower, upper, threshold, spin_irrep, isolated=False, reverse=False, bias=None):
         """
         Uses a binary search to find the maximum allowed gap in a particular type
         of operator before the CFT stops existing. The allowed value closest to the
@@ -841,13 +841,13 @@ class SDP:
         bias_found = False
         checkpoints = False
         old = self.get_bound(spin_irrep)
-        if bias != None:
+        if bias is not None:
             bias = min(bias, 1.0 / bias)
 
         while abs(upper - lower) > threshold:
-            if bias == None and d_time != 0 and p_time != 0:
+            if bias is None and d_time != 0 and p_time != 0:
                 bias = p_time / d_time
-            if bias != None and bias_found == False:
+            if bias is not None and bias_found is False:
                 # Bisection within a bisection
                 u = 0.5
                 l = 0.0
@@ -863,43 +863,44 @@ class SDP:
 
             test = lower + x * (upper - lower)
             print("Trying " + test.__str__())
-            if isolated == True:
+            if isolated is True:
                 self.add_point(spin_irrep, test)
             else:
                 self.set_bound(spin_irrep, test)
 
             # Using the same name twice in a row is only dangerous if the runs are really long
             start = time.time()
-            if checkpoints and sdpb_version == 1:
-                result = self.iterate(name= str(start))
+            if checkpoints and self.sdpb.version == 1:
+                self.sdpb.set_option("sdpDir", str(start))
+                result = self.iterate()
             else:
-                result = self.iterate(name= name)
+                result = self.iterate()
             end = time.time()
-            if int(end - start) > int(self.get_option("checkpointInterval")):
+            if int(end - start) > int(self.sdpb.get_option("checkpointInterval")):
                 checkpoints = True
-            if isolated == True:
+            if isolated is True:
                 self.points = self.points[:-1]
 
-            if result == False:
-                if reverse == False:
+            if result is False:
+                if reverse is False:
                     upper = test
                 else:
                     lower = test
                 d_time = end - start
             else:
-                if reverse == False:
+                if reverse is False:
                     lower = test
                 else:
                     upper = test
                 p_time = end - start
 
         self.set_bound(spin_irrep, old)
-        if reverse == False:
+        if reverse is False:
             return lower
         else:
             return upper
 
-    def opemax(self, dimension, spin_irrep, reverse= False, vector = None, name = "mySDP"):
+    def opemax(self, dimension, spin_irrep, reverse=False, vector=None):
         """
         Minimizes or maximizes the squared length of the vector of OPE coefficients
         involving an operator with a prescribed scaling dimension, spin and global
@@ -935,7 +936,7 @@ class SDP:
             sign = 1
         prod = self.shifted_prefactor(self.table[l][0][0].poles, r_cross, dimension, 0) * sign
 
-        if vector == None or len(vector) != size:
+        if vector is None or len(vector) != size:
             vec = [0] * size
             vec[0] = 1
         else:
@@ -953,10 +954,10 @@ class SDP:
                 for s in range(0, size):
                     el += vec[r] * vec[s] * self.table[l][r][s].vector[i].subs(delta, dimension)
             norm.append(el * prod)
-        functional = self.solution_functional(self.get_bound(spin_irrep), spin_irrep, self.unit, norm, name)
-        output = self.read_output(name= name)
+        functional = self.solution_functional(self.get_bound(spin_irrep), spin_irrep, self.unit, norm)
+        output = self.sdpb.read_output(self.sdpb.get_option("outDir"))
         primal_value = output["primalObjective"]
-        if size == 1 or vector != None:
+        if size == 1 or vector is not None:
             return float(primal_value) * (-1)
 
         # This primal value will be divided by 1 or something different if the matrix is not 1x1
@@ -979,7 +980,7 @@ class SDP:
             print("Divide " + str(float(primal_value)) + " by the minimum eigenvalue")
         return DenseMatrix(outer_list)
 
-    def solution_functional(self, dimension, spin_irrep, obj= None, norm = None, name = "mySDP"):
+    def solution_functional(self, dimension, spin_irrep, obj=None, norm=None):
         """
         Returns a functional (list of numerical components) that serves as a
         solution to the `SDP`. Like `iterate`, this sets a bound, generates an XML
@@ -1003,80 +1004,77 @@ class SDP:
         name:       [Optional] The name of the XML file generated in the process
                     without any ".xml" at the end. Defaults to "mySDP".
         """
-        if obj == None:
+        if obj is None:
             obj = [0.0] * len(self.table[0][0][0].vector)
-        if norm == None:
+        if norm is None:
             norm = self.unit
 
         old = self.get_bound(spin_irrep)
         self.set_bound(spin_irrep, dimension)
-        self.write_xml(obj, norm, name)
+        self.write_xml(obj, norm, self.sdpb.get_option("sdpDir"))
         self.set_bound(spin_irrep, old)
 
-        if sdpb_version == 1:
-            subprocess.check_call([sdpb_path, "-s", name + ".xml", "--precision=" + str(prec), "--noFinalCheckpoint"] + self.options)
-        else:
-            ppn = self.get_option("procsPerNode")
-            ppn = str(max(1, int(ppn)))
-            self.set_option("procsPerNode", ppn)
-            subprocess.check_call([mpirun_path, "-n", ppn, sdpb_path, "-s", name, "--precision=" + str(prec), "--noFinalCheckpoint"] + self.options)
-        output = self.read_output(name= name)
+        self.sdpb.run({"noFinalCheckpoint": True})
+
+        output = self.sdpb.read_output(self.sdpb.get_option("outDir"))
+
         return [one] + output["y"]
 
-    def convert_spectrum_file(self, input_path, output_path, rescaling= 4 ** delta):
-        """
-        Reads a spectrum produced by the arXiv:1603.04444 script and outputs a file
-        with physical dimensions and OPE coefficients. Instead of a scaling
-        dimension, the original file reports the difference between the scaling
-        dimension and the gap. Instead of an OPE coefficient, the original file
-        reports the factor relating the OPE coefficient to the positive prefactor.
-        Note that this only works if `set_bound` has not been called since the
-        XML file was generated.
+    # THIS FUNCTION IS DEPRECATED SINCE I DON'T HAVE THE OUTPUT TO REWRITE IT IN A BETTER WAY
+    # def convert_spectrum_file(self, input_path, output_path, rescaling=4 ** delta):
+    #     """
+    #     Reads a spectrum produced by the arXiv:1603.04444 script and outputs a file
+    #     with physical dimensions and OPE coefficients. Instead of a scaling
+    #     dimension, the original file reports the difference between the scaling
+    #     dimension and the gap. Instead of an OPE coefficient, the original file
+    #     reports the factor relating the OPE coefficient to the positive prefactor.
+    #     Note that this only works if `set_bound` has not been called since the
+    #     XML file was generated.
 
-        Parameters
-        ----------
-        input_path:  The path to the spectrum in Mathematica-like format.
-        output_path: The path desired for the file after the additive and
-                     multiplicative corrections have been performed.
-        rescaling:   [Optional] An expression, which may depend on `delta` and
-                     `ell`, for changing the convention used for OPE coefficients.
-                     Defaults to 4 ** delta.
-        """
-        in_file = open(input_path, 'r')
-        out_file = open(output_path, 'w')
+    #     Parameters
+    #     ----------
+    #     input_path:  The path to the spectrum in Mathematica-like format.
+    #     output_path: The path desired for the file after the additive and
+    #                  multiplicative corrections have been performed.
+    #     rescaling:   [Optional] An expression, which may depend on `delta` and
+    #                  `ell`, for changing the convention used for OPE coefficients.
+    #                  Defaults to 4 ** delta.
+    #     """
+    #     in_file = open(input_path, 'r')
+    #     out_file = open(output_path, 'w')
 
-        out_file.write('{')
-        for j in range(0, len(self.table) + len(self.points)):
-            if j >= len(self.table):
-                shift = self.points[j - len(self.table)][1]
-                spin = self.points[j - len(self.table)][0][0]
-            else:
-                shift = self.bounds[j]
-                spin = self.table[j][0][0].label[0]
-            out_file.write(str(j) + " -> ")
-            line = next(in_file)[:-2].split("->")[1]
-            line = line.replace('{', '[').replace('}', ']')
-            line = re.sub("([0-9]+\.[0-9]+e?-?[0-9]+)", r"RealMPFR('\1', prec)", line)
-            exec("ops = " + line)
-            for o in range(0, len(ops)):
-                ops[o][0] = ops[o][0] + shift
-                if j >= len(self.table):
-                    prod = 1
-                else:
-                    prod = self.shifted_prefactor(self.table[j][0][0].poles, r_cross, ops[o][0], 0)
-                if "subs" in rescaling:
-                    prod *= rescaling.subs(delta, ops[o][0]).subs(ell, spin)
-                else:
-                    prod *= rescaling
-                for t in range(0, len(ops[o][1])):
-                    ops[o][1][t] = ops[o][1][t] / sqrt(prod)
-            ops_str = str(ops).replace('[', '{').replace(']', '}')
-            out_file.write(ops_str + ",\n")
-        # Copy the objective at the end
-        out_file.write(next(in_file))
+    #     out_file.write('{')
+    #     for j in range(0, len(self.table) + len(self.points)):
+    #         if j >= len(self.table):
+    #             shift = self.points[j - len(self.table)][1]
+    #             spin = self.points[j - len(self.table)][0][0]
+    #         else:
+    #             shift = self.bounds[j]
+    #             spin = self.table[j][0][0].label[0]
+    #         out_file.write(str(j) + " -> ")
+    #         line = next(in_file)[:-2].split("->")[1]
+    #         line = line.replace('{', '[').replace('}', ']')
+    #         line = re.sub("([0-9]+\.[0-9]+e?-?[0-9]+)", r"RealMPFR('\1', prec)", line)
+    #         exec("ops = " + line)
+    #         for o in range(0, len(ops)):
+    #             ops[o][0] = ops[o][0] + shift
+    #             if j >= len(self.table):
+    #                 prod = 1
+    #             else:
+    #                 prod = self.shifted_prefactor(self.table[j][0][0].poles, r_cross, ops[o][0], 0)
+    #             if "subs" in rescaling:
+    #                 prod *= rescaling.subs(delta, ops[o][0]).subs(ell, spin)
+    #             else:
+    #                 prod *= rescaling
+    #             for t in range(0, len(ops[o][1])):
+    #                 ops[o][1][t] = ops[o][1][t] / sqrt(prod)
+    #         ops_str = str(ops).replace('[', '{').replace(']', '}')
+    #         out_file.write(ops_str + ",\n")
+    #     # Copy the objective at the end
+    #     out_file.write(next(in_file))
 
-        in_file.close()
-        out_file.close()
+    #     in_file.close()
+    #     out_file.close()
 
     def extremal_dimensions(self, functional, spin_irrep, zero_threshold):
         """
@@ -1098,8 +1096,6 @@ class SDP:
         zero_threshold: The threshold for identifying a real zero. The determinant
                         over its second derivative must be less than this value.
         """
-        unisolve_path = find_executable("unisolve")
-
         zeros = []
         entries = []
         l = self.get_table_index(spin_irrep)
@@ -1122,15 +1118,15 @@ class SDP:
         det2 = det1.diff(delta)
         coeffs = coefficients(det1)
         # Pass output to unisolve
-        pol_file = open("tmp.pol", 'w')
-        pol_file.write("drf\n")
-        pol_file.write(str(prec) + "\n")
-        pol_file.write(str(len(coeffs) - 1) + "\n")
-        for c in coeffs:
-            pol_file.write(str(c) + "\n")
-        pol_file.close()
-        spec = subprocess.check_output([unisolve_path, "-H1", "-o" + str(prec), "-Oc", "-Ga", "tmp.pol"])
-        spec_lines = spec.split('\n')[:-1]
+        with open("tmp.pol", "w") as pol_file:
+            pol_file.write("drf\n")
+            pol_file.write(str(prec) + "\n")
+            pol_file.write(str(len(coeffs) - 1) + "\n")
+            for c in coeffs:
+                pol_file.write(str(c) + "\n")
+
+        unisolve_proc = self.sdpb.unisovle_run(prec, "tmp.pol")
+        spec_lines = unisolve_proc.stout.splitlines()
         for line in spec_lines:
             pair = line.replace('(', '').replace(')', '').split(',')
             real = RealMPFR(pair[0], prec)
@@ -1139,7 +1135,7 @@ class SDP:
                 zeros.append(real)
         return zeros
 
-    def extremal_coefficients(self, dimensions, spin_irreps, nullity= 1):
+    def extremal_coefficients(self, dimensions, spin_irreps, nullity=1):
         """
         Once the full extremal spectrum is known, one can reconstruct the OPE
         coefficients that cause those convolved conformal blocks to sum to the
@@ -1187,14 +1183,14 @@ class SDP:
         for i in range(0, len(self.unit)):
             j = 0
             good_row = True
-            while j < zeros and good_row == True:
+            while j < zeros and good_row is True:
                 size = len(extremal_table[j])
                 for r in range(0, size):
                     for s in range(0, size):
                         if abs(extremal_table[j][r][s][i]) > tiny and r != s:
                             good_row = False
                 j += 1
-            if good_row == True:
+            if good_row is True:
                 good_rows.append(i)
 
         fail = False
@@ -1218,13 +1214,13 @@ class SDP:
                 elif current_target[0] == 0:
                     j = 0
                     found = False
-                    while j < zeros and found == False:
+                    while j < zeros and found is False:
                         size = len(extremal_table[j])
                         for vec in self.irrep_set:
                             if vec[1] == spin_irreps[j][1]:
                                 break
                         r = 0
-                        while r < size and found == False:
+                        while r < size and found is False:
                             dim_set1 = [vec[0][0][r][r][0], vec[0][0][r][r][1], dimensions[j]]
                             dim_set1 = sorted(dim_set1)
                             for c in known_ops:
@@ -1237,7 +1233,7 @@ class SDP:
                                     break
                             r += 1
                         j += 1
-                    if found == False:
+                    if found is False:
                         # This could happen if the SDP given to us does not correspond to the bootstrap of a physical theory
                         print("Leads exhausted")
                         fail = True
@@ -1268,9 +1264,9 @@ class SDP:
                                 break
                             elif c[0] == j:
                                 found_one = True
-                        if found_both == False:
+                        if found_both is False:
                             current_coeffs.append((j, r))
-                        if found_one == False:
+                        if found_one is False:
                             new_dimensions.append(dimensions[j])
                             new_spin_irreps.append(spin_irreps[j])
 
@@ -1279,7 +1275,7 @@ class SDP:
                 refine = True
                 kept_coeffs = []
 
-                while refine == True:
+                while refine is True:
                     index_new = new_dimensions.index(min(new_dimensions))
                     # Allow for different operators of the same dimension
                     target_dimension = new_dimensions[index_new]
@@ -1392,7 +1388,7 @@ class SDP:
         # Now that the functional components are positive, make a toy SDP for this
         aux_table1 = ConformalBlockTable(1, 0, 0, 0, 0)
         aux_table2 = ConvolvedBlockTable(aux_table1)
-        aux_sdp = SDP(0, aux_table2)
+        aux_sdp = SDP(0, aux_table2, sdpb_mode=self.sdpb_mode, sdpb_kwargs=self.sdpb_kwargs)
         aux_sdp.bounds = [0] * len(constraint_vector)
         aux_sdp.basis = [DenseMatrix([[1]])] * len(constraint_vector)
         for i in range(0, len(constraint_vector)):
@@ -1401,14 +1397,14 @@ class SDP:
 
         norm = [0] * len(obj)
         norm[0] = -1
-        aux_sdp.write_xml(obj, norm, name= "tmp")
+        aux_sdp.write_xml(obj, norm, name="tmp")
 
-        # SDPB should now run quickly with default options
-        if sdpb_version == 1:
-            subprocess.check_call([sdpb_path, "-s", "tmp.xml", "--noFinalCheckpoint"])
-        else:
-            subprocess.check_call([mpirun_path, "-n", "1", sdpb_path, "-s", "tmp.xml", "--noFinalCheckpoint"])
-        output = self.read_output(name= "tmp")
+        aux_sdp.sdpb.set_option("sdpDir", "tmp.xml")
+        aux_sdp.sdpb.set_option("procsPerNode", 1)
+        aux_sdp.sdpb.set_option("noFinalCheckpoint", True)
+        aux_sdp.sdpb.run({"noFinalCheckpoint": True})
+
+        output = aux_sdp.sdpb.read_output(aux_sdp.sdpb.get_option("outDir"))
         solution = output["y"]
         solution = solution[zeros + nullity:]
         return DenseMatrix(zeros, 1, solution)
