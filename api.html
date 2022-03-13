@@ -312,7 +312,7 @@ this.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.add_point">
-<span class="sig-name descname"><span class="pre">add_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spin_irrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.add_point" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spin_irrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.add_point" title="Permalink to this definition"></a></dt>
 <dd><p>Tells the <cite>SDP</cite> that a particular fixed operator should be included in the
 sum rule. If called with one argument, all points with that label will be
 removed. If called with no arguments, all points with any label will be
@@ -362,7 +362,7 @@ performing a change of variables.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.bisect">
-<span class="sig-name descname"><span class="pre">bisect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_irrep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isolated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mySDP'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.bisect" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">bisect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_irrep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isolated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.bisect" title="Permalink to this definition"></a></dt>
 <dd><p>Uses a binary search to find the maximum allowed gap in a particular type
 of operator before the CFT stops existing. The allowed value closest to the
 boundary is returned.</p>
@@ -381,28 +381,6 @@ Defaults to <cite>False</cite>.</p></li>
 <li><p><strong>bias</strong> (<em>[</em><em>Optional</em><em>] </em><em>The ratio between the expected time needed to rule</em>) – out a CFT and the expected time needed to conclude that it
 cannot be. Defaults to <cite>None</cite> which means that this will be
 measured as the binary search progresses.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.convert_spectrum_file">
-<span class="sig-name descname"><span class="pre">convert_spectrum_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rescaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span> <span class="pre">**</span> <span class="pre">delta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.convert_spectrum_file" title="Permalink to this definition"></a></dt>
-<dd><p>Reads a spectrum produced by the arXiv:1603.04444 script and outputs a file
-with physical dimensions and OPE coefficients. Instead of a scaling
-dimension, the original file reports the difference between the scaling
-dimension and the gap. Instead of an OPE coefficient, the original file
-reports the factor relating the OPE coefficient to the positive prefactor.
-Note that this only works if <cite>set_bound</cite> has not been called since the
-XML file was generated.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>input_path</strong> (<em>The path to the spectrum in Mathematica-like format.</em>) – </p></li>
-<li><p><strong>output_path</strong> (<em>The path desired for the file after the additive and</em>) – multiplicative corrections have been performed.</p></li>
-<li><p><strong>rescaling</strong> ([Optional] An expression, which may depend on <cite>delta</cite> and) – <cite>ell</cite>, for changing the convention used for OPE coefficients.
-Defaults to 4 ** delta.</p></li>
 </ul>
 </dd>
 </dl>
@@ -502,7 +480,7 @@ approximation to a conformal block.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.iterate">
-<span class="sig-name descname"><span class="pre">iterate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mySDP'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.iterate" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">iterate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.iterate" title="Permalink to this definition"></a></dt>
 <dd><p>Returns <cite>True</cite> if this <cite>SDP</cite> with its current gaps represents an allowed CFT
 and <cite>False</cite> otherwise.</p>
 <dl class="field-list simple">
@@ -541,7 +519,7 @@ linear program solver here.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.opemax">
-<span class="sig-name descname"><span class="pre">opemax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_irrep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mySDP'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.opemax" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">opemax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_irrep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.opemax" title="Permalink to this definition"></a></dt>
 <dd><p>Minimizes or maximizes the squared length of the vector of OPE coefficients
 involving an operator with a prescribed scaling dimension, spin and global
 symmetry representation. This results in a matrix produced by the action of
@@ -656,7 +634,7 @@ superfluous zeros if the number is too small.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.solution_functional">
-<span class="sig-name descname"><span class="pre">solution_functional</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_irrep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mySDP'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.solution_functional" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">solution_functional</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_irrep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.solution_functional" title="Permalink to this definition"></a></dt>
 <dd><p>Returns a functional (list of numerical components) that serves as a
 solution to the <cite>SDP</cite>. Like <cite>iterate</cite>, this sets a bound, generates an XML
 file and calls <cite>SDPB</cite>. However, rather than stopping after it determines
@@ -1277,7 +1255,7 @@ have been converted to their respective Python types.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extra_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.run" title="Permalink to this definition"></a></dt>
 <dd><p>Runs an sdpb command with options specifie by self.options</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -1301,6 +1279,11 @@ have been converted to their respective Python types.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.set_default_option">
+<span class="sig-name descname"><span class="pre">set_default_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.set_default_option" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.set_option">
 <span class="sig-name descname"><span class="pre">set_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.set_option" title="Permalink to this definition"></a></dt>
 <dd><p>Sets the value of a switch that should be passed to <cite>SDPB</cite> on the command
@@ -1321,6 +1304,11 @@ reset to its default value.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.set_required_options">
 <span class="sig-name descname"><span class="pre">set_required_options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.set_required_options" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.unisovle_run">
+<span class="sig-name descname"><span class="pre">unisovle_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">precision</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.unisovle_run" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
