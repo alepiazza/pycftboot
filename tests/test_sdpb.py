@@ -2,13 +2,14 @@ import unittest
 import shutil
 import os
 import subprocess
-from pprint import pprint
 import filecmp
 from symengine.lib.symengine_wrapper import RealMPFR
 
 from pycftboot import SdpbDocker, SdpbBinary
 from pycftboot.constants import prec
 
+
+DIR = 'test_output'
 
 def have_binary(bin_name):
     bin_in_path = shutil.which(bin_name)
@@ -37,7 +38,7 @@ def check_directory_equal(dir1, dir2):
 
 class TestSdpb(unittest.TestCase):
     def setUp(self):
-        self.volume = 'test_output'
+        self.volume = DIR
         os.makedirs(self.volume, exist_ok=True)
 
         if have_binary('docker'):
@@ -46,6 +47,11 @@ class TestSdpb(unittest.TestCase):
             self.s = SdpbBinary()
         else:
             raise RuntimeError("Nor docker or sdpb found")
+
+        self.input_xml = f"{DIR}/test.xml"
+        self.s.set_option("sdpDir", f"{DIR}/test_pvm2sdp")
+        self.s.set_option("outDir", f"{DIR}/test_sdpb")
+        self.s.set_option("procsPerNode", 1)
 
     def tearDown(self):
         shutil.rmtree(self.volume)
@@ -58,23 +64,29 @@ class TestSdpb(unittest.TestCase):
 
         self.assertEqual(out_docker.__dict__, out_shell.__dict__)
 
-        self.s.run_command("touch 'test'")
-        self.assertTrue(os.path.isfile(f'{self.volume}/test'))
+        self.s.run_command(f"touch '{DIR}/test'")
+        self.assertTrue(os.path.isfile(f'{DIR}/test'))
 
-        self.s.run_command("rm 'test'")
-        self.assertFalse(os.path.isfile(f'{self.volume}/test'))
+        self.s.run_command(f"rm '{DIR}/test'")
+        self.assertFalse(os.path.isfile(f'{DIR}/test'))
 
     def test_sdpb_sdpb(self):
-        shutil.copy('tests/input/test.xml', self.volume)
+        shutil.copy('tests/input/test.xml', self.input_xml)
 
-        self.s.pvm2sdp_run("660 test.xml test_pvm2sdp".split())
-        self.assertTrue(filecmp.cmp(f'{self.volume}/test_pvm2sdp', 'tests/check_output/test_pvm2sdp'))
+        self.s.pvm2sdp_run(self.input_xml, self.s.get_option("sdpDir"))
+        self.assertTrue(filecmp.cmp(f'{DIR}/test_pvm2sdp', 'tests/check_output/test_pvm2sdp'))
 
-        self.s.run("--procsPerNode 1 -s test_pvm2sdp -o test_sdpb".split())
-        self.assertTrue(check_directory_equal(f'{self.volume}/test_pvm2sdp.ck', 'tests/check_output/test_pvm2sdp.ck'))
-        self.assertTrue(check_directory_equal(f'{self.volume}/test_sdpb', 'tests/check_output/test_sdpb'))
+        self.s.run()
+        self.assertTrue(check_directory_equal(f'{DIR}/test_pvm2sdp.ck', 'tests/check_output/test_pvm2sdp.ck'))
+        self.assertTrue(check_directory_equal(f'{DIR}/test_sdpb', 'tests/check_output/test_sdpb'))
 
     def test_sdpb_read_sdpb_output(self):
+        shutil.copy('tests/input/test.xml', self.input_xml)
+        self.s.pvm2sdp_run(self.input_xml, self.s.get_option("sdpDir"))
+        self.s.run()
+
+        output = self.s.read_output(self.s.get_option("outDir"))
+
         expected = {
             'terminateReason': "found primal-dual optimal solution",
             'primalObjective': RealMPFR('1.84026576313204924668804017173055420056358532030282556465761906133430166726537336826049865612094019021116018862947817214304719196101000427864203352107112262936760692514062283196788975004021011672107', prec),
@@ -85,13 +97,6 @@ class TestSdpb(unittest.TestCase):
             'Solver runtime': float(0),
             'y': [RealMPFR('-1.84026576313204924668804017172924388084784907020307957926406455972756967820389551729116356865203683721324847695046740812192888147479629469781056654543846872510659962749879756855722780845863763393790', prec)]
         }
-
-        shutil.copy('tests/input/test.xml', self.volume)
-        self.s.pvm2sdp_run(f"{prec} test.xml test_pvm2sdp".split())
-        self.s.run(f"--procsPerNode 1 -s test_pvm2sdp --precision {prec}".split())
-
-        output = self.s.read_output('test_output/test_pvm2sdp')
-
         expected = {k: str(v) for k, v in expected.items()}
         output = {k: str(v) for k, v in output.items()}
 
