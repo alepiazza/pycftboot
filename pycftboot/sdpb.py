@@ -41,7 +41,7 @@ class Sdpb(ABC):
         """
         pass
 
-    def run(self):
+    def run(self, extra_options={}):
         """Runs an sdpb command with options specifie by self.options
 
         Returns
@@ -51,19 +51,27 @@ class Sdpb(ABC):
         if 'sdpDir' not in self.options.keys():
             raise RuntimeError("sdpDir is mandatory argument of sdpb but was not set")
 
+        for key, val in extra_options.items():
+            self.set_option(key, val)
+
         args = self.options_to_args()
 
         if self.version == 1:
-            self.run_command([self.path] + args)
+            sdpb_out = self.run_command([self.path] + args)
         elif self.version == 2:
             if 'procsPerNode' not in self.options.keys():
                 raise RuntimeError("procsPerNode is mandatory argument of sdpb (v2) but was not set")
 
             procs_per_node = self.options['procsPerNode']
-            self.run_command(
+            sdpb_out = self.run_command(
                 [self.mpirun_path] + ["--allow-run-as-root"] + ["-n", f"{procs_per_node}"] + \
                 [self.path] + args
             )
+
+        for key in extra_options.keys():
+            self.set_default_option(key)
+
+        return sdpb_out
 
     def pvm2sdp_run(self, input_xml, output_file):
         if self.version == 1:
@@ -71,7 +79,7 @@ class Sdpb(ABC):
         if 'procsPerNode' not in self.options.keys():
             raise RuntimeError("procsPerNode is mandatory argument of sdpb (v2) but was not set")
         procs_per_node = self.options['procsPerNode']
-        self.run_command(
+        return self.run_command(
             [self.mpirun_path] + ["--allow-run-as-root"] + ["-n", f"{procs_per_node}"] + \
             [self.pvm2sdp_path, str(self.options["precision"]), input_xml, output_file]
         )
@@ -161,7 +169,10 @@ class Sdpb(ABC):
         keys = self.options.keys()
         if key not in keys:
             if key == "outDir":
-                return self.options["sdpDir"] + "_out"
+                if self.version == 1:
+                    return self.options["sdpDir"] + ".out"
+                elif self.version == 2:
+                    return self.options["sdpDir"] + "_out"
             elif key == "checkpointDir":
                 return self.options["sdpDir"] + ".ck"
             elif key == "initialCheckpointDir":
@@ -169,8 +180,10 @@ class Sdpb(ABC):
                     return self.options["checkpointDir"]
                 else:
                     return self.options["sdpDir"] + ".ck"
+            elif key in self.default_options.keys():
+                return self.default_options[key]
             else:
-                raise ValueError(f"key = {key} not found in self.options")
+                raise ValueError(f"key = {key} not found in self.options or self.default_options")
         else:
             return self.options[key]
 
@@ -200,6 +213,9 @@ class Sdpb(ABC):
             self.options[key] = value
         else:
             raise ValueError(f"key = {key} is not a sdpb valid option")
+
+    def set_default_option(self, key):
+        self.options.pop(key)
 
     def read_output(self, name):
         """
