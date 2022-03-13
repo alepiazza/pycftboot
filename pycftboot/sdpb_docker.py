@@ -17,6 +17,8 @@ class SdpbDocker(Sdpb):
         self.volume = volume
         self.volume_abs = os.path.abspath(volume)
 
+        os.makedirs(self.volume, exist_ok=True)
+
         self.image = image
 
         self.path = sdpb_path
@@ -25,9 +27,6 @@ class SdpbDocker(Sdpb):
         self.unisovle_path = unisolve_path
 
         super().__init__()
-
-    def close(self):
-        self.__client.close()
 
     def run_command(self, command):
         """Run command in a docker image specified by `image`
