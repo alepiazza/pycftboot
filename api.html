@@ -471,21 +471,6 @@ and the second is the label found in <cite>vector_types</cite> or
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.get_option">
-<span class="sig-name descname"><span class="pre">get_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.get_option" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the string representation of a value that <cite>SDPB</cite> will use, whether
-or not it has been explicitly set.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>key</strong> (The name of the <cite>SDPB</cite> parameter without any “–” at the beginning or) – </p></li>
-<li><p><strong>end.</strong> (<em>&quot;=&quot; at the</em>) – </p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.get_table_index">
 <span class="sig-name descname"><span class="pre">get_table_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spin_irrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.get_table_index" title="Permalink to this definition"></a></dt>
 <dd><p>Searches for the label of a <cite>PolynomialVector</cite> and returns its position in
@@ -634,24 +619,6 @@ included. Defaults to None which means unitarity.</p></li>
 <li><p><strong>reset_basis</strong> (<em>[</em><em>Optional</em><em>] </em><em>An internal parameter which may be used to</em>) – prevent the orthogonal polynomials which improve the
 numerical stability of <cite>SDPB</cite> from being recalculated.
 Defaults to <cite>True</cite>.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.set_option">
-<span class="sig-name descname"><span class="pre">set_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.set_option" title="Permalink to this definition"></a></dt>
-<dd><p>Sets the value of a switch that should be passed to <cite>SDPB</cite> on the command
-line. <cite>SDPB</cite> options that do not take a parameter are handled by other
-methods so it should not be necessary to pass them.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>key</strong> ([Optional] The name of the <cite>SDPB</cite> parameter being set without any) – “–” at the beginning or “=” at the end. Defaults to <cite>None</cite> which
-means all parameters will be reset to their default values.</p></li>
-<li><p><strong>value</strong> ([Optional] The string or numerical value that should accompany <cite>key</cite>.) – Defaults to <cite>None</cite> which means that the parameter for <cite>key</cite> will be
-reset to its default value.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1228,7 +1195,7 @@ given spatial dimension and spin.</p>
 <span id="pycftboot-sdpb"></span><h2>pycftboot.sdpb<a class="headerlink" href="#module-pycftboot.sdpb" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.sdpb.</span></span><span class="sig-name descname"><span class="pre">Sdpb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">procs_per_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.sdpb.</span></span><span class="sig-name descname"><span class="pre">Sdpb</span></span><a class="headerlink" href="#pycftboot.sdpb.Sdpb" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>Abstract class for SDPB</p>
 <dl class="py attribute">
@@ -1262,14 +1229,24 @@ given spatial dimension and spin.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.get_defaults">
-<span class="sig-name descname"><span class="pre">get_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.get_defaults" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.get_all_default_options">
+<span class="sig-name descname"><span class="pre">get_all_default_options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.get_all_default_options" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.get_options">
-<span class="sig-name descname"><span class="pre">get_options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.get_options" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.get_option">
+<span class="sig-name descname"><span class="pre">get_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.get_option" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the string representation of a value that <cite>SDPB</cite> will use, whether
+or not it has been explicitly set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (The name of the <cite>SDPB</cite> parameter without any “–” at the beginning or) – </p></li>
+<li><p><strong>end.</strong> (<em>&quot;=&quot; at the</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.get_version">
@@ -1277,13 +1254,18 @@ given spatial dimension and spin.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.options_to_args">
+<span class="sig-name descname"><span class="pre">options_to_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.options_to_args" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.pvm2sdp_run">
-<span class="sig-name descname"><span class="pre">pvm2sdp_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.pvm2sdp_run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pvm2sdp_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_xml</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.pvm2sdp_run" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.read_output">
-<span class="sig-name descname"><span class="pre">read_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mySDP'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.read_output" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">read_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.read_output" title="Permalink to this definition"></a></dt>
 <dd><p>Reads an <cite>SDPB</cite> output file and returns a dictionary in which all entries
 have been converted to their respective Python types.</p>
 <dl class="field-list simple">
@@ -1295,14 +1277,11 @@ have been converted to their respective Python types.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.run" title="Permalink to this definition"></a></dt>
-<dd><p>Runs an sdpb command</p>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.run" title="Permalink to this definition"></a></dt>
+<dd><p>Runs an sdpb command with options specifie by self.options</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>args</strong> (<em>sdpb options</em>) – </p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>returns a subprocess.CompletedProcess object</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>returns a subprocess.CompletedProcess object</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1320,6 +1299,29 @@ have been converted to their respective Python types.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.set_option">
+<span class="sig-name descname"><span class="pre">set_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.set_option" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the value of a switch that should be passed to <cite>SDPB</cite> on the command
+line. <cite>SDPB</cite> options that do not take a parameter are handled by other
+methods so it should not be necessary to pass them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> ([Optional] The name of the <cite>SDPB</cite> parameter being set without any) – “–” at the beginning or “=” at the end. Defaults to <cite>None</cite> which
+means all parameters will be reset to their default values.</p></li>
+<li><p><strong>value</strong> ([Optional] The string or numerical value that should accompany <cite>key</cite>.) – Defaults to <cite>None</cite> which means that the parameter for <cite>key</cite> will be
+reset to its default value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.Sdpb.set_required_options">
+<span class="sig-name descname"><span class="pre">set_required_options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.Sdpb.set_required_options" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
