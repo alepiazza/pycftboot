@@ -1076,7 +1076,7 @@ class SDP:
     #     in_file.close()
     #     out_file.close()
 
-    def extremal_dimensions(self, functional, spin_irrep, zero_threshold):
+    def extremal_dimensions(self, functional, spin_irrep, zero_threshold, tmp_file):
         """
         When a functional acts on `PolynomialVector`s, this finds approximate zeros
         of the resulting expression with the `unisolve` executable. When the sum
@@ -1118,14 +1118,14 @@ class SDP:
         det2 = det1.diff(delta)
         coeffs = coefficients(det1)
         # Pass output to unisolve
-        with open("tmp.pol", "w") as pol_file:
+        with open(tmp_file, "w") as pol_file:
             pol_file.write("drf\n")
             pol_file.write(str(prec) + "\n")
             pol_file.write(str(len(coeffs) - 1) + "\n")
             for c in coeffs:
                 pol_file.write(str(c) + "\n")
 
-        unisolve_proc = self.sdpb.unisovle_run(prec, "tmp.pol")
+        unisolve_proc = self.sdpb.unisovle_run(prec, tmp_file)
         spec_lines = unisolve_proc.stout.splitlines()
         for line in spec_lines:
             pair = line.replace('(', '').replace(')', '').split(',')

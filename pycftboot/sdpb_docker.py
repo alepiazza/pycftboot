@@ -24,7 +24,7 @@ class SdpbDocker(Sdpb):
         self.path = sdpb_path
         self.pvm2sdp_path = pvm2sdp_path
         self.mpirun_path = mpirun_path
-        self.unisovle_path = unisolve_path
+        self.unisolve_path = unisolve_path
 
         super().__init__()
 

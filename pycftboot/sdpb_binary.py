@@ -16,7 +16,7 @@ class SdpbBinary(Sdpb):
         if self.version == 2:
             self.pvm2sdp_path = self.__find_executable(pvm2sdp_bin)
             self.mpirun_path = self.__find_executable(mpirun_bin)
-        self.unisovle_path = self.__find_executable(unisolve_bin)
+        self.unisolve_path = self.__find_executable(unisolve_bin)
 
     def __find_executable(self, name):
         """Searches for the executable given by `name`. If not found we try to
