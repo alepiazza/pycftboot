@@ -1,0 +1,5 @@
+build
+coverage
+sphinx
+sphinx-rtd-theme
+myst-parser
