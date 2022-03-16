@@ -13,6 +13,7 @@ the explicit correlators must be scalars, but they may have different scaling
 dimensions and transform in arbitrary representations of a global symmetry.
 """
 from typing import Union, List, Tuple
+from functools import wraps
 import xml.dom.minidom
 import time
 from symengine.lib.symengine_wrapper import (
@@ -784,7 +785,31 @@ class SDP:
         if self.sdpb.version == 2:
             self.sdpb.pvm2sdp_run(f"{name}.xml", name)
 
-    def iterate(self):
+    def manage_name(method):
+        @wraps(method)
+        def wrapper(self, *args, **kwargs):
+            name_is_set = 'name' in kwargs
+            sdpDir_already_exist = "sdpDir" in self.sdpb.options
+
+            if name_is_set:
+                if sdpDir_already_exist:
+                    old_name = self.sdpb.get_option["sdpDir"]
+                self.sdpb.set_option("sdpDir", kwargs['name'])
+
+            output = method(self, *args, **kwargs)
+
+            if name_is_set:
+                if sdpDir_already_exist:
+                    self.sdpb.set_option("sdpDir", old_name)
+                else:
+                    self.sdpb.options.pop("sdpDir")
+
+            return output
+
+        return wrapper
+
+    @manage_name
+    def iterate(self, *, name: str = None):
         """
         Returns `True` if this `SDP` with its current gaps represents an allowed CFT
         and `False` otherwise.
@@ -794,23 +819,24 @@ class SDP:
         name:       [Optional] The name of the XML file generated in the process
                     without any ".xml" at the end. Defaults to "mySDP".
         """
+        # Prepare SDPB input
         obj = [0.0] * len(self.table[0][0][0].vector)
         self.write_xml(obj, self.unit, self.sdpb.get_option("sdpDir"))
 
+        # Run SDPB
+        extra_options = {'findPrimalFeasible': True, 'findDualFeasible': True}
         if self.sdpb.version == 1:
-            self.sdpb.set_option("noFinalCheckpoint", True)
+            extra_options["noFinalCheckpoint"] = True
 
-        self.sdpb.run({'findPrimalFeasible': True, 'findDualFeasible': True})
-
-        if self.sdpb.version == 1:
-            self.sdpb.set_default_option("noFinalCheckpoint")
+        self.sdpb.run(extra_options)
 
         output = self.sdpb.read_output(self.sdpb.get_option("outDir"))
 
         terminate_reason = output["terminateReason"]
         return terminate_reason == "found primal feasible solution"
 
-    def bisect(self, lower, upper, threshold, spin_irrep, isolated=False, reverse=False, bias=None):
+    @manage_name
+    def bisect(self, lower, upper, threshold, spin_irrep, isolated=False, reverse=False, bias=None, *, name: str = None):
         """
         Uses a binary search to find the maximum allowed gap in a particular type
         of operator before the CFT stops existing. The allowed value closest to the
@@ -871,8 +897,7 @@ class SDP:
             # Using the same name twice in a row is only dangerous if the runs are really long
             start = time.time()
             if checkpoints and self.sdpb.version == 1:
-                self.sdpb.set_option("sdpDir", str(start))
-                result = self.iterate()
+                result = self.iterate(name=str(start))
             else:
                 result = self.iterate()
             end = time.time()
@@ -900,7 +925,8 @@ class SDP:
         else:
             return upper
 
-    def opemax(self, dimension, spin_irrep, reverse=False, vector=None):
+    @manage_name
+    def opemax(self, dimension, spin_irrep, reverse=False, vector=None, *, name: str = None):
         """
         Minimizes or maximizes the squared length of the vector of OPE coefficients
         involving an operator with a prescribed scaling dimension, spin and global
@@ -980,7 +1006,8 @@ class SDP:
             print("Divide " + str(float(primal_value)) + " by the minimum eigenvalue")
         return DenseMatrix(outer_list)
 
-    def solution_functional(self, dimension, spin_irrep, obj=None, norm=None):
+    @manage_name
+    def solution_functional(self, dimension, spin_irrep, obj=None, norm=None, *, name: str = None):
         """
         Returns a functional (list of numerical components) that serves as a
         solution to the `SDP`. Like `iterate`, this sets a bound, generates an XML
