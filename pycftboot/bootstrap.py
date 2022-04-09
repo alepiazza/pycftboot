@@ -45,7 +45,7 @@ def uppergamma(x, a):
     return RealMPFR(str(mpmath.gammainc(mpmath.mpf(str(x)), a = mpmath.mpf(str(a)))), prec)
 """
 
-SpinIrrep = Union[None, int, Tuple[int, Union[int, str]]]
+SpinIrrep = Union[int, Tuple[int, Union[int, str]]]
 
 
 class SDP:
@@ -304,9 +304,9 @@ class SDP:
         spin_irrep: [Optional] An ordered pair used to label the `PolynomialVector`
                     for the operator. The first entry is the spin, the second is the
                     label which must be found in `vector_types` or 0 if not present.
-                    Defaults to None which means all operators.
+                    Defaults to -1 which means all operators.
         dimension:  [Optional] The scaling dimension of the operator being added.
-                    Defaults to None which means the point should be removed.
+                    Defaults to -1 which means the point should be removed.
         extra:      [Optional] A list of quintuples specifying information about
                     other operators that should be packaged with this operator. The
                     first two elements of a quintuple are the `spin_irrep` and
@@ -322,12 +322,12 @@ class SDP:
                     added. The purpose of this is to enforce OPE coefficient
                     relations as in arXiv:1603.04436.
         """
-        if spin_irrep is None:
+        if spin_irrep == -1:
             self.points = []
         else:
             if isinstance(spin_irrep, int):
                 spin_irrep = [spin_irrep, 0]
-            if dimension is not None:
+            if dimension != -1:
                 self.points.append((spin_irrep, dimension, extra))
             else:
                 for p in self.points:
@@ -353,7 +353,7 @@ class SDP:
             if self.table[l][0][0].label == gapped_spin_irrep:
                 return self.bounds[l]
 
-    def set_bound(self, gapped_spin_irrep: SpinIrrep = None, delta_min: float = None, reset_basis=True):
+    def set_bound(self, gapped_spin_irrep: SpinIrrep = -1, delta_min: float = -1, reset_basis=True):
         """
         Sets the minimum scaling dimension of a given operator in the sum rule. If
         called with one argument, the operator with that label will be assigned the
@@ -365,17 +365,17 @@ class SDP:
         gapped_spin_irrep: [Optional] An ordered pair used to label the
                            `PolynomialVector` whose bound should be set. The first
                            entry is the spin and the second is the label found in
-                           `vector_types` or 0 if not present. Defaults to None which
+                           `vector_types` or 0 if not present. Defaults to -1 which
                            means all operators.
         delta_min:         [Optional] The minimum scaling dimension to set. Also
                            accepts oo to indicate that a continuum should not be
-                           included. Defaults to None which means unitarity.
+                           included. Defaults to -1 which means unitarity.
         reset_basis:       [Optional] An internal parameter which may be used to
                            prevent the orthogonal polynomials which improve the
                            numerical stability of `SDPB` from being recalculated.
                            Defaults to `True`.
         """
-        if gapped_spin_irrep is None:
+        if gapped_spin_irrep == -1:
             for l in range(0, len(self.table)):
                 spin = self.table[l][0][0].label[0]
                 self.bounds[l] = unitarity_bound(self.dim, spin)
@@ -389,7 +389,7 @@ class SDP:
             l = self.get_table_index(gapped_spin_irrep)
             spin = gapped_spin_irrep[0]
 
-            if delta_min is None:
+            if delta_min == -1:
                 self.bounds[l] = unitarity_bound(self.dim, spin)
             else:
                 self.bounds[l] = delta_min
