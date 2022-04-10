@@ -876,8 +876,7 @@ using the recursion relations with meromorphic versions of the blocks.
 Usually, it will not be necessary for the user to call it. Instead,
 <cite>ConformalBlockTable</cite> calls it automatically for <cite>m_max = 3</cite> and <cite>n_max = 0</cite>.
 For people wanting to call it with different values of <cite>m_max</cite> and <cite>n_max</cite>,
-the parameters and attributes are the same as those of <cite>ConformalBlockTable</cite>.
-It also supports the <cite>dump</cite> method.</p>
+the parameters and attributes are the same as those of <cite>ConformalBlockTable</cite>.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -1321,14 +1320,6 @@ reset to its default value.</p></li>
 </section>
 <section id="module-pycftboot.serialize">
 <span id="pycftboot-serialize"></span><h2>pycftboot.serialize<a class="headerlink" href="#module-pycftboot.serialize" title="Permalink to this headline"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="pycftboot.serialize.dump_table_contents">
-<span class="sig-prename descclassname"><span class="pre">pycftboot.serialize.</span></span><span class="sig-name descname"><span class="pre">dump_table_contents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.serialize.dump_table_contents" title="Permalink to this definition"></a></dt>
-<dd><p>This is called by <cite>ConformalBlockTable</cite> and <cite>ConformalBlockTableSeed</cite>. It
-writes executable Python code to a file designed to recreate the full set of
-the table’s attributes as quickly as possible.</p>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="pycftboot.serialize.read_table">
 <span class="sig-prename descclassname"><span class="pre">pycftboot.serialize.</span></span><span class="sig-name descname"><span class="pre">read_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">form</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'json'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.serialize.read_table" title="Permalink to this definition"></a></dt>
