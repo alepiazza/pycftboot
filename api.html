@@ -388,7 +388,7 @@ measured as the binary search progresses.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.extremal_coefficients">
-<span class="sig-name descname"><span class="pre">extremal_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_irreps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nullity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.extremal_coefficients" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">extremal_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimensions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_irreps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmp_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nullity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.extremal_coefficients" title="Permalink to this definition"></a></dt>
 <dd><p>Once the full extremal spectrum is known, one can reconstruct the OPE
 coefficients that cause those convolved conformal blocks to sum to the
 <cite>SDP</cite>’s <cite>unit</cite>. This outputs a vector of squared OPE coefficients
@@ -406,6 +406,7 @@ order used for <cite>dimensions</cite>.</p></li>
 <li><p><strong>nullity</strong> (<em>[</em><em>Optional</em><em>] </em><em>The number of extra equations to use beyond the</em>) – number of unknown variables. If this is non-zero, a positivity
 constraint will be placed on the optimal OPE coefficients.
 Defaults to 1.</p></li>
+<li><p><strong>tmp_name</strong> (A temporary sdpDir used internally by <cite>least_absolute_distance</cite>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -428,6 +429,7 @@ arXiv:1603.04444 script.</p>
 spin and the second entry is the representation label found
 in <cite>vector_types</cite>.</p></li>
 <li><p><strong>zero_threshold</strong> (<em>The threshold for identifying a real zero. The determinant</em>) – over its second derivative must be less than this value.</p></li>
+<li><p><strong>tmp_file</strong> (A temporary file name where to put the <cite>unisolve</cite> input) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -492,7 +494,7 @@ and <cite>False</cite> otherwise.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pycftboot.bootstrap.SDP.least_absolute_distance">
-<span class="sig-name descname"><span class="pre">least_absolute_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.least_absolute_distance" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">least_absolute_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aux_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.bootstrap.SDP.least_absolute_distance" title="Permalink to this definition"></a></dt>
 <dd><p>This returns the vector which is closest in the 1-norm to being a solution
 of an inhomogeneous linear system. It is convenient to overload <cite>SDPB</cite> as a
 linear program solver here.</p>
@@ -501,6 +503,7 @@ linear program solver here.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>matrix</strong> (<em>A matrix having more rows than columns.</em>) – </p></li>
 <li><p><strong>vector</strong> (A vector whose length is the row dimension of <cite>matrix</cite>.) – </p></li>
+<li><p><strong>aux_name</strong> (<em>sdpDir for auxillary sdpb run</em>) – </p></li>
 </ul>
 </dd>
 </dl>
