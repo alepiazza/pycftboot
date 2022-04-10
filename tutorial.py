@@ -7,13 +7,15 @@ be found by reading the other sections or the documentation strings of PyCFTBoot
 These can be accessed by running `pydoc -g`.
 """
 # Imports the package
-import bootstrap
+import pycftboot as bootstrap
 # The conformal blocks needed for a given run are calculated as a sum over poles.
 # Demand that poles with small residues are approximated by poles with large ones.
 bootstrap.cutoff = 1e-10
 
+
 def cprint(message):
     print("\033[94m" + message + "\033[0m")
+
 
 print("Welcome to the PyCFTBoot tutorial!")
 print("Please read the comments and watch for coloured text.")
@@ -45,7 +47,8 @@ if choice == 1:
     # Computes the convolution.
     table2 = bootstrap.ConvolvedBlockTable(table1)
     # Sets up a semidefinite program that we can use to study this.
-    sdp = bootstrap.SDP(dim_phi, table2)
+    sdp = bootstrap.SDP(dim_phi, table2, sdpb_mode="docker")
+    sdp.sdpb.set_option("procsPerNode", 2)
     # We think it is perfectly fine for all internal scalars coupling to our external one to have dimension above 0.7.
     lower = 0.7
     # Conversely, we think it is a problem for crossing symmetry if they all have dimension above 1.7.
@@ -55,7 +58,7 @@ if choice == 1:
     # The 0.7 and 1.7 are our guesses for scalars, not some other type of operator.
     channel = 0
     # Calls SDPB to compute the bound.
-    result = sdp.bisect(lower, upper, tol, channel, name = "tutorial_1a")
+    result = sdp.bisect(lower, upper, tol, channel, name="tutorial_1a")
     cprint("If crossing symmetry and unitarity hold, the maximum gap we can have for Z2-even scalars is: " + str(result))
     cprint("Checking if (" + str(dim_phi) + ", " + str(result) + ") is still allowed if we require only one relevant Z2-even scalar...")
     # States that the continuum of internal scalars being checked starts at 3.
@@ -63,7 +66,7 @@ if choice == 1:
     # States that the point near the boundary that we found should be the one exception.
     sdp.add_point(channel, result)
     # Calls SDPB to check.
-    allowed = sdp.iterate(name = "tutorial_1b")
+    allowed = sdp.iterate(name="tutorial_1b")
     if (allowed):
         cprint("Yes")
     else:
@@ -74,7 +77,7 @@ if choice == 1:
     # Adds a different one at a smaller dimension.
     sdp.add_point(channel, 1.2)
     # Checks again.
-    allowed = sdp.iterate(name = "tutorial_1c")
+    allowed = sdp.iterate(name="tutorial_1c")
     if (allowed):
         cprint("Yes")
     else:
@@ -91,9 +94,9 @@ if choice == 2:
     m_max = 1
     n_max = 3
     # This time we need to keep odd spins because O(N) models have antisymmetric tensors.
-    table1 = bootstrap.ConformalBlockTable(dim, k_max, l_max, m_max, n_max, odd_spins = True)
+    table1 = bootstrap.ConformalBlockTable(dim, k_max, l_max, m_max, n_max, odd_spins=True)
     # Computes the two convolutions needed by the sum rule.
-    table2 = bootstrap.ConvolvedBlockTable(table1, symmetric = True)
+    table2 = bootstrap.ConvolvedBlockTable(table1, symmetric=True)
     table3 = bootstrap.ConvolvedBlockTable(table1)
     # Specializes to N = 3.
     N = 3.0
@@ -106,34 +109,39 @@ if choice == 2:
     # The spins of these irreps (with arbitrary names) are even, even, odd.
     info = [[vec1, 0, "singlet"], [vec2, 0, "symmetric"], [vec3, 1, "antisymmetric"]]
     # Sets up an SDP here.
-    sdp1 = bootstrap.SDP(dim_phi1, [table2, table3], vector_types = info)
+    sdp1 = bootstrap.SDP(dim_phi1, [table2, table3], vector_types=info, sdpb_mode="docker")
+    sdp1.sdpb.set_option("procsPerNode", 2)
     # This time channel needs two labels.
     channel1 = [0, "singlet"]
-    result = sdp1.bisect(0.7, 1.8, 0.01, channel1, name = "tutorial_2a")
+    result = sdp1.bisect(0.7, 1.8, 0.01, channel1, name="tutorial_2a")
     cprint("If crossing symmetry and unitarity hold, the maximum gap we can have for singlet scalars is: " + str(result))
     cprint("Bounding the OPE coefficient for the stress-energy tensor...")
     # The spin is now 2 and the dimension is 3.
     channel2 = [2, "singlet"]
     dim_t = dim
     # Calls SDPB to return a squared OPE coefficient bound.
-    result1 = sdp1.opemax(dim_t, channel2, name = "tutorial_2b")
+    result1 = sdp1.opemax(dim_t, channel2, name="tutorial_2b")
     cprint("Bounding the same coefficient in the free theory to get a point of comparison...")
     # Sets up a new SDP where this time, the external scalar has a dimension very close to unitarity.
     dim_phi2 = 0.5001
-    sdp2 = bootstrap.SDP(dim_phi2, [table2, table3], vector_types = info)
-    result2 = sdp2.opemax(dim_t, channel2, name = "tutorial_2c")
+    sdp2 = bootstrap.SDP(dim_phi2, [table2, table3], vector_types=info, sdpb_mode="docker")
+    sdp2.sdpb.set_option("procsPerNode", 2)
+    result2 = sdp2.opemax(dim_t, channel2, name="tutorial_2c")
     # Uses the central charge formula which follows from the Ward identity to compute the ratio.
     ratio = ((result2 / result1) * (dim_phi1 / dim_phi2)) ** 2
     cprint("The central charge of the theory at " + str(dim_phi1) + " is " + str(ratio) + " times the free one.")
 
 # A function used for the multi-correlator 3D Ising example.
+
+
 def convolved_table_list(tab1, tab2, tab3):
     f_tab1a = bootstrap.ConvolvedBlockTable(tab1)
-    f_tab1s = bootstrap.ConvolvedBlockTable(tab1, symmetric = True)
+    f_tab1s = bootstrap.ConvolvedBlockTable(tab1, symmetric=True)
     f_tab2a = bootstrap.ConvolvedBlockTable(tab2)
-    f_tab2s = bootstrap.ConvolvedBlockTable(tab2, symmetric = True)
+    f_tab2s = bootstrap.ConvolvedBlockTable(tab2, symmetric=True)
     f_tab3 = bootstrap.ConvolvedBlockTable(tab3)
     return [f_tab1a, f_tab1s, f_tab2a, f_tab2s, f_tab3]
+
 
 if choice == 3:
     cprint("Generating the tables needed to test two points...")
@@ -145,13 +153,13 @@ if choice == 3:
     pair2 = [0.53, 1.412]
     # Generates three tables, two of which depend on the dimension differences.
     g_tab1 = bootstrap.ConformalBlockTable(dim, 20, 20, 2, 4)
-    g_tab2 = bootstrap.ConformalBlockTable(dim, 20, 20, 2, 4, pair1[1] - pair1[0], pair1[0] - pair1[1], odd_spins = True)
-    g_tab3 = bootstrap.ConformalBlockTable(dim, 20, 20, 2, 4, pair1[0] - pair1[1], pair1[0] - pair1[1], odd_spins = True)
+    g_tab2 = bootstrap.ConformalBlockTable(dim, 20, 20, 2, 4, pair1[1] - pair1[0], pair1[0] - pair1[1], odd_spins=True)
+    g_tab3 = bootstrap.ConformalBlockTable(dim, 20, 20, 2, 4, pair1[0] - pair1[1], pair1[0] - pair1[1], odd_spins=True)
     # Uses the function above to return the convolved tables we need.
     tab_list1 = convolved_table_list(g_tab1, g_tab2, g_tab3)
     # One of the three tables above does not need to be regenerated for the next point.
-    g_tab4 = bootstrap.ConformalBlockTable(dim, 20, 20, 2, 4, pair2[1] - pair2[0], pair2[0] - pair2[1], odd_spins = True)
-    g_tab5 = bootstrap.ConformalBlockTable(dim, 20, 20, 2, 4, pair2[0] - pair2[1], pair2[0] - pair2[1], odd_spins = True)
+    g_tab4 = bootstrap.ConformalBlockTable(dim, 20, 20, 2, 4, pair2[1] - pair2[0], pair2[0] - pair2[1], odd_spins=True)
+    g_tab5 = bootstrap.ConformalBlockTable(dim, 20, 20, 2, 4, pair2[0] - pair2[1], pair2[0] - pair2[1], odd_spins=True)
     tab_list2 = convolved_table_list(g_tab1, g_tab4, g_tab5)
     # Saves and deletes tables that are no longer needed and might take up a lot of memory.
     for tab in [g_tab1, g_tab2, g_tab3, g_tab4, g_tab5]:
@@ -172,7 +180,8 @@ if choice == 3:
     # Spins for these again go even, even, odd.
     info = [[vec1, 0, "z2-even-l-even"], [vec2, 0, "z2-odd-l-even"], [vec3, 1, "z2-odd-l-odd"]]
     cprint("Checking if (" + str(pair1[0]) + ", " + str(pair1[1]) + ") is allowed if we require only one relevant Z2-odd scalar...")
-    sdp1 = bootstrap.SDP(pair1, tab_list1, vector_types = info)
+    sdp1 = bootstrap.SDP(pair1, tab_list1, vector_types=info, sdpb_mode="docker")
+    sdp1.sdpb.set_option("procsPerNode", 2)
     # The pair[1] scalar is Z2-even so have the corresponding channel start here.
     sdp1.set_bound([0, "z2-even-l-even"], pair1[1])
     # The Z2-odd scalars should start at 3 instead and just have pair[0] as a point given our assumption.
@@ -180,20 +189,21 @@ if choice == 3:
     sdp1.add_point([0, "z2-odd-l-even"], pair1[0])
     # In this problem, a ruled out point may have primal error smaller than dual error unless we run for much longer.
     sdp1.set_option("dualErrorThreshold", 1e-15)
-    allowed = sdp1.iterate(name = "tutorial_3a")
+    allowed = sdp1.iterate(name="tutorial_3a")
     if (allowed):
         cprint("Yes")
     else:
         cprint("No")
     cprint("Checking if (" + str(pair2[0]) + ", " + str(pair2[1]) + ") is allowed under the same conditions...")
     # All bounds / points changed in the first SDP will be changed again so we may use it as a prototype.
-    sdp2 = bootstrap.SDP(pair2, tab_list2, vector_types = info, prototype = sdp1)
+    sdp2 = bootstrap.SDP(pair2, tab_list2, vector_types=info, prototype=sdp1, sdpb_mode="docker")
+    sdp2.sdpb.set_option("procsPerNode", 6)
     # Does the exact same testing for the second point.
     sdp2.set_bound([0, "z2-even-l-even"], pair2[1])
     sdp2.set_bound([0, "z2-odd-l-even"], dim)
     sdp2.add_point([0, "z2-odd-l-even"], pair2[0])
     sdp2.set_option("dualErrorThreshold", 1e-15)
-    allowed = sdp2.iterate(name = "tutorial_3b")
+    allowed = sdp2.iterate(name="tutorial_3b")
     if (allowed):
         cprint("Yes")
     else:
@@ -208,7 +218,7 @@ if choice == 4:
     l_max = 26
     m_max = 3
     n_max = 5
-    g_tab = bootstrap.ConformalBlockTable(3.99, k_max, l_max, m_max, n_max, odd_spins = True)
+    g_tab = bootstrap.ConformalBlockTable(3.99, k_max, l_max, m_max, n_max, odd_spins=True)
     # Bring reserved symbols into our namespace to avoid typing "bootstrap" in what follows.
     delta = bootstrap.delta
     ell = bootstrap.ell
@@ -225,10 +235,10 @@ if choice == 4:
     combo2[2][0] *= -1
     # This makes all of the convolved block tables we need.
     f_tab1a = bootstrap.ConvolvedBlockTable(g_tab)
-    f_tab1s = bootstrap.ConvolvedBlockTable(g_tab, symmetric = True)
-    f_tab2a = bootstrap.ConvolvedBlockTable(g_tab, content = combo1)
-    f_tab2s = bootstrap.ConvolvedBlockTable(g_tab, content = combo1, symmetric = True)
-    f_tab3 = bootstrap.ConvolvedBlockTable(g_tab, content = combo2)
+    f_tab1s = bootstrap.ConvolvedBlockTable(g_tab, symmetric=True)
+    f_tab2a = bootstrap.ConvolvedBlockTable(g_tab, content=combo1)
+    f_tab2s = bootstrap.ConvolvedBlockTable(g_tab, content=combo1, symmetric=True)
+    f_tab3 = bootstrap.ConvolvedBlockTable(g_tab, content=combo2)
     tab_list = [f_tab1a, f_tab1s, f_tab2a, f_tab2s, f_tab3]
     # Sets up a vectorial sum rule just like in example 2.
     vec1 = [[1, 4], [1, 2], [1, 3]]
@@ -236,12 +246,13 @@ if choice == 4:
     vec3 = [[0, 0], [1, 0], [-1, 1]]
     info = [[vec1, 0, "singlet"], [vec2, 1, "antisymmetric"], [vec3, 0, "symmetric"]]
     # Allocates an SDP and makes it easier for a problem to be recognized as dual feasible.
-    sdp = bootstrap.SDP(dim_phi, tab_list, vector_types = info)
+    sdp = bootstrap.SDP(dim_phi, tab_list, vector_types=info, sdpb_mode="docker")
+    sdp.sdpb.set_option("procsPerNode", 2)
     sdp.set_option("dualErrorThreshold", 1e-22)
     # Goes through all the spins and tells the symmetric channel to contain a BPS operator and then a gap.
     for l in range(0, l_max + 1, 2):
         sdp.add_point([l, "symmetric"], 2 * dim_phi + l)
         sdp.set_bound([l, "symmetric"], abs(2 * dim_phi - 3) + 3 + l)
     # Does a long test.
-    result = sdp.bisect(3.0, 4.25, 0.01, [0, "singlet"], name = "tutorial_4")
+    result = sdp.bisect(3.0, 4.25, 0.01, [0, "singlet"], name="tutorial_4")
     cprint("If crossing symmetry and unitarity hold, the maximum gap we can have for singlet scalars is: " + str(result))
