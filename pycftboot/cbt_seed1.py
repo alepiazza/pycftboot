@@ -18,7 +18,6 @@ class ConformalBlockTableSeed1(ConformalBlockTableCommon):
     `ConformalBlockTable` calls it automatically for `m_max = 3` and `n_max = 0`.
     For people wanting to call it with different values of `m_max` and `n_max`,
     the parameters and attributes are the same as those of `ConformalBlockTable`.
-    It also supports the `dump` method.
     """
 
     def _compute_table(self, dim, k_max, l_max, m_max, n_max, delta_12, delta_34, odd_spins):
@@ -160,14 +159,6 @@ class ConformalBlockTableSeed1(ConformalBlockTableCommon):
             chain_rule_double(m_order, n_order, rules1, rules2, table, conformal_blocks)
 
         return (m_order, n_order, table)
-
-    # def dump(self, name, form=None):
-    #     if form == "juliboots":
-    #         juliboots_write(self, name)
-    #     elif form == "scalar_blocks":
-    #         scalar_blocks_write(self, name)
-    #     else:
-    #         dump_table_contents(self, name)
 
 
 def delta_residue(nu, k, l, delta_12, delta_34, series):

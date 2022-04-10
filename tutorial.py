@@ -164,7 +164,7 @@ if choice == 3:
     # Saves and deletes tables that are no longer needed and might take up a lot of memory.
     for tab in [g_tab1, g_tab2, g_tab3, g_tab4, g_tab5]:
         # A somewhat descriptive name.
-        tab.dump("tab_" + str(tab.delta_12) + "_" + str(tab.delta_34))
+        bootstrap.serialize.write_table(tab, f"tab_{tab.delta_12}_{tab.delta_34}.json")
         del tab
     # Third vector: 0, 0, 1 * table4 with one of each dimension, -1 * table2 with only pair[0] dimensions, 1 * table3 with only pair[0] dimensions
     vec3 = [[0, 0, 0, 0], [0, 0, 0, 0], [1, 4, 1, 0], [-1, 2, 0, 0], [1, 3, 0, 0]]
@@ -188,7 +188,7 @@ if choice == 3:
     sdp1.set_bound([0, "z2-odd-l-even"], dim)
     sdp1.add_point([0, "z2-odd-l-even"], pair1[0])
     # In this problem, a ruled out point may have primal error smaller than dual error unless we run for much longer.
-    sdp1.set_option("dualErrorThreshold", 1e-15)
+    sdp1.sdpb.set_option("dualErrorThreshold", 1e-15)
     allowed = sdp1.iterate(name="tutorial_3a")
     if (allowed):
         cprint("Yes")
@@ -197,12 +197,12 @@ if choice == 3:
     cprint("Checking if (" + str(pair2[0]) + ", " + str(pair2[1]) + ") is allowed under the same conditions...")
     # All bounds / points changed in the first SDP will be changed again so we may use it as a prototype.
     sdp2 = bootstrap.SDP(pair2, tab_list2, vector_types=info, prototype=sdp1, sdpb_mode="docker")
-    sdp2.sdpb.set_option("procsPerNode", 6)
+    sdp2.sdpb.set_option("procsPerNode", 2)
     # Does the exact same testing for the second point.
     sdp2.set_bound([0, "z2-even-l-even"], pair2[1])
     sdp2.set_bound([0, "z2-odd-l-even"], dim)
     sdp2.add_point([0, "z2-odd-l-even"], pair2[0])
-    sdp2.set_option("dualErrorThreshold", 1e-15)
+    sdp2.sdpb.set_option("dualErrorThreshold", 1e-15)
     allowed = sdp2.iterate(name="tutorial_3b")
     if (allowed):
         cprint("Yes")
@@ -220,8 +220,8 @@ if choice == 4:
     n_max = 5
     g_tab = bootstrap.ConformalBlockTable(3.99, k_max, l_max, m_max, n_max, odd_spins=True)
     # Bring reserved symbols into our namespace to avoid typing "bootstrap" in what follows.
-    delta = bootstrap.delta
-    ell = bootstrap.ell
+    delta = bootstrap.constants.delta
+    ell = bootstrap.constants.ell
     # Four coefficients that show up in the 4D N = 1 expression for superconformal blocks.
     c1 = (delta + ell + 1) * (delta - ell - 1) * (ell + 1)
     c2 = -(delta + ell) * (delta - ell - 1) * (ell + 2)
@@ -248,7 +248,7 @@ if choice == 4:
     # Allocates an SDP and makes it easier for a problem to be recognized as dual feasible.
     sdp = bootstrap.SDP(dim_phi, tab_list, vector_types=info, sdpb_mode="docker")
     sdp.sdpb.set_option("procsPerNode", 2)
-    sdp.set_option("dualErrorThreshold", 1e-22)
+    sdp.sdpb.set_option("dualErrorThreshold", 1e-22)
     # Goes through all the spins and tells the symmetric channel to contain a BPS operator and then a gap.
     for l in range(0, l_max + 1, 2):
         sdp.add_point([l, "symmetric"], 2 * dim_phi + l)
