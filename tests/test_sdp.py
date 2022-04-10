@@ -26,13 +26,30 @@ class TestSDP(unittest.TestCase):
             raise RuntimeError("Nor docker or sdpb found")
 
         self.sdp = SDP(0.518, table2, sdpb_mode=sdpb_mode, sdpb_kwargs=sdpb_kwargs)
+        self.sdp.sdpb.set_option("procsPerNode", 1)
 
     def tearDown(self):
         shutil.rmtree("test_output")
 
     def test_sdp_bisect(self):
-        self.sdp.sdpb.set_option("procsPerNode", 1)
-        self.sdp.bisect(0.7, 1.7, 0.1, 0, name="test_output/test_bisect")
+        tol = 0.01
+        result = self.sdp.bisect(0.7, 1.7, tol, 0, name="test_output/test_bisect")
+
+        self.assertTrue(abs(result - 1.4170708508484153) < tol)
+
+        self.sdp.set_bound(0, 3)
+        self.sdp.add_point(0, result)
+        allowed = self.sdp.iterate(name="test_output/test_add_point")
+
+        self.assertTrue(allowed)
+
+    def test_sdp_openmax(self):
+        self.sdp.opemax(1.2, 0, name="test_output/test_openmax")
+
+    def test_sdp_extremal(self):
+        func = self.sdp.solution_functional(1.2, [0, 0], name="test_output/test_functional")
+        dims = self.sdp.extremal_dimensions(func, [0, 0], 0.001, tmp_file="test_output/extremal_dimensions.tmp")
+        self.sdp.extremal_coefficients(dims, [0, 0], tmp_name="test_output/tmp")
 
 
 if __name__ == '__main__':
