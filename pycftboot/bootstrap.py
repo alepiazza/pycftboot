@@ -12,32 +12,24 @@ the space of scaling dimensions for various CFT operators. All operators used in
 the explicit correlators must be scalars, but they may have different scaling
 dimensions and transform in arbitrary representations of a global symmetry.
 """
-from __future__ import print_function
+from typing import Union, List, Tuple
+from functools import wraps
 import xml.dom.minidom
 import time
-import os
-import subprocess
-import re
-
-# Regular sympy is slow but we only use it for quick access to Gegenbauer polynomials
-# Even this could be removed since our conformal block code is needlessly general
 from symengine.lib.symengine_wrapper import (
-    have_mpfr, Symbol, RealMPFR, factorial, oo, uppergamma, log, DenseMatrix,
+    have_mpfr, RealMPFR, factorial, oo, uppergamma, log, DenseMatrix,
     pi, exp, sqrt
 )
 
-from .compat_juliboots import juliboots_read, juliboots_write
-from .compat_scalar_blocks import scalar_blocks_read, scalar_blocks_write
-from .blocks1 import ConformalBlockTableSeed
-from .blocks2 import ConformalBlockTableSeed2
 from .polynomial_vector import PolynomialVector
+from .conformal_block_table import ConformalBlockTable
+from .convolved_block_table import ConvolvedBlockTable
 from .common import (
-    ell, prec, delta, two, one, dump_table_contents, delta_ext, gather,
-    get_index_approx, index_iter, r_cross, omit_all, rf, deepcopy,
-    unitarity_bound, sdpb_options, sdpb_defaults, coefficients, zero, tiny,
-    get_index,
-    sdpb_version, sdpb_path, mpirun_path, find_executable
+    rf, gather, deepcopy, unitarity_bound, coefficients, get_index,
 )
+from .constants import prec, delta, one, delta_ext, r_cross, zero, tiny
+from .sdpb_binary import SdpbBinary
+from .sdpb_docker import SdpbDocker
 
 if have_mpfr is False:
     print("Symengine must be compiled with MPFR support")
@@ -53,399 +45,8 @@ def uppergamma(x, a):
     return RealMPFR(str(mpmath.gammainc(mpmath.mpf(str(x)), a = mpmath.mpf(str(a)))), prec)
 """
 
+SpinIrrep = Union[int, Tuple[int, Union[int, str]]]
 
-class ConformalBlockTable:
-    """
-    A class which calculates tables of conformal block derivatives when initialized.
-    This uses recursion relations on the diagonal found by Hogervorst, Osborn and
-    Rychkov in arXiv:1305.1321.
-
-    Parameters
-    ----------
-    dim:       The spatial dimension. If even dimensions are of interest, floating
-               point numbers with small fractional parts are recommended.
-    k_max:     Number controlling the accuracy of the rational approximation.
-               Specifically, it is the maximum power of the crossing symmetric value
-               of the radial co-ordinate as described in arXiv:1406.4858.
-    l_max:     The maximum spin to include in the table.
-    m_max:     Number controlling how many `a` derivatives to include where the
-               standard co-ordinates are expressed as `(a + sqrt(b)) / 2` and
-               `(a - sqrt(b)) / 2`. As explained in arXiv:1412.4127, a value of 0
-               does not necessarily eliminate all `a` derivatives.
-    n_max:     The number of `b` derivatives to include where the standard
-               co-ordinates are expressed as `(a + sqrt(b)) / 2` and
-               `(a - sqrt(b)) / 2`.
-    delta_12:  [Optional] The difference between the external scaling dimensions of
-               operator 1 and operator 2. Defaults to 0.
-    delta_34:  [Optional] The difference between the external scaling dimensions of
-               operator 3 and operator 4. Defaults to 0.
-    odd_spins: [Optional] Whether to include 0, 1, 2, 3, ..., `l_max` instead of
-               just 0, 2, 4, ..., `l_max`. Defaults to `False`.
-    name:      [Optional] The name of a file containing conformal blocks that have
-               already been calculated. If this is specified and refers to a file
-               produced by PyCFTBoot, all other parameters passed to the class are
-               overwritten by the ones in the table. If it refers to one produced
-               by JuliBoots, all parameters passed to the class except delta_12 and
-               delta_34 are overwritten. If it refers to a directory, the contents
-               will be treated as scalar_blocks output files. Parameters will be
-               only be overwritten in this case if they can easily be parsed from
-               the filenames.
-
-    Attributes
-    ----------
-    table:     A list of `PolynomialVector`s. A block's position in the table is
-               equal to its spin if `odd_spins` is True. Otherwise it is equal to
-               half of the spin.
-    m_order:   A list with the same number of components as the `PolynomialVector`s
-               in `table`. Any `i`-th entry in a `PolynomialVector` is a particular
-               derivative of a conformal block, but to remember which one, just look
-               at the `i`-th entry of `m_order` which is the number of `a`
-               derivatives.
-    n_order:   A list with the same number of components as the `PolynomialVector`s
-               in `table`. Any `i`-th entry in a `PolynomialVector` is a particular
-               derivative of a conformal block, but to remember which one, just look
-               at the `i`-th entry of `n_order` which is the number of `b`
-               derivatives.
-    """
-    def __init__(self, dim, k_max, l_max, m_max, n_max, delta_12 = 0, delta_34 = 0, odd_spins = False, name = None):
-        self.dim = dim
-        self.k_max = k_max
-        self.l_max = l_max
-        self.m_max = m_max
-        self.n_max = n_max
-        self.delta_12 = delta_12
-        self.delta_34 = delta_34
-        self.odd_spins = odd_spins
-
-        if name != None:
-            try:
-                if os.path.isdir(name):
-                    scalar_blocks_read(self, name)
-                else:
-                    dump_file = open(name, 'r')
-                    token = next(dump_file)[:4]
-                    dump_file.close()
-
-                    if token == "self":
-                        dump_file = open(name, 'r')
-                        command = dump_file.read()
-                        exec(command)
-                        dump_file.close()
-                    else:
-                        juliboots_read(self, name)
-                return
-            except:
-                print("Table " + name + " not present, generating another")
-
-        if type(dim) == type(1) and dim % 2 == 0:
-            small_table = ConformalBlockTableSeed2(dim, k_max, l_max, min(m_max + 2 * n_max, 3), delta_12, delta_34, odd_spins)
-        else:
-            small_table = ConformalBlockTableSeed(dim, k_max, l_max, min(m_max + 2 * n_max, 3), 0, delta_12, delta_34, odd_spins)
-        self.m_order = small_table.m_order
-        self.n_order = small_table.n_order
-        self.table = small_table.table
-
-        a = Symbol('a')
-        nu = RealMPFR(str(dim - 2), prec) / 2
-        c_2 = (ell * (ell + 2 * nu) + delta * (delta - 2 * nu - 2)) / 2
-        c_4 = ell * (ell + 2 * nu) * (delta - 1) * (delta - 2 * nu - 1)
-        polys = [0, 0, 0, 0, 0]
-        poly_derivs = [[], [], [], [], []]
-        delta_prod = -delta_12 * delta_34 / two
-        delta_sum = -(delta_12 - delta_34) / two
-
-        # Polynomial 0 goes with the lowest order derivative on the right hand side
-        # Polynomial 3 goes with the highest order derivative on the right hand side
-        # Polynomial 4 goes with the derivative for which we are solving
-        polys[0] += (a ** 0) * (16 * c_2 * (2 * nu + 1) - 8 * c_4)
-        polys[0] += (a ** 1) * (4 * (c_4 + 2 * (2 * nu + 1) * (c_2 * delta_sum - c_2 + nu * delta_prod)))
-        polys[0] += (a ** 2) * (2 * (delta_sum - nu) * (c_2 * (2 * delta_sum - 1) + delta_prod * (6 * nu - 1)))
-        polys[0] += (a ** 3) * (2 * delta_prod * (delta_sum - nu) * (delta_sum - nu + 1))
-        polys[1] += (a ** 1) * (-16 * c_2 * (2 * nu + 1))
-        polys[1] += (a ** 2) * (4 * delta_prod - 24 * nu * delta_prod + 8 * nu * (2 * nu - 1) * (2 * delta_sum + 1) + 4 * c_2 * (1 - 4 * delta_sum + 6 * nu))
-        polys[1] += (a ** 3) * (2 * c_2 * (4 * delta_sum - 2 * nu + 1) + 4 * (2 * nu - 1) * (2 * delta_sum + 1) * (delta_sum - nu + 1) + 2 * delta_prod * (10 * nu - 5 - 4 * delta_sum))
-        polys[1] += (a ** 4) * ((delta_sum - nu + 1) * (4 * delta_prod + (2 * delta_sum + 1) * (delta_sum - nu + 2)))
-        polys[2] += (a ** 2) * (16 * c_2 + 16 * nu - 32 * nu * nu)
-        polys[2] += (a ** 3) * (8 * delta_prod - 8 * (3 * delta_sum - nu + 3) * (2 * nu - 1) - 16 * c_2 - 8 * nu + 16 * nu * nu)
-        polys[2] += (a ** 4) * (4 * (c_2 - delta_prod + (3 * delta_sum - nu + 3) * (2 * nu - 1)) - 4 * delta_prod - 2 * (delta_sum - nu + 2) * (5 * delta_sum - nu + 5))
-        polys[2] += (a ** 5) * (2 * delta_prod + (delta_sum - nu + 2) * (5 * delta_sum - nu + 5))
-        polys[3] += (a ** 3) * (32 * nu - 16)
-        polys[3] += (a ** 4) * (16 - 32 * nu + 4 * (4 * delta_sum - 2 * nu + 7))
-        polys[3] += (a ** 5) * (4 * (2 * nu - 1) - 4 * (4 * delta_sum - 2 * nu + 7))
-        polys[3] += (a ** 6) * (4 * delta_sum - 2 * nu + 7)
-        polys[4] += (a ** 7) - 6 * (a ** 6) + 12 * (a ** 5) - 8 * (a ** 4)
-
-        # Store all possible derivatives of these polynomials
-        for i in range(0, 5):
-            for j in range(0, i + 4):
-                poly_derivs[i].append(polys[i].subs(a, 1))
-                polys[i] = polys[i].diff(a)
-
-        for m in range(self.m_order[-1] + 1, m_max + 2 * n_max + 1):
-            for l in range(0, len(small_table.table)):
-                new_deriv = 0
-                for i in range(m - 1, max(m - 8, -1), -1):
-                    coeff = 0
-                    index = max(m - i - 4, 0)
-
-                    prefactor = one
-                    for k in range(0, index):
-                        prefactor *= (m - 4 - k)
-                        prefactor /= k + 1
-
-                    k = max(4 + i - m, 0)
-                    while k <= 4 and index <= (m - 4):
-                        coeff += prefactor * poly_derivs[k][index]
-                        prefactor *= (m - 4 - index)
-                        prefactor /= index + 1
-                        index += 1
-                        k += 1
-
-                    if type(coeff) != type(1):
-                        coeff = coeff.subs(ell, small_table.table[l].label[0])
-                    new_deriv -= coeff * self.table[l].vector[i]
-
-                new_deriv = new_deriv / poly_derivs[4][0]
-                self.table[l].vector.append(new_deriv.expand())
-
-            self.m_order.append(m)
-            self.n_order.append(0)
-
-        # This is just an alternative to storing derivatives as a doubly-indexed list
-        index = m_max + 2 * n_max + 1
-        index_map = [range(0, m_max + 2 * n_max + 1)]
-
-        for n in range(1, n_max + 1):
-            index_map.append([])
-            for m in range(0, 2 * (n_max - n) + m_max + 1):
-                index_map[n].append(index)
-
-                coeff1 = m * (-1) * (2 - 4 * n - 4 * nu)
-                coeff2 = m * (m - 1) * (2 - 4 * n - 4 * nu)
-                coeff3 = m * (m - 1) * (m - 2) * (2 - 4 * n - 4 * nu)
-                coeff4 = 1
-                coeff5 = (-6 + m + 4 * n - 2 * nu - 2 * delta_sum)
-                coeff6 = (-1) * (4 * c_2 + m * m + 8 * m * n - 5 * m + 4 * n * n - 2 * n - 2 - 4 * nu * (1 - m - n) + 4 * delta_sum * (m + 2 * n - 2) + 2 * delta_prod)
-                coeff7 = m * (-1) * (m * m + 12 * m * n - 13 * m + 12 * n * n - 34 * n + 22 - 2 * nu * (2 * n - m - 1) + 2 * delta_sum * (m + 4 * n - 5) + 2 * delta_prod)
-                coeff8 = (1 - n)
-                coeff9 = (1 - n) * (-6 + 3 * m + 4 * n - 2 * nu + 2 * delta_sum)
-
-                for l in range(0, len(small_table.table)):
-                    new_deriv = 0
-
-                    if m > 0:
-                        new_deriv += coeff1 * self.table[l].vector[index_map[n][m - 1]]
-                    if m > 1:
-                        new_deriv += coeff2 * self.table[l].vector[index_map[n][m - 2]]
-                    if m > 2:
-                        new_deriv += coeff3 * self.table[l].vector[index_map[n][m - 3]]
-
-                    new_deriv += coeff4 * self.table[l].vector[index_map[n - 1][m + 2]]
-                    new_deriv += coeff5 * self.table[l].vector[index_map[n - 1][m + 1]]
-                    new_deriv += coeff6.subs(ell, small_table.table[l].label[0]) * self.table[l].vector[index_map[n - 1][m]]
-                    new_deriv += coeff7 * self.table[l].vector[index_map[n - 1][m - 1]]
-
-                    if n > 1:
-                        new_deriv += coeff8 * self.table[l].vector[index_map[n - 2][m + 2]]
-                        new_deriv += coeff9 * self.table[l].vector[index_map[n - 2][m + 1]]
-
-                    new_deriv = new_deriv / (2 - 4 * n - 4 * nu)
-                    self.table[l].vector.append(new_deriv.expand())
-
-                self.m_order.append(m)
-                self.n_order.append(n)
-                index += 1
-
-    def dump(self, name, form = None):
-        """
-        Saves a table of conformal block derivatives to a file. Unless overridden,
-        the file is valid Python code which manually populates the entries of
-        `table` when executed.
-
-        Parameters
-        ----------
-        name: The path to use for output.
-        form: [Optional] A string indicating that the file should be saved in
-              another program's format if it is equal to "scalar_blocks" or
-              "juliboots". Any other value will be ignored. Defaults to `None`.
-        """
-        if form == "juliboots":
-            juliboots_write(self, name)
-        elif form == "scalar_blocks":
-            scalar_blocks_write(self, name)
-        else:
-            dump_table_contents(self, name)
-
-class ConvolvedBlockTable:
-    """
-    A class which produces the functions that need to be linearly dependent in a
-    crossing symmetric CFT. If a `ConformalBlockTable` does not need to be changed
-    after a change to the external dimensions, a `ConvolvedBlockTable` does not
-    either. This is because external dimensions only appear symbolically through a
-    symbol called `delta_ext`.
-
-    Parameters
-    ----------
-    block_table: A `ConformalBlockTable` from which to produce the convolved blocks.
-    odd_spins:   [Optional] A parameter telling the class to keep odd spins which is
-                 only used if `odd_spins` is True for `block_table`. Defaults to
-                 `True`.
-    symmetric:   [Optional] Whether to add blocks in two different channels instead
-                 of subtract them. Defaults to `False`.
-    content:     [Optional] A list of ordered triples that are used to produce
-                 user-defined linear combinations of convolved conformal blocks
-                 instead of just individual convolved conformal blocks where all the
-                 coefficients are 1. Elements of a triple are taken to be the
-                 coefficient, the dimension shift and the spin shift respectively.
-                 It should always make sense to include a triple whose second and
-                 third entries are 0 and 0 since this corresponds to a convolved
-                 conformal block with scaling dimension `delta` and spin `ell`.
-                 However, if other blocks in the multiplet have `delta + 1` and
-                 `ell - 1` relative to this, another triple should be included whose
-                 second and third entries are 1 and -1. The coefficient (first
-                 entry) may be a polynomial in `delta` with coefficients depending
-                 on `ell`.
-
-    Attributes
-    ----------
-    dim:         The spatial dimension, inherited from `block_table`.
-    k_max:       Numer controlling the accuracy of the rational approximation,
-                 inherited from `block_table`.
-    l_max:       The highest spin kept in the convolved block table. This is at most
-                 the `l_max` of `block_table`.
-    m_max:       Number controlling how many `a` derivatives there are where the
-                 standard co-ordinates are expressed as `(a + sqrt(b)) / 2` and
-                 `(a - sqrt(b)) / 2`. This is at most the `m_max` of `block_table`.
-    n_max:       The number of `b` derivatives there are where the standard
-                 co-ordinates are expressed as `(a + sqrt(b)) / 2` and
-                 `(a - sqrt(b)) / 2`. This is at most the `n_max` of `block_table`.
-    delta_12:    The difference between the external scaling dimensions of operator
-                 1 and operator 2, inherited from `block_table`.
-    delta_32:    The difference between the external scaling dimensions of operator
-                 3 and operator 4, inherited from `block_table`.
-    table:       A list of `PolynomialVector`s. A block's position in the table is
-                 equal to its spin if `odd_spins` is `True`. Otherwise it is equal
-                 to half of the spin.
-    m_order:     A list stating how many `a` derivatives are being described by the
-                 corresponding entry in a `PolynomialVector` in `table`. Different
-                 from the `m_order` of `block_table` because some derivatives vanish
-                 by symmetry.
-    n_order:     A list stating how many `b` derivatives are being described by the
-                 corresponding entry in a `PolynomialVector` in `table`.
-    """
-    def __init__(self, block_table, odd_spins = True, symmetric = False, spins = [], content = [[1, 0, 0]]):
-        # Copying everything but the unconvolved table is fine from a memory standpoint
-        self.dim = block_table.dim
-        self.k_max = block_table.k_max
-        self.l_max = block_table.l_max
-        self.m_max = block_table.m_max
-        self.n_max = block_table.n_max
-        self.delta_12 = block_table.delta_12
-        self.delta_34 = block_table.delta_34
-
-        self.m_order = []
-        self.n_order = []
-        self.table = []
-
-        max_spin_shift = 0
-        for trip in content:
-            max_spin_shift = max(max_spin_shift, trip[2])
-        self.l_max -= max_spin_shift
-
-        # We can restrict to even spin when the provided table has odd spin but not vice-versa
-        if odd_spins == False and block_table.odd_spins == True:
-            self.odd_spins = False
-        else:
-            self.odd_spins = block_table.odd_spins
-        if block_table.odd_spins == True:
-            step = 1
-        else:
-            step = 2
-        if len(spins) > 0:
-            spin_list = spins
-        elif self.odd_spins:
-            spin_list = range(0, self.l_max + 1, 1)
-        else:
-            spin_list = range(0, self.l_max + 1, 2)
-
-        symbol_array = []
-        for n in range(0, block_table.n_max + 1):
-            symbol_list = []
-            for m in range(0, 2 * (block_table.n_max - n) + block_table.m_max + 1):
-                symbol_list.append(Symbol('g_' + n.__str__() + '_' + m.__str__()))
-            symbol_array.append(symbol_list)
-
-        derivatives = []
-        for n in range(0, block_table.n_max + 1):
-            for m in range(0, 2 * (block_table.n_max - n) + block_table.m_max + 1):
-                # Skip the ones that will vanish
-                if (symmetric == False and m % 2 == 0) or (symmetric == True and m % 2 == 1):
-                    continue
-
-                self.m_order.append(m)
-                self.n_order.append(n)
-
-                expression = 0
-                old_coeff = RealMPFR("0.25", prec) ** delta_ext
-                for j in range(0, n + 1):
-                    coeff = old_coeff
-                    for i in range(0, m + 1):
-                        expression += coeff * symbol_array[n - j][m - i]
-                        coeff *= (i + 2 * j - 2 * delta_ext) * (m - i) / (i + 1)
-                    old_coeff *= (j - delta_ext) * (n - j) / (j + 1)
-
-                deriv = expression / RealMPFR(str(factorial(m) * factorial(n)), prec)
-                derivatives.append(deriv)
-
-        combined_block_table = []
-        for spin in spin_list:
-            vector = []
-            l = spin // step
-
-            # Different blocks in the linear combination may be divided by different poles
-            all_poles = []
-            pole_dict = {}
-            for trip in content:
-                del_shift = trip[1]
-                ell_shift = trip[2] // step
-                if l + ell_shift >= 0:
-                    gathered_poles = gather(block_table.table[l + ell_shift].poles)
-                    for p in gathered_poles.keys():
-                        ind = get_index_approx(pole_dict.keys(), p - del_shift)
-                        if ind == -1:
-                            pole_dict[p - del_shift] = gathered_poles[p]
-                        else:
-                            pole_dict_index = index_iter(pole_dict.keys(), ind)
-                            num = pole_dict[pole_dict_index]
-                            pole_dict[pole_dict_index] = max(num, gathered_poles[p])
-            for p in pole_dict.keys():
-                all_poles += [p] * pole_dict[p]
-
-            for i in range(0, len(block_table.table[l].vector)):
-                entry = 0
-                for trip in content:
-                    if "subs" in dir(trip[0]):
-                        coeff = trip[0].subs(ell, spin)
-                    else:
-                        coeff = trip[0]
-                    del_shift = trip[1]
-                    ell_shift = trip[2] // step
-
-                    coeff *= r_cross ** del_shift
-                    if l + ell_shift >= 0:
-                        coeff *= omit_all(all_poles, block_table.table[l + ell_shift].poles, delta, del_shift)
-                        entry += coeff * block_table.table[l + ell_shift].vector[i].subs(delta, delta + del_shift)
-                vector.append(entry.expand())
-            combined_block_table.append(PolynomialVector(vector, [spin, 0], all_poles))
-
-        for l in range(0, len(combined_block_table)):
-            new_derivs = []
-            for i in range(0, len(derivatives)):
-                deriv = derivatives[i]
-                for j in range(len(combined_block_table[l].vector) - 1, 0, -1):
-                    deriv = deriv.subs(symbol_array[block_table.n_order[j]][block_table.m_order[j]], combined_block_table[l].vector[j])
-                new_derivs.append(2 * deriv.subs(symbol_array[0][0], combined_block_table[l].vector[0]))
-            self.table.append(PolynomialVector(new_derivs, combined_block_table[l].label, combined_block_table[l].poles))
 
 class SDP:
     """
@@ -538,13 +139,26 @@ class SDP:
                      in the monomial basis. It should not be necessary to change
                      this.
     """
-    def __init__(self, dim_list, conv_table_list, vector_types = [[[[[[1, 0, 0, 0]]]], 0, 0]], prototype = None):
+
+    def __init__(
+            self, dim_list: Union[float, List[float]], conv_table_list: Union[ConformalBlockTable, List[ConformalBlockTable]],
+            vector_types=[[[[[[1, 0, 0, 0]]]], 0, 0]], prototype=None,
+            sdpb_mode: str = 'binary', sdpb_kwargs={}
+    ):
         # If a user is looking at single correlators, we will not punish
         # her for only passing one dimension
-        if type(dim_list) != type([]):
+        if not isinstance(dim_list, list):
             dim_list = [dim_list]
-        if type(conv_table_list) != type([]):
+        if not isinstance(conv_table_list, list):
             conv_table_list = [conv_table_list]
+
+        # Type checking
+        if all([isinstance(tab, ConvolvedBlockTable) for tab in conv_table_list]):
+            TypeError(f"conv_table_list = {conv_table_list} must be a ConvolvedBlockTable of a list of ConvolvedBlockTable")
+
+        if prototype is not None:
+            if not isinstance(prototype, SDP):
+                TypeError(f"prototype = {prototype} must be a SDP object")
 
         # Same story here
         self.dim = 0
@@ -572,7 +186,7 @@ class SDP:
         # Turn any "raw elements" from the vectorial sum rule into 1x1 matrices
         for i in range(0, len(vector_types)):
             for j in range(0, len(vector_types[i][0])):
-                if type(vector_types[i][0][j][0]) != type([]):
+                if not isinstance(vector_types[i][0][j][0], list):
                     vector_types[i][0][j] = [[vector_types[i][0][j]]]
 
         # Again, fill in arguments that need not be specified for single correlators
@@ -597,9 +211,9 @@ class SDP:
                     for s in range(0, len(matrix[r])):
                         quad = matrix[r][s]
                         param = RealMPFR("0.5", prec) * (dim_list[quad[2]] + dim_list[quad[3]])
-                        #tab = conv_table_list[quad[1]]
-                        #factor = self.shifted_prefactor(tab.table[0].poles, r_cross, 0, 0)
-                        #unit += factor * quad[0] * tab.table[0].vector[i].subs(delta, 0).subs(delta_ext, (dim_list[quad[2]] + dim_list[quad[3]]) / 2.0)
+                        # tab = conv_table_list[quad[1]]
+                        # factor = self.shifted_prefactor(tab.table[0].poles, r_cross, 0, 0)
+                        # unit += factor * quad[0] * tab.table[0].vector[i].subs(delta, 0).subs(delta_ext, (dim_list[quad[2]] + dim_list[quad[3]]) / 2.0)
                         unit += 2 * quad[0] * (RealMPFR("0.25", prec) ** param) * rf(-param, n) * rf(2 * n - 2 * param, m) / (factorial(m) * factorial(n))
 
                 self.m_order.append(m)
@@ -609,7 +223,7 @@ class SDP:
         # Looping over types and spins gives "0 - S", "0 - T", "1 - A" and so on
         for vec in vector_types:
             # Instead of specifying even or odd spins, the user can specify a list of spins
-            if type(vec[1]) == type([]):
+            if isinstance(vec[1], list):
                 spin_list = vec[1]
             elif (vec[1] % 2) == 1:
                 self.odd_spins = True
@@ -659,16 +273,26 @@ class SDP:
         self.bounds = [0.0] * len(self.table)
         self.options = []
 
-        if prototype == None:
+        if prototype is None:
             self.basis = [0] * len(self.table)
-            self.set_bound(reset_basis = True)
+            self.set_bound(reset_basis=True)
         else:
             self.basis = []
             for mat in prototype.basis:
                 self.basis.append(mat)
-            self.set_bound(reset_basis = False)
+            self.set_bound(reset_basis=False)
 
-    def add_point(self, spin_irrep = -1, dimension = -1, extra = []):
+        # Initialize sdpb object based on `sdpb_mode`
+        if sdpb_mode == 'binary':
+            self.sdpb = SdpbBinary(**sdpb_kwargs)
+        elif sdpb_mode == 'docker':
+            self.sdpb = SdpbDocker(**sdpb_kwargs)
+        else:
+            raise ValueError(f"sdpb_mode = {sdpb_mode} must be either 'binary' or 'docker'")
+        self.sdpb_mode = sdpb_mode
+        self.sdpb_kwargs = sdpb_kwargs
+
+    def add_point(self, spin_irrep: SpinIrrep = -1, dimension: float = -1, extra: list = []):
         """
         Tells the `SDP` that a particular fixed operator should be included in the
         sum rule. If called with one argument, all points with that label will be
@@ -700,18 +324,17 @@ class SDP:
         """
         if spin_irrep == -1:
             self.points = []
-            return
-
-        if type(spin_irrep) == type(1):
-            spin_irrep = [spin_irrep, 0]
-        if dimension != -1:
-            self.points.append((spin_irrep, dimension, extra))
         else:
-            for p in self.points:
-                if p[0] == spin_irrep:
-                    self.points.remove(p)
+            if isinstance(spin_irrep, int):
+                spin_irrep = [spin_irrep, 0]
+            if dimension != -1:
+                self.points.append((spin_irrep, dimension, extra))
+            else:
+                for p in self.points:
+                    if p[0] == spin_irrep:
+                        self.points.remove(p)
 
-    def get_bound(self, gapped_spin_irrep):
+    def get_bound(self, gapped_spin_irrep: SpinIrrep):
         """
         Returns the minimum scaling dimension of a given operator in this `SDP`.
         This will return the unitarity bound until the user starts calling
@@ -724,13 +347,13 @@ class SDP:
                            and the second is the label found in `vector_types` or
                            0 if not present.
         """
-        if type(gapped_spin_irrep) == type(1):
+        if isinstance(gapped_spin_irrep, int):
             gapped_spin_irrep = [gapped_spin_irrep, 0]
         for l in range(0, len(self.table)):
             if self.table[l][0][0].label == gapped_spin_irrep:
                 return self.bounds[l]
 
-    def set_bound(self, gapped_spin_irrep = -1, delta_min = -1, reset_basis = True):
+    def set_bound(self, gapped_spin_irrep: SpinIrrep = -1, delta_min: float = -1, reset_basis=True):
         """
         Sets the minimum scaling dimension of a given operator in the sum rule. If
         called with one argument, the operator with that label will be assigned the
@@ -760,7 +383,7 @@ class SDP:
                 if reset_basis:
                     self.set_basis(l)
         else:
-            if type(gapped_spin_irrep) == type(1):
+            if isinstance(gapped_spin_irrep, int):
                 gapped_spin_irrep = [gapped_spin_irrep, 0]
 
             l = self.get_table_index(gapped_spin_irrep)
@@ -774,59 +397,7 @@ class SDP:
             if reset_basis and delta_min != oo:
                 self.set_basis(l)
 
-    def get_option(self, key):
-        """
-        Returns the string representation of a value that `SDPB` will use, whether
-        or not it has been explicitly set.
-
-        Parameters
-        ----------
-        key: The name of the `SDPB` parameter without any "--" at the beginning or
-        "=" at the end.
-        """
-        if key in sdpb_options:
-            ret = sdpb_defaults[sdpb_options.index(key)]
-            opt_string = "--" + key + "="
-            for i in range(0, len(self.options)):
-                if self.options[i][:len(opt_string)] == opt_string:
-                    ret = self.options[i][len(opt_string):]
-                    break
-            return ret
-
-    def set_option(self, key = None, value = None):
-        """
-        Sets the value of a switch that should be passed to `SDPB` on the command
-        line. `SDPB` options that do not take a parameter are handled by other
-        methods so it should not be necessary to pass them.
-
-        Parameters
-        ----------
-        key:   [Optional] The name of the `SDPB` parameter being set without any
-               "--" at the beginning or "=" at the end. Defaults to `None` which
-               means all parameters will be reset to their default values.
-        value: [Optional] The string or numerical value that should accompany `key`.
-               Defaults to `None` which means that the parameter for `key` will be
-               reset to its default value.
-        """
-        if key == None:
-            self.options = []
-        elif key in sdpb_options:
-            found = False
-            opt_string = "--" + key + "="
-            for i in range(0, len(self.options)):
-                if self.options[i][:len(opt_string)] == opt_string:
-                    found = True
-                    break
-            if found == True and value == None:
-                self.options = self.options[:i] + self.options[i + 1:]
-            elif found == True and value != None:
-                self.options[i] = opt_string + str(value)
-            elif found == False and value != None:
-                self.options.append(opt_string + str(value))
-        else:
-            print("Unknown option")
-
-    def get_table_index(self, spin_irrep):
+    def get_table_index(self, spin_irrep: SpinIrrep):
         """
         Searches for the label of a `PolynomialVector` and returns its position in
         `table` or -1 if not found.
@@ -836,14 +407,14 @@ class SDP:
         spin_irrep: An ordered pair of the type passed to `set_bound`. Used to
                     label the spin and representation being searched.
         """
-        if type(spin_irrep) == type(1):
+        if isinstance(spin_irrep, int):
             spin_irrep = [spin_irrep, 0]
         for l in range(0, len(self.table)):
             if self.table[l][0][0].label == spin_irrep:
                 return l
         return -1
 
-    def set_basis(self, index):
+    def set_basis(self, index: int):
         """
         Calculates a basis of polynomials that are orthogonal with respect to the
         positive measure prefactor that turns a `PolynomialVector` into a rational
@@ -916,7 +487,7 @@ class SDP:
         for el in norm:
             norm_hack.append(float(el))
 
-        max_index = norm_hack.index(max(norm_hack, key = abs))
+        max_index = norm_hack.index(max(norm_hack, key=abs))
         const = vector[max_index] / norm[max_index]
         ret = []
 
@@ -1049,7 +620,7 @@ class SDP:
 
         return ret
 
-    def write_xml(self, obj, norm, name = "mySDP"):
+    def write_xml(self, obj, norm, name="mySDP"):
         """
         Outputs an XML file describing the `table`, `bounds`, `points` and `basis`
         for this `SDP` in a format that `SDPB` can use to check for solvability.
@@ -1202,57 +773,43 @@ class SDP:
 
         # Recognize an SDP that looks overdetermined
         if degree_sum < len(self.unit):
-            print("Crossing equations have too many derivative components")
+            raise RuntimeWarning("Crossing equations have too many derivative components")
 
         self.table = self.table[:len(self.bounds)]
-        xml_file = open(name + ".xml", 'w')
-        doc.writexml(xml_file, addindent = "    ", newl = '\n')
-        xml_file.close()
+
+        with open(f"{name}.xml", "w") as xml_file:
+            doc.writexml(xml_file, addindent="    ", newl='\n')
+
         doc.unlink()
 
-        if sdpb_version == 2:
-            pvm2sdp_path = os.path.dirname(sdpb_path) + "/pvm2sdp"
-            subprocess.check_call([mpirun_path, "-n", "1", pvm2sdp_path, str(prec), name + ".xml", name])
+        if self.sdpb.version == 2:
+            self.sdpb.pvm2sdp_run(f"{name}.xml", name)
 
-    def read_output(self, name = "mySDP"):
-        """
-        Reads an `SDPB` output file and returns a dictionary in which all entries
-        have been converted to their respective Python types.
+    def manage_name(method):
+        @wraps(method)
+        def wrapper(self, *args, **kwargs):
+            name_is_set = 'name' in kwargs
+            sdpDir_already_exist = "sdpDir" in self.sdpb.options
 
-        Parameters
-        ----------
-        name:       [Optional] The name of the file without any ".out" at the end.
-                    Defaults to "mySDP".
-        """
-        ret = {}
-        if sdpb_version == 1:
-            out_file = open(name + ".out", 'r')
-        else:
-            out_file = open(name + "_out/out.txt", 'r')
-        for line in out_file:
-            (key, delimiter, value) = line.partition(" = ")
-            value = value.replace('\n', '')
-            value = value.replace(';', '')
-            value = value.replace('{', '[')
-            value = value.replace('}', ']')
-            value = re.sub("([0-9]+\.[0-9]+e?-?[0-9]+)", r"RealMPFR('\1', prec)", value)
-            command = "ret['" + key.strip() + "'] = " + value
-            exec(command)
-        out_file.close()
+            if name_is_set:
+                if sdpDir_already_exist:
+                    old_name = self.sdpb.get_option["sdpDir"]
+                self.sdpb.set_option("sdpDir", kwargs['name'])
 
-        if sdpb_version == 2:
-            y = []
-            outfile = open(name + "_out/y.txt", 'r')
-            lines = outfile.readlines()
-            for i in range(1, len(lines)):
-                value = lines[i].replace('\n', '')
-                value = re.sub("([0-9]+\.[0-9]+e?-?[0-9]+)", r"RealMPFR('\1', prec)", value)
-                exec("y.append(" + value + ")")
-            outfile.close()
-            ret["y"] = y
-        return ret
+            output = method(self, *args, **kwargs)
 
-    def iterate(self, name = "mySDP"):
+            if name_is_set:
+                if sdpDir_already_exist:
+                    self.sdpb.set_option("sdpDir", old_name)
+                else:
+                    self.sdpb.options.pop("sdpDir")
+
+            return output
+
+        return wrapper
+
+    @manage_name
+    def iterate(self, *, name: str = None):
         """
         Returns `True` if this `SDP` with its current gaps represents an allowed CFT
         and `False` otherwise.
@@ -1262,22 +819,24 @@ class SDP:
         name:       [Optional] The name of the XML file generated in the process
                     without any ".xml" at the end. Defaults to "mySDP".
         """
+        # Prepare SDPB input
         obj = [0.0] * len(self.table[0][0][0].vector)
-        self.write_xml(obj, self.unit, name)
+        self.write_xml(obj, self.unit, self.sdpb.get_option("sdpDir"))
 
-        if sdpb_version == 1:
-            subprocess.check_call([sdpb_path, "-s", name + ".xml", "--precision=" + str(prec), "--findPrimalFeasible", "--findDualFeasible", "--noFinalCheckpoint"] + self.options)
-        else:
-            ppn = self.get_option("procsPerNode")
-            ppn = str(max(1, int(ppn)))
-            self.set_option("procsPerNode", ppn)
-            subprocess.check_call([mpirun_path, "-n", ppn, sdpb_path, "-s", name, "--precision=" + str(prec), "--findPrimalFeasible", "--findDualFeasible"] + self.options)
-        output = self.read_output(name = name)
+        # Run SDPB
+        extra_options = {'findPrimalFeasible': True, 'findDualFeasible': True}
+        if self.sdpb.version == 1:
+            extra_options["noFinalCheckpoint"] = True
+
+        self.sdpb.run(extra_options)
+
+        output = self.sdpb.read_output(self.sdpb.get_option("outDir"))
 
         terminate_reason = output["terminateReason"]
         return terminate_reason == "found primal feasible solution"
 
-    def bisect(self, lower, upper, threshold, spin_irrep, isolated = False, reverse = False, bias = None, name = "mySDP"):
+    @manage_name
+    def bisect(self, lower, upper, threshold, spin_irrep, isolated=False, reverse=False, bias=None, *, name: str = None):
         """
         Uses a binary search to find the maximum allowed gap in a particular type
         of operator before the CFT stops existing. The allowed value closest to the
@@ -1308,13 +867,13 @@ class SDP:
         bias_found = False
         checkpoints = False
         old = self.get_bound(spin_irrep)
-        if bias != None:
+        if bias is not None:
             bias = min(bias, 1.0 / bias)
 
         while abs(upper - lower) > threshold:
-            if bias == None and d_time != 0 and p_time != 0:
+            if bias is None and d_time != 0 and p_time != 0:
                 bias = p_time / d_time
-            if bias != None and bias_found == False:
+            if bias is not None and bias_found is False:
                 # Bisection within a bisection
                 u = 0.5
                 l = 0.0
@@ -1330,43 +889,44 @@ class SDP:
 
             test = lower + x * (upper - lower)
             print("Trying " + test.__str__())
-            if isolated == True:
+            if isolated is True:
                 self.add_point(spin_irrep, test)
             else:
                 self.set_bound(spin_irrep, test)
 
             # Using the same name twice in a row is only dangerous if the runs are really long
             start = time.time()
-            if checkpoints and sdpb_version == 1:
-                result = self.iterate(name = str(start))
+            if checkpoints and self.sdpb.version == 1:
+                result = self.iterate(name=str(start))
             else:
-                result = self.iterate(name = name)
+                result = self.iterate()
             end = time.time()
-            if int(end - start) > int(self.get_option("checkpointInterval")):
+            if int(end - start) > int(self.sdpb.get_option("checkpointInterval")):
                 checkpoints = True
-            if isolated == True:
+            if isolated is True:
                 self.points = self.points[:-1]
 
-            if result == False:
-                if reverse == False:
+            if result is False:
+                if reverse is False:
                     upper = test
                 else:
                     lower = test
                 d_time = end - start
             else:
-                if reverse == False:
+                if reverse is False:
                     lower = test
                 else:
                     upper = test
                 p_time = end - start
 
         self.set_bound(spin_irrep, old)
-        if reverse == False:
+        if reverse is False:
             return lower
         else:
             return upper
 
-    def opemax(self, dimension, spin_irrep, reverse = False, vector = None, name = "mySDP"):
+    @manage_name
+    def opemax(self, dimension, spin_irrep, reverse=False, vector=None, *, name: str = None):
         """
         Minimizes or maximizes the squared length of the vector of OPE coefficients
         involving an operator with a prescribed scaling dimension, spin and global
@@ -1402,7 +962,7 @@ class SDP:
             sign = 1
         prod = self.shifted_prefactor(self.table[l][0][0].poles, r_cross, dimension, 0) * sign
 
-        if vector == None or len(vector) != size:
+        if vector is None or len(vector) != size:
             vec = [0] * size
             vec[0] = 1
         else:
@@ -1420,10 +980,10 @@ class SDP:
                 for s in range(0, size):
                     el += vec[r] * vec[s] * self.table[l][r][s].vector[i].subs(delta, dimension)
             norm.append(el * prod)
-        functional = self.solution_functional(self.get_bound(spin_irrep), spin_irrep, self.unit, norm, name)
-        output = self.read_output(name = name)
+        functional = self.solution_functional(self.get_bound(spin_irrep), spin_irrep, self.unit, norm)
+        output = self.sdpb.read_output(self.sdpb.get_option("outDir"))
         primal_value = output["primalObjective"]
-        if size == 1 or vector != None:
+        if size == 1 or vector is not None:
             return float(primal_value) * (-1)
 
         # This primal value will be divided by 1 or something different if the matrix is not 1x1
@@ -1446,7 +1006,8 @@ class SDP:
             print("Divide " + str(float(primal_value)) + " by the minimum eigenvalue")
         return DenseMatrix(outer_list)
 
-    def solution_functional(self, dimension, spin_irrep, obj = None, norm = None, name = "mySDP"):
+    @manage_name
+    def solution_functional(self, dimension, spin_irrep, obj=None, norm=None, *, name: str = None):
         """
         Returns a functional (list of numerical components) that serves as a
         solution to the `SDP`. Like `iterate`, this sets a bound, generates an XML
@@ -1470,82 +1031,79 @@ class SDP:
         name:       [Optional] The name of the XML file generated in the process
                     without any ".xml" at the end. Defaults to "mySDP".
         """
-        if obj == None:
+        if obj is None:
             obj = [0.0] * len(self.table[0][0][0].vector)
-        if norm == None:
+        if norm is None:
             norm = self.unit
 
         old = self.get_bound(spin_irrep)
         self.set_bound(spin_irrep, dimension)
-        self.write_xml(obj, norm, name)
+        self.write_xml(obj, norm, self.sdpb.get_option("sdpDir"))
         self.set_bound(spin_irrep, old)
 
-        if sdpb_version == 1:
-            subprocess.check_call([sdpb_path, "-s", name + ".xml", "--precision=" + str(prec), "--noFinalCheckpoint"] + self.options)
-        else:
-            ppn = self.get_option("procsPerNode")
-            ppn = str(max(1, int(ppn)))
-            self.set_option("procsPerNode", ppn)
-            subprocess.check_call([mpirun_path, "-n", ppn, sdpb_path, "-s", name, "--precision=" + str(prec), "--noFinalCheckpoint"] + self.options)
-        output = self.read_output(name = name)
+        self.sdpb.run({"noFinalCheckpoint": True})
+
+        output = self.sdpb.read_output(self.sdpb.get_option("outDir"))
+
         return [one] + output["y"]
 
-    def convert_spectrum_file(self, input_path, output_path, rescaling = 4 ** delta):
-        """
-        Reads a spectrum produced by the arXiv:1603.04444 script and outputs a file
-        with physical dimensions and OPE coefficients. Instead of a scaling
-        dimension, the original file reports the difference between the scaling
-        dimension and the gap. Instead of an OPE coefficient, the original file
-        reports the factor relating the OPE coefficient to the positive prefactor.
-        Note that this only works if `set_bound` has not been called since the
-        XML file was generated.
+    # THIS FUNCTION IS DEPRECATED SINCE I DON'T HAVE THE OUTPUT TO REWRITE IT IN A BETTER WAY
+    # def convert_spectrum_file(self, input_path, output_path, rescaling=4 ** delta):
+    #     """
+    #     Reads a spectrum produced by the arXiv:1603.04444 script and outputs a file
+    #     with physical dimensions and OPE coefficients. Instead of a scaling
+    #     dimension, the original file reports the difference between the scaling
+    #     dimension and the gap. Instead of an OPE coefficient, the original file
+    #     reports the factor relating the OPE coefficient to the positive prefactor.
+    #     Note that this only works if `set_bound` has not been called since the
+    #     XML file was generated.
 
-        Parameters
-        ----------
-        input_path:  The path to the spectrum in Mathematica-like format.
-        output_path: The path desired for the file after the additive and
-                     multiplicative corrections have been performed.
-        rescaling:   [Optional] An expression, which may depend on `delta` and
-                     `ell`, for changing the convention used for OPE coefficients.
-                     Defaults to 4 ** delta.
-        """
-        in_file = open(input_path, 'r')
-        out_file = open(output_path, 'w')
+    #     Parameters
+    #     ----------
+    #     input_path:  The path to the spectrum in Mathematica-like format.
+    #     output_path: The path desired for the file after the additive and
+    #                  multiplicative corrections have been performed.
+    #     rescaling:   [Optional] An expression, which may depend on `delta` and
+    #                  `ell`, for changing the convention used for OPE coefficients.
+    #                  Defaults to 4 ** delta.
+    #     """
+    #     in_file = open(input_path, 'r')
+    #     out_file = open(output_path, 'w')
 
-        out_file.write('{')
-        for j in range(0, len(self.table) + len(self.points)):
-            if j >= len(self.table):
-                shift = self.points[j - len(self.table)][1]
-                spin = self.points[j - len(self.table)][0][0]
-            else:
-                shift = self.bounds[j]
-                spin = self.table[j][0][0].label[0]
-            out_file.write(str(j) + " -> ")
-            line = next(in_file)[:-2].split("->")[1]
-            line = line.replace('{', '[').replace('}', ']')
-            line = re.sub("([0-9]+\.[0-9]+e?-?[0-9]+)", r"RealMPFR('\1', prec)", line)
-            exec("ops = " + line)
-            for o in range(0, len(ops)):
-                ops[o][0] = ops[o][0] + shift
-                if j >= len(self.table):
-                    prod = 1
-                else:
-                    prod = self.shifted_prefactor(self.table[j][0][0].poles, r_cross, ops[o][0], 0)
-                if "subs" in rescaling:
-                    prod *= rescaling.subs(delta, ops[o][0]).subs(ell, spin)
-                else:
-                    prod *= rescaling
-                for t in range(0, len(ops[o][1])):
-                    ops[o][1][t] = ops[o][1][t] / sqrt(prod)
-            ops_str = str(ops).replace('[', '{').replace(']', '}')
-            out_file.write(ops_str + ",\n")
-        # Copy the objective at the end
-        out_file.write(next(in_file))
+    #     out_file.write('{')
+    #     for j in range(0, len(self.table) + len(self.points)):
+    #         if j >= len(self.table):
+    #             shift = self.points[j - len(self.table)][1]
+    #             spin = self.points[j - len(self.table)][0][0]
+    #         else:
+    #             shift = self.bounds[j]
+    #             spin = self.table[j][0][0].label[0]
+    #         out_file.write(str(j) + " -> ")
+    #         line = next(in_file)[:-2].split("->")[1]
+    #         line = line.replace('{', '[').replace('}', ']')
+    #         line = re.sub("([0-9]+\.[0-9]+e?-?[0-9]+)", r"RealMPFR('\1', prec)", line)
+    #         exec("ops = " + line)
+    #         for o in range(0, len(ops)):
+    #             ops[o][0] = ops[o][0] + shift
+    #             if j >= len(self.table):
+    #                 prod = 1
+    #             else:
+    #                 prod = self.shifted_prefactor(self.table[j][0][0].poles, r_cross, ops[o][0], 0)
+    #             if "subs" in rescaling:
+    #                 prod *= rescaling.subs(delta, ops[o][0]).subs(ell, spin)
+    #             else:
+    #                 prod *= rescaling
+    #             for t in range(0, len(ops[o][1])):
+    #                 ops[o][1][t] = ops[o][1][t] / sqrt(prod)
+    #         ops_str = str(ops).replace('[', '{').replace(']', '}')
+    #         out_file.write(ops_str + ",\n")
+    #     # Copy the objective at the end
+    #     out_file.write(next(in_file))
 
-        in_file.close()
-        out_file.close()
+    #     in_file.close()
+    #     out_file.close()
 
-    def extremal_dimensions(self, functional, spin_irrep, zero_threshold):
+    def extremal_dimensions(self, functional, spin_irrep, zero_threshold, tmp_file):
         """
         When a functional acts on `PolynomialVector`s, this finds approximate zeros
         of the resulting expression with the `unisolve` executable. When the sum
@@ -1565,8 +1123,6 @@ class SDP:
         zero_threshold: The threshold for identifying a real zero. The determinant
                         over its second derivative must be less than this value.
         """
-        unisolve_path = find_executable("unisolve")
-
         zeros = []
         entries = []
         l = self.get_table_index(spin_irrep)
@@ -1589,15 +1145,15 @@ class SDP:
         det2 = det1.diff(delta)
         coeffs = coefficients(det1)
         # Pass output to unisolve
-        pol_file = open("tmp.pol", 'w')
-        pol_file.write("drf\n")
-        pol_file.write(str(prec) + "\n")
-        pol_file.write(str(len(coeffs) - 1) + "\n")
-        for c in coeffs:
-            pol_file.write(str(c) + "\n")
-        pol_file.close()
-        spec = subprocess.check_output([unisolve_path, "-H1", "-o" + str(prec), "-Oc", "-Ga", "tmp.pol"])
-        spec_lines = spec.split('\n')[:-1]
+        with open(tmp_file, "w") as pol_file:
+            pol_file.write("drf\n")
+            pol_file.write(str(prec) + "\n")
+            pol_file.write(str(len(coeffs) - 1) + "\n")
+            for c in coeffs:
+                pol_file.write(str(c) + "\n")
+
+        unisolve_proc = self.sdpb.unisovle_run(prec, tmp_file)
+        spec_lines = unisolve_proc.stout.splitlines()
         for line in spec_lines:
             pair = line.replace('(', '').replace(')', '').split(',')
             real = RealMPFR(pair[0], prec)
@@ -1606,7 +1162,7 @@ class SDP:
                 zeros.append(real)
         return zeros
 
-    def extremal_coefficients(self, dimensions, spin_irreps, nullity = 1):
+    def extremal_coefficients(self, dimensions, spin_irreps, nullity=1):
         """
         Once the full extremal spectrum is known, one can reconstruct the OPE
         coefficients that cause those convolved conformal blocks to sum to the
@@ -1654,14 +1210,14 @@ class SDP:
         for i in range(0, len(self.unit)):
             j = 0
             good_row = True
-            while j < zeros and good_row == True:
+            while j < zeros and good_row is True:
                 size = len(extremal_table[j])
                 for r in range(0, size):
                     for s in range(0, size):
                         if abs(extremal_table[j][r][s][i]) > tiny and r != s:
                             good_row = False
                 j += 1
-            if good_row == True:
+            if good_row is True:
                 good_rows.append(i)
 
         fail = False
@@ -1685,26 +1241,26 @@ class SDP:
                 elif current_target[0] == 0:
                     j = 0
                     found = False
-                    while j < zeros and found == False:
+                    while j < zeros and found is False:
                         size = len(extremal_table[j])
                         for vec in self.irrep_set:
                             if vec[1] == spin_irreps[j][1]:
                                 break
                         r = 0
-                        while r < size and found == False:
+                        while r < size and found is False:
                             dim_set1 = [vec[0][0][r][r][0], vec[0][0][r][r][1], dimensions[j]]
                             dim_set1 = sorted(dim_set1)
                             for c in known_ops:
                                 dim_set2 = [c[1], c[2], c[3]]
                                 dim_set2 = sorted(dim_set2)
-                                if abs(dim_set1[0] - dim_set2[0]) < 0.01 and abs(dim_set1[1] - dim_set2[1]) < 0.01  and abs(dim_set1[2] - dim_set2[2]) < 0.01:
+                                if abs(dim_set1[0] - dim_set2[0]) < 0.01 and abs(dim_set1[1] - dim_set2[1]) < 0.01 and abs(dim_set1[2] - dim_set2[2]) < 0.01:
                                     # OPE coefficient symmetry only holds with a particular normalization
                                     current_target = [(4.0 ** (dimensions[j] - c[3])) * c[0], j, r]
                                     found = True
                                     break
                             r += 1
                         j += 1
-                    if found == False:
+                    if found is False:
                         # This could happen if the SDP given to us does not correspond to the bootstrap of a physical theory
                         print("Leads exhausted")
                         fail = True
@@ -1735,9 +1291,9 @@ class SDP:
                                 break
                             elif c[0] == j:
                                 found_one = True
-                        if found_both == False:
+                        if found_both is False:
                             current_coeffs.append((j, r))
-                        if found_one == False:
+                        if found_one is False:
                             new_dimensions.append(dimensions[j])
                             new_spin_irreps.append(spin_irreps[j])
 
@@ -1746,7 +1302,7 @@ class SDP:
                 refine = True
                 kept_coeffs = []
 
-                while refine == True:
+                while refine is True:
                     index_new = new_dimensions.index(min(new_dimensions))
                     # Allow for different operators of the same dimension
                     target_dimension = new_dimensions[index_new]
@@ -1770,7 +1326,7 @@ class SDP:
             # If there are more crossing equations than operators, we must omit the ones corresponding to high derivatives
             # The last case might land us in this one as well if some OPE coefficients show up in pairs
             if len(current_rows) > len(current_coeffs) + nullity:
-                current_rows = sorted(current_rows, key = lambda i: self.m_order[i] + self.n_order[i])
+                current_rows = sorted(current_rows, key= lambda i: self.m_order[i] + self.n_order[i])
                 current_rows = current_rows[:len(current_coeffs) + nullity]
 
             # Solve our system now that it is square
@@ -1846,7 +1402,7 @@ class SDP:
                 constraint_matrix[zeros + nullity + i][zeros + nullity + j] = matrix.get(i, j)
 
         # To solve this with scipy, one could stop here
-        #return linprog(-obj[1:], -constraint_matrix, -constraint_vector)
+        # return linprog(-obj[1:], -constraint_matrix, -constraint_vector)
 
         extra = []
         for i in range(0, 2 * zeros + nullity):
@@ -1859,7 +1415,7 @@ class SDP:
         # Now that the functional components are positive, make a toy SDP for this
         aux_table1 = ConformalBlockTable(1, 0, 0, 0, 0)
         aux_table2 = ConvolvedBlockTable(aux_table1)
-        aux_sdp = SDP(0, aux_table2)
+        aux_sdp = SDP(0, aux_table2, sdpb_mode=self.sdpb_mode, sdpb_kwargs=self.sdpb_kwargs)
         aux_sdp.bounds = [0] * len(constraint_vector)
         aux_sdp.basis = [DenseMatrix([[1]])] * len(constraint_vector)
         for i in range(0, len(constraint_vector)):
@@ -1868,14 +1424,14 @@ class SDP:
 
         norm = [0] * len(obj)
         norm[0] = -1
-        aux_sdp.write_xml(obj, norm, name = "tmp")
+        aux_sdp.write_xml(obj, norm, name="tmp")
 
-        # SDPB should now run quickly with default options
-        if sdpb_version == 1:
-            subprocess.check_call([sdpb_path, "-s", "tmp.xml", "--noFinalCheckpoint"])
-        else:
-            subprocess.check_call([mpirun_path, "-n", "1", sdpb_path, "-s", "tmp.xml", "--noFinalCheckpoint"])
-        output = self.read_output(name = "tmp")
+        aux_sdp.sdpb.set_option("sdpDir", "tmp.xml")
+        aux_sdp.sdpb.set_option("procsPerNode", 1)
+        aux_sdp.sdpb.set_option("noFinalCheckpoint", True)
+        aux_sdp.sdpb.run({"noFinalCheckpoint": True})
+
+        output = aux_sdp.sdpb.read_output(aux_sdp.sdpb.get_option("outDir"))
         solution = output["y"]
         solution = solution[zeros + nullity:]
         return DenseMatrix(zeros, 1, solution)

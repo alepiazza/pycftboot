@@ -1,3 +1,9 @@
+from symengine.lib.symengine_wrapper import eval_mpfr
+
+from .common import coefficients, build_polynomial
+from .constants import prec, tiny, delta
+
+
 class PolynomialVector:
     """
     The main class for vectors on which the functionals being found by SDPB may act.
@@ -16,8 +22,52 @@ class PolynomialVector:
     """
 
     def __init__(self, derivatives, spin_irrep, poles):
-        if type(spin_irrep) == type(1):
+        if isinstance(spin_irrep, int):
             spin_irrep = [spin_irrep, 0]
+
         self.vector = derivatives
         self.label = spin_irrep
         self.poles = poles
+
+    def __eq__(self, other):
+        if not isinstance(other, PolynomialVector):
+            # don't attempt to compare against unrelated types
+            return NotImplemented
+        pv_dict = self.__dict__
+        other_dict = other.__dict__
+
+        pv_dict["vector"] = [poly.__str__ for poly in pv_dict["vector"]]
+        other_dict["vector"] = [poly.__str__ for poly in pv_dict["vector"]]
+        return pv_dict == other_dict
+
+    def cancel_poles(self):
+        """Checks which roots of a conformal block denominator are also roots of the
+        numerator. Whenever one is found, a simple factoring is applied.
+        """
+        poles = []
+        zero_poles = []
+        for p in self.poles:
+            if abs(float(p)) > tiny:
+                poles.append(p)
+            else:
+                zero_poles.append(p)
+        poles = zero_poles + poles
+
+        for p in poles:
+            # We should really make sure the pole is a root of all numerators
+            # However, this is automatic if it is a root before differentiating
+            if abs(self.vector[0].subs(delta, p)) < tiny:
+                self.poles.remove(p)
+
+                # A factoring algorithm which works if the zeros are first
+                for n in range(0, len(self.vector)):
+                    coeffs = coefficients(self.vector[n])
+                    if abs(p) > tiny:
+                        new_coeffs = [coeffs[0] / eval_mpfr(-p, prec)]
+                        for i in range(1, len(coeffs) - 1):
+                            new_coeffs.append((new_coeffs[i - 1] - coeffs[i]) / eval_mpfr(p, prec))
+                    else:
+                        coeffs.remove(coeffs[0])
+                        new_coeffs = coeffs
+
+                    self.vector[n] = build_polynomial(new_coeffs)

@@ -1,71 +1,7 @@
-import os
-import subprocess
-import re
 import itertools
+from symengine.lib.symengine_wrapper import RealMPFR, Symbol, sqrt, Integer, eval_mpfr
 
-from symengine.lib.symengine_wrapper import (
-    RealMPFR, zero, one, sqrt, Symbol, function_symbol, Derivative, Subs,
-    Integer
-)
-
-cutoff = 0
-prec = 660
-dec_prec = int((3.0 / 10.0) * prec)
-tiny = RealMPFR("1e-" + str(dec_prec // 2), prec)
-
-zero = zero.n(prec)
-one = one.n(prec)
-two = 2 * one
-r_cross = 3 - 2 * sqrt(2).n(prec)
-
-ell = Symbol('ell')
-delta = Symbol('delta')
-delta_ext = Symbol('delta_ext')
-
-# Default paths, used as first priority if they exists
-sdpb_path = "/usr/bin/sdpb"
-mpirun_path = "/usr/bin/mpirun"
-
-
-def find_executable(name):
-    if os.path.isfile(name):
-        return name
-    else:
-        for path in os.environ["PATH"].split(os.pathsep):
-            test = os.path.join(path, name)
-            if os.path.isfile(test):
-                return test
-        else:
-            raise EnvironmentError("%s was not found on path." % name)
-
-
-# If default path doesn't apply, look for SDPB on user's PATH
-if not os.path.isfile(sdpb_path):
-    sdpb_path = find_executable("sdpb")
-
-# Determine (major) version of SDPB
-proc = subprocess.Popen([sdpb_path, "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-(stdout, _) = proc.communicate()
-if proc.returncode != 0:
-    # Assume that this is version 1.x, which didn't support --version
-    sdpb_version = 1
-else:
-    # Otherwise parse the output of --version
-    m = re.search(r"SDPB ([0-9])", str(stdout))
-    if m is None:
-        raise RuntimeError("Failed to retrieve SDPB version.")
-    sdpb_version = int(m.group(1))
-
-sdpb_options = ["checkpointInterval", "maxIterations", "maxRuntime", "dualityGapThreshold", "primalErrorThreshold", "dualErrorThreshold", "initialMatrixScalePrimal", "initialMatrixScaleDual", "feasibleCenteringParameter", "infeasibleCenteringParameter", "stepLengthReduction", "maxComplementarity"]
-sdpb_defaults = ["3600", "500", "86400", "1e-30", "1e-30", "1e-30", "1e+20", "1e+20", "0.1", "0.3", "0.7", "1e+100"]
-if sdpb_version == 1:
-    sdpb_options = ["maxThreads", "choleskyStabilizeThreshold"] + sdpb_options
-    sdpb_defaults = ["4", "1e-40"] + sdpb_defaults
-else:
-    sdpb_options = ["procsPerNode", "procGranularity", "verbosity"] + sdpb_options
-    sdpb_defaults = ["0", "1", "1"] + sdpb_defaults
-    if not os.path.isfile(mpirun_path):
-        mpirun_path = find_executable("mpirun")
+from .constants import tiny, prec, delta
 
 
 def rf(x, n):
@@ -144,7 +80,7 @@ def extract_power(term):
     as (coefficient, (delta, exponent)). This is helpful for sorting polynomials
     which are not sorted by default.
     """
-    if not "args" in dir(term):
+    if "args" not in dir(term):
         return 0
 
     if term.args == ():
@@ -161,7 +97,7 @@ def coefficients(polynomial):
     constant term. Zeros are automatically added so that the length of the list
     is always one more than the degree.
     """
-    if not "args" in dir(polynomial):
+    if "args" not in dir(polynomial):
         return [polynomial]
     if polynomial.args == ():
         return [polynomial]
@@ -225,37 +161,6 @@ def omit_all(poles, special_poles, var, shift=0):
     return expression
 
 
-def dump_table_contents(block_table, name):
-    """
-    This is called by `ConformalBlockTable` and `ConformalBlockTableSeed`. It
-    writes executable Python code to a file designed to recreate the full set of
-    the table's attributes as quickly as possible.
-    """
-    dump_file = open(name, 'w')
-
-    dump_file.write("self.dim = " + block_table.dim.__str__() + "\n")
-    dump_file.write("self.k_max = " + block_table.k_max.__str__() + "\n")
-    dump_file.write("self.l_max = " + block_table.l_max.__str__() + "\n")
-    dump_file.write("self.m_max = " + block_table.m_max.__str__() + "\n")
-    dump_file.write("self.n_max = " + block_table.n_max.__str__() + "\n")
-    dump_file.write("self.delta_12 = " + block_table.delta_12.__str__() + "\n")
-    dump_file.write("self.delta_34 = " + block_table.delta_34.__str__() + "\n")
-    dump_file.write("self.odd_spins = " + block_table.odd_spins.__str__() + "\n")
-    dump_file.write("self.m_order = " + block_table.m_order.__str__() + "\n")
-    dump_file.write("self.n_order = " + block_table.n_order.__str__() + "\n")
-    dump_file.write("self.table = []\n")
-
-    for l in range(0, len(block_table.table)):
-        dump_file.write("derivatives = []\n")
-        for i in range(0, len(block_table.table[0].vector)):
-            poly_string = block_table.table[l].vector[i].__str__()
-            poly_string = re.sub("([0-9]+\.[0-9]+e?-?[0-9]+)", r"RealMPFR('\1', prec)", poly_string)
-            dump_file.write("derivatives.append(" + poly_string + ")\n")
-        dump_file.write("self.table.append(PolynomialVector(derivatives, " + block_table.table[l].label.__str__() + ", " + block_table.table[l].poles.__str__() + "))\n")
-
-    dump_file.close()
-
-
 def rules(m_max, n_max):
     """
     This takes the radial and angular co-ordinates, defined by Hogervorst and
@@ -303,200 +208,24 @@ def rules(m_max, n_max):
     return (rules1, rules2, m_order, n_order)
 
 
-def chain_rule_single_symengine(m_order, rules, table, conformal_blocks, accessor):
+def delta_pole(nu: RealMPFR, k, l, series):
     """
-    This reads a conformal block list where each spin's entry is a list of radial
-    derivatives. It converts these to diagonal `a` derivatives using the rules
-    given. Once these are calculated, the passed `table` is populated. Here,
-    `accessor` is a hack to get around the fact that different parts of the code
-    like to index in different ways.
+    Returns the pole of a meromorphic global conformal block given by the
+    parameters in arXiv:1406.4858 by Kos, Poland and Simmons-Duffin.
+
+    Parameters
+    ----------
+    nu:     `(d - 2) / 2` where d is the spatial dimension.
+    k:      The parameter k indexing the various poles. As described in
+            arXiv:1406.4858, it may be any positive integer unless `series` is 3.
+    l:      The spin.
+    series: The parameter i desribing the three types of poles in arXiv:1406.4858.
     """
-    _x = Symbol('_x')
-    a = Symbol('a')
-    r = function_symbol('r', a)
-    g = function_symbol('g', r)
-    m_max = max(m_order)
+    if series == 1:
+        pole = 1 - l - k
+    elif series == 2:
+        pole = 1 + nu - k
+    else:
+        pole = 1 + l + 2 * nu - k
 
-    for m in range(0, m_max + 1):
-        if m == 0:
-            old_expression = g
-            g = function_symbol('g', _x)
-        else:
-            old_expression = old_expression.diff(a)
-
-        expression = old_expression
-        for i in range(1, m + 1):
-            expression = expression.subs(Derivative(r, [a] * m_order[i]), rules[i])
-
-        for l in range(0, len(conformal_blocks)):
-            new_deriv = expression
-            for i in range(1, m + 1):
-                new_deriv = new_deriv.subs(Subs(Derivative(g, [_x] * i), [_x], [r]), accessor(l, i))
-            if m == 0:
-                new_deriv = accessor(l, 0)
-            table[l].vector.append(new_deriv.expand())
-
-
-def chain_rule_single(m_order, rules, table, conformal_blocks, accessor):
-    """
-    This implements the same thing except in Python which should not be faster
-    but it is.
-    """
-    a = Symbol('a')
-    r = function_symbol('r', a)
-    m_max = max(m_order)
-
-    old_coeff_grid = [0] * (m_max + 1)
-    old_coeff_grid[0] = 1
-    order = 0
-
-    for m in range(0, m_max + 1):
-        if m == 0:
-            coeff_grid = old_coeff_grid[:]
-        else:
-            for i in range(m - 1, -1, -1):
-                coeff = coeff_grid[i]
-                if type(coeff) == type(1):
-                    coeff_deriv = 0
-                else:
-                    coeff_deriv = coeff.diff(a)
-                coeff_grid[i + 1] += coeff * r.diff(a)
-                coeff_grid[i] = coeff_deriv
-
-        deriv = coeff_grid[:]
-        for l in range(order, 0, -1):
-            for i in range(0, m + 1):
-                if type(deriv[i]) != type(1):
-                    deriv[i] = deriv[i].subs(Derivative(r, [a] * m_order[l]), rules[l])
-
-        for l in range(0, len(conformal_blocks)):
-            new_deriv = 0
-            for i in range(0, m + 1):
-                new_deriv += deriv[i] * accessor(l, i)
-            table[l].vector.append(new_deriv.expand())
-        order += 1
-
-
-def chain_rule_double_symengine(m_order, n_order, rules1, rules2, table, conformal_blocks):
-    """
-    This reads a conformal block list where each spin has a chunk for a given
-    number of angular derivatives and different radial derivatives within each
-    chunk. It converts these to diagonal and off-diagonal `a` and `b` derivatives
-    using the two sets of rules given. Once these are calculated, the passed
-    `table` is populated.
-    """
-    _x = Symbol('_x')
-    __x = Symbol('__x')
-    a = Symbol('a')
-    b = Symbol('b')
-    r = function_symbol('r', a, b)
-    eta = function_symbol('eta', a, b)
-    g = function_symbol('g', r, eta)
-    n_max = max(n_order)
-    m_max = max(m_order) - 2 * n_max
-    order = 0
-
-    for n in range(0, n_max + 1):
-        for m in range(0, 2 * (n_max - n) + m_max + 1):
-            if n == 0 and m == 0:
-                old_expression = g
-                expression = old_expression
-                g0 = function_symbol('g', __x, _x)
-                g1 = function_symbol('g', _x, __x)
-                g2 = function_symbol('g', _x, eta)
-                g3 = function_symbol('g', r, _x)
-                g4 = function_symbol('g', r, eta)
-            elif m == 0:
-                old_expression = old_expression.diff(b)
-                expression = old_expression
-            else:
-                expression = expression.diff(a)
-
-            deriv = expression
-            for l in range(order, 0, -1):
-                deriv = deriv.subs(Derivative(r, [a] * m_order[l] + [b] * n_order[l]), rules1[l])
-                deriv = deriv.subs(Derivative(r, [b] * n_order[l] + [a] * m_order[l]), rules1[l])
-                deriv = deriv.subs(Derivative(eta, [a] * m_order[l] + [b] * n_order[l]), rules2[l])
-                deriv = deriv.subs(Derivative(eta, [b] * n_order[l] + [a] * m_order[l]), rules2[l])
-
-            for l in range(0, len(conformal_blocks)):
-                new_deriv = deriv
-                for i in range(1, m + n + 1):
-                    for j in range(1, m + n - i + 1):
-                        new_deriv = new_deriv.subs(Subs(Derivative(g1, [_x] * i + [__x] * j), [_x, __x], [r, eta]), conformal_blocks[l].chunks[j].get(i, 0))
-                        new_deriv = new_deriv.subs(Subs(Derivative(g0, [_x] * j + [__x] * i), [_x, __x], [eta, r]), conformal_blocks[l].chunks[j].get(i, 0))
-                for i in range(1, m + n + 1):
-                    new_deriv = new_deriv.subs(Subs(Derivative(g2, [_x] * i), [_x], [r]), conformal_blocks[l].chunks[0].get(i, 0))
-                for j in range(1, m + n + 1):
-                    new_deriv = new_deriv.subs(Subs(Derivative(g3, [_x] * j), [_x], [eta]), conformal_blocks[l].chunks[j].get(0, 0))
-                new_deri = new_deriv.subs(g4, conformal_blocks[l].chunks[0].get(0, 0))
-                table[l].vector.append(new_deriv.expand())
-            order += 1
-
-
-def chain_rule_double(m_order, n_order, rules1, rules2, table, conformal_blocks):
-    """
-    This implements the same thing except in Python which should not be faster
-    but it is.
-    """
-    a = Symbol('a')
-    b = Symbol('b')
-    r = function_symbol('r', a, b)
-    eta = function_symbol('eta', a, b)
-    n_max = max(n_order)
-    m_max = max(m_order) - 2 * n_max
-
-    old_coeff_grid = []
-    for n in range(0, m_max + 2 * n_max + 1):
-        old_coeff_grid.append([0] * (m_max + 2 * n_max + 1))
-    old_coeff_grid[0][0] = 1
-    order = 0
-
-    for n in range(0, n_max + 1):
-        for m in range(0, 2 * (n_max - n) + m_max + 1):
-            # Hack implementation of the g(r(a, b), eta(a, b)) chain rule
-            if n == 0 and m == 0:
-                coeff_grid = deepcopy(old_coeff_grid)
-            elif m == 0:
-                for i in range(m + n - 1, -1, -1):
-                    for j in range(m + n - i - 1, -1, -1):
-                        coeff = old_coeff_grid[i][j]
-                        if type(coeff) == type(1):
-                            coeff_deriv = 0
-                        else:
-                            coeff_deriv = coeff.diff(b)
-                        old_coeff_grid[i + 1][j] += coeff * r.diff(b)
-                        old_coeff_grid[i][j + 1] += coeff * eta.diff(b)
-                        old_coeff_grid[i][j] = coeff_deriv
-                coeff_grid = deepcopy(old_coeff_grid)
-            else:
-                for i in range(m + n - 1, -1, -1):
-                    for j in range(m + n - i - 1, -1, -1):
-                        coeff = coeff_grid[i][j]
-                        if type(coeff) == type(1):
-                            coeff_deriv = 0
-                        else:
-                            coeff_deriv = coeff.diff(a)
-                        coeff_grid[i + 1][j] += coeff * r.diff(a)
-                        coeff_grid[i][j + 1] += coeff * eta.diff(a)
-                        coeff_grid[i][j] = coeff_deriv
-
-            # Replace r and eta derivatives with the rules found above
-            deriv = deepcopy(coeff_grid)
-            for l in range(order, 0, -1):
-                for i in range(0, m + n + 1):
-                    for j in range(0, m + n - i + 1):
-                        if type(deriv[i][j]) != type(1):
-                            deriv[i][j] = deriv[i][j].subs(Derivative(r, [a] * m_order[l] + [b] * n_order[l]), rules1[l])
-                            deriv[i][j] = deriv[i][j].subs(Derivative(r, [b] * n_order[l] + [a] * m_order[l]), rules1[l])
-                            deriv[i][j] = deriv[i][j].subs(Derivative(eta, [a] * m_order[l] + [b] * n_order[l]), rules2[l])
-                            deriv[i][j] = deriv[i][j].subs(Derivative(eta, [b] * n_order[l] + [a] * m_order[l]), rules2[l])
-
-            # Replace conformal block derivatives similarly for each spin
-            for l in range(0, len(conformal_blocks)):
-                new_deriv = 0
-                for i in range(0, m + n + 1):
-                    for j in range(0, m + n - i + 1):
-                        new_deriv += deriv[i][j] * conformal_blocks[l].chunks[j].get(i, 0)
-                table[l].vector.append(new_deriv.expand())
-            order += 1
+    return eval_mpfr(pole, prec)
