@@ -26,7 +26,7 @@ def write_table(block_table, name, form="json"):
     name: The path to use for output.
     form: [Optional] A string indicating that the file should be saved in
           another program's format if it is equal to "scalar_blocks" or
-          "juliboots". Any other value will be ignored. Defaults to `None`.
+          "juliboots". Any other value will be ignored. Defaults to "json".
     """
     if isinstance(block_table, ConformalBlockTable):
         if form == "json":
