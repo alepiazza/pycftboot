@@ -1122,6 +1122,7 @@ class SDP:
                         in `vector_types`.
         zero_threshold: The threshold for identifying a real zero. The determinant
                         over its second derivative must be less than this value.
+        tmp_file:       A temporary file name where to put the `unisolve` input
         """
         zeros = []
         entries = []
@@ -1153,7 +1154,7 @@ class SDP:
                 pol_file.write(str(c) + "\n")
 
         unisolve_proc = self.sdpb.unisovle_run(prec, tmp_file)
-        spec_lines = unisolve_proc.stout.splitlines()
+        spec_lines = unisolve_proc.stdout.splitlines()
         for line in spec_lines:
             pair = line.replace('(', '').replace(')', '').split(',')
             real = RealMPFR(pair[0], prec)
@@ -1162,7 +1163,7 @@ class SDP:
                 zeros.append(real)
         return zeros
 
-    def extremal_coefficients(self, dimensions, spin_irreps, nullity=1):
+    def extremal_coefficients(self, dimensions, spin_irreps, tmp_name, nullity=1):
         """
         Once the full extremal spectrum is known, one can reconstruct the OPE
         coefficients that cause those convolved conformal blocks to sum to the
@@ -1184,12 +1185,13 @@ class SDP:
                      number of unknown variables. If this is non-zero, a positivity
                      constraint will be placed on the optimal OPE coefficients.
                      Defaults to 1.
+        tmp_name:    A temporary sdpDir used internally by `least_absolute_distance`
         """
         # Builds an auxillary table to store the specific vectors in this sum rule
         extremal_table = []
         zeros = min(len(dimensions), len(spin_irreps))
         for j in range(0, zeros):
-            if type(spin_irreps[j]) == type(1):
+            if isinstance(spin_irreps[j], int):
                 spin_irreps[j] = [spin_irreps[j], 0]
             l = self.get_table_index(spin_irreps[j])
             factor = self.shifted_prefactor(self.table[l][0][0].poles, r_cross, dimensions[j], 0)
@@ -1349,7 +1351,7 @@ class SDP:
             if nullity == 0:
                 solution = extremal_matrix.solve(identity)
             else:
-                solution = self.least_absolute_distance(extremal_matrix, identity)
+                solution = self.least_absolute_distance(extremal_matrix, identity, aux_name=tmp_name)
 
             # Add these coefficients, along with other things we know, to the list of operators
             for i in range(0, len(current_coeffs)):
@@ -1363,7 +1365,7 @@ class SDP:
                 known_ops.append([ope_coeff, dim1, dim2, dimensions[j], spin_irreps[j]])
         return known_ops
 
-    def least_absolute_distance(self, matrix, vector):
+    def least_absolute_distance(self, matrix, vector, aux_name):
         """
         This returns the vector which is closest in the 1-norm to being a solution
         of an inhomogeneous linear system. It is convenient to overload `SDPB` as a
@@ -1373,6 +1375,7 @@ class SDP:
         ----------
         matrix: A matrix having more rows than columns.
         vector: A vector whose length is the row dimension of `matrix`.
+        aux_name: sdpDir for auxillary sdpb run
         """
         zeros = matrix.ncols()
         nullity = matrix.nrows() - zeros
@@ -1416,6 +1419,7 @@ class SDP:
         aux_table1 = ConformalBlockTable(1, 0, 0, 0, 0)
         aux_table2 = ConvolvedBlockTable(aux_table1)
         aux_sdp = SDP(0, aux_table2, sdpb_mode=self.sdpb_mode, sdpb_kwargs=self.sdpb_kwargs)
+        aux_sdp.sdpb.set_option("procsPerNode", self.sdpb.get_option("procsPerNode"))
         aux_sdp.bounds = [0] * len(constraint_vector)
         aux_sdp.basis = [DenseMatrix([[1]])] * len(constraint_vector)
         for i in range(0, len(constraint_vector)):
@@ -1424,9 +1428,10 @@ class SDP:
 
         norm = [0] * len(obj)
         norm[0] = -1
-        aux_sdp.write_xml(obj, norm, name="tmp")
 
-        aux_sdp.sdpb.set_option("sdpDir", "tmp.xml")
+        aux_sdp.write_xml(obj, norm, name=aux_name)
+
+        aux_sdp.sdpb.set_option("sdpDir", aux_name)
         aux_sdp.sdpb.set_option("procsPerNode", 1)
         aux_sdp.sdpb.set_option("noFinalCheckpoint", True)
         aux_sdp.sdpb.run({"noFinalCheckpoint": True})
