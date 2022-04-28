@@ -1,5 +1,10 @@
 API
-===
+***
+
+.. toctree::
+   :glob:
+
+   api/*
 
 pycftboot.bootstrap
 --------------------------
@@ -73,15 +78,6 @@ pycftboot.common
    :members:
    :undoc-members:
    :show-inheritance:
-
-pycftboot.sdpb
---------------------------
-
-.. automodule:: pycftboot.sdpb
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 
 pycftboot.serialize
 ----------------------------------
