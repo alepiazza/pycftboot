@@ -3,19 +3,22 @@ import re
 import os
 from typing import Union
 from symengine.lib.symengine_wrapper import RealMPFR
+from subprocess import CompletedProcess
 
 from .constants import prec
 
 
 class Sdpb(ABC):
-    """Abstract class for SDPB
+    """Abstract class for interacting with `SDPB <https://github.com/davidsd/sdpb>`_
 
-    Attributes
-    ----------
-    version: version of the sdpb program
-    options: available options
-    defaults: default values of sdpb
+    The actual :func:`pycftboot.sdpb.Sdpb.run_command` must be implemented by a
+    derived class, but this class implements everything else is needed
+    to interact with the ``SDPB`` program
 
+    Attributes:
+        version (int): version of the sdpb program
+        options (dict): manually set options, managed by :func:`pycftboot.sdpb.Sdpb.set_option`
+        defaults (dict): default options of sdpb
     """
 
     def __init__(self):
@@ -28,25 +31,20 @@ class Sdpb(ABC):
             raise ValueError(f"Unkwon sdpb version = {self.version}")
 
     @abstractmethod
-    def run_command(self, command: list):
+    def run_command(self, command: list) -> CompletedProcess:
         """Abstract function to run an arbitrary command
 
-        Parameters
-        ----------
-        command: command as a list
-
-        Returns
-        -------
-        returns a subprocess.CompletedProcess object
+        Args:
+            command: command as a list
         """
         pass
 
-    def run(self, extra_options={}):
-        """Runs an sdpb command with options specifie by self.options
+    def run(self, extra_options: dict = {}) -> CompletedProcess:
+        """Runs an sdpb command with options specified by self.options
 
-        Returns
-        -------
-        returns a subprocess.CompletedProcess object
+        Args:
+           extra_options: extra options passed to sdpb, it's recommended
+                          to use :func:`pycftboot.sdpb.Sdpb.set_option` instead
         """
         if 'sdpDir' not in self.options.keys():
             raise RuntimeError("sdpDir is mandatory argument of sdpb but was not set")
@@ -57,15 +55,15 @@ class Sdpb(ABC):
         args = self.options_to_args()
 
         if self.version == 1:
-            sdpb_out = self.run_command([self.path] + args)
+            sdpb_out = self.run_command([self.bin] + args)
         elif self.version == 2:
             if 'procsPerNode' not in self.options.keys():
                 raise RuntimeError("procsPerNode is mandatory argument of sdpb (v2) but was not set")
 
             procs_per_node = self.options['procsPerNode']
             sdpb_out = self.run_command(
-                [self.mpirun_path] + ["--allow-run-as-root"] + ["-n", f"{procs_per_node}"] + \
-                [self.path] + args
+                [self.mpirun_bin] + ["--allow-run-as-root"] + ["-n", f"{procs_per_node}"] +
+                [self.bin] + args
             )
 
         for key in extra_options.keys():
@@ -73,22 +71,29 @@ class Sdpb(ABC):
 
         return sdpb_out
 
-    def pvm2sdp_run(self, input_xml, output_file):
+    def pvm2sdp_run(self, input_xml: str, output_file: str) -> CompletedProcess:
+        """Runs ``pvm2spb <input_xml> <output_file>`` with ``mpirun``. This is
+        converts the xml file into the sdpb input
+        """
         if self.version == 1:
             raise RuntimeError(f"Sdpb version {self.version} is not meant to be used with pvm2sdp")
         if 'procsPerNode' not in self.options.keys():
             raise RuntimeError("procsPerNode is mandatory argument of sdpb (v2) but was not set")
         procs_per_node = self.options['procsPerNode']
         return self.run_command(
-            [self.mpirun_path] + ["--allow-run-as-root"] + ["-n", f"{procs_per_node}"] + \
-            [self.pvm2sdp_path, str(self.options["precision"]), input_xml, output_file]
+            [self.mpirun_bin] + ["--allow-run-as-root"] + ["-n", f"{procs_per_node}"] +
+            [self.pvm2sdp_bin, str(self.options["precision"]), input_xml, output_file]
         )
 
-    def unisovle_run(self, precision, input_file):
-        return self.run_command([self.unisolve_path, "-H1", "-o" + str(prec), "-Oc", "-Ga", input_file])
+    def unisovle_run(self, precision: int, input_file: str) -> CompletedProcess:
+        """Runs the ``unisolve`` on given file
+        """
+        return self.run_command([self.unisolve_bin, "-H1", "-o" + str(prec), "-Oc", "-Ga", input_file])
 
-    def get_version(self):
-        proc = self.run_command([self.path] + ["--version"])
+    def get_version(self) -> int:
+        """Find out the version of sdpb that we are using
+        """
+        proc = self.run_command([self.bin] + ["--version"])
 
         # Assume that this is version 1.x, which didn't support --version
         # Otherwise parse the output of --version
@@ -100,7 +105,11 @@ class Sdpb(ABC):
                 raise RuntimeError("Failed to retrieve SDPB version.")
             return int(m.group(1))
 
-    def get_all_default_options(self):
+    def get_all_default_options(self) -> dict:
+        """
+        Returns:
+             dictionary with the default SDPB options as given by ``sdpb --help``
+        """
         default_sdpDir = 'work_sdpb'
         options = {
             'sdpDir': default_sdpDir,
@@ -146,7 +155,11 @@ class Sdpb(ABC):
 
         return options
 
-    def options_to_args(self):
+    def options_to_args(self) -> list:
+        """
+        Returns:
+            :attr:`pycftboot.sdpb.Sdpb.options` as command line options
+        """
         options_without_bools = self.options
         for (key, value) in self.options.items():
             if key == 'paramFile' and value == '':
@@ -159,15 +172,13 @@ class Sdpb(ABC):
 
         return (' '.join([f'--{key} {value}' for key, value in options_without_bools.items()])).split()
 
-    def get_option(self, key: str):
-        """
-        Returns the string representation of a value that `SDPB` will use, whether
-        or not it has been explicitly set.
+    def get_option(self, key: str) -> str:
+        """This is the recommended way to set options
+        Args:
+            key: the name of the ``SDPB`` parameter
 
-        Parameters
-        ----------
-        key: The name of the `SDPB` parameter without any "--" at the beginning or
-        "=" at the end.
+        Returns:
+            a value that ``SDPB`` will use, whether or not it has been explicitly set.
         """
         keys = self.options.keys()
         if key not in keys:
@@ -190,45 +201,43 @@ class Sdpb(ABC):
         else:
             return self.options[key]
 
-    def set_required_options(self):
-        self.options['sdpDir'] = self.sdpDir
-        if self.version == 2:
-            self.procsPerNode['procsPerNode'] = self.procsPerNode
-
     def set_option(self, key: str = None, value: Union[float, str, bool] = None):
         """
-        Sets the value of a switch that should be passed to `SDPB` on the command
-        line. `SDPB` options that do not take a parameter are handled by other
-        methods so it should not be necessary to pass them.
+        Sets the value of an option that should be passed to ``SDPB`` on the command
+        line. ``SDPB`` options that do not take a parameter are managed by ``True``
+        or ``False``, for instance calling ``set_option('findPrimalFeasible', True)``
+        will have the effect of calling ``sdpb [...] --findPrimalFeasible``
 
-        Parameters
-        ----------
-        key:   [Optional] The name of the `SDPB` parameter being set without any
-               "--" at the beginning or "=" at the end. Defaults to `None` which
-               means all parameters will be reset to their default values.
-        value: [Optional] The string or numerical value that should accompany `key`.
-               Defaults to `None` which means that the parameter for `key` will be
-               reset to its default value.
+        Args:
+            key: the name of the ``SDPB`` parameter being set without any
+                 ``--`` at the beginning or ``=`` at the end. Defaults to ``None`` which
+                 means all parameters will be reset to their default values.
+            value: the value that should accompany ``key``. Defaults to ``None`` which
+                   means that the parameter for ``key`` will be reset to its default value.
         """
         if key is None:
             self.options = {}
+        elif value is None:
+            self.set_default_option(key)
         elif key in self.default_options.keys():
             self.options[key] = value
         else:
             raise ValueError(f"key = {key} is not a sdpb valid option")
 
-    def set_default_option(self, key):
+    def set_default_option(self, key: str):
+        """Sets an ``SDPB`` option to default
+
+        Args:
+            key: the name of the ``SDPB`` option to restore to default
+        """
         self.options.pop(key)
 
-    def read_output(self, name):
+    def read_output(self, name: str) -> dict:
         """
-        Reads an `SDPB` output file and returns a dictionary in which all entries
-        have been converted to their respective Python types.
+        Reads an ``SDPB`` output file and returns a dictionary
 
-        Parameters
-        ----------
-        name:       [Optional] The name of the file without any ".out" at the end.
-                    Defaults to "mySDP".
+        Args:
+            name: the name of the file (sdpb v1) or directory (sdpb v2)
         """
         ret = {}
 
