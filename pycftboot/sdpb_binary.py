@@ -11,6 +11,8 @@ class SdpbBinary(Sdpb):
     def __init__(self, sdpb_bin='/usr/bin/sdpb', pvm2sdp_bin='/usr/bin/pvm2sdp', mpirun_bin='/usr/bin/mpirun', unisolve_bin='/usr/bin/unisolve'):
         self.path = self.__find_executable(sdpb_bin)
 
+        self.debug = False
+
         super().__init__()
 
         if self.version == 2:
@@ -34,4 +36,8 @@ class SdpbBinary(Sdpb):
             return bin_in_path
 
     def run_command(self, command):
+        # Print command to stdout if debug is true
+        if self.debug:
+            print(" ".join(command))
+
         return subprocess.run(command, capture_output=True, check=True, text=True)

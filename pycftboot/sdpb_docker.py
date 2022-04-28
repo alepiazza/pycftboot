@@ -26,6 +26,8 @@ class SdpbDocker(Sdpb):
         self.mpirun_path = mpirun_path
         self.unisolve_path = unisolve_path
 
+        self.debug = False
+
         super().__init__()
 
     def run_command(self, command):
@@ -39,6 +41,10 @@ class SdpbDocker(Sdpb):
         -------
         object with at stdout, stderr, returncode attributes of the command
         """
+        # Print command to stdout if debug is true
+        if self.debug:
+            print(" ".join(command))
+
         # Initialize docker client
         client = docker.from_env()
 
