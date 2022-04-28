@@ -5,7 +5,7 @@ from typing import Union
 from symengine.lib.symengine_wrapper import RealMPFR
 from subprocess import CompletedProcess
 
-from .constants import prec
+from ..constants import prec
 
 
 class Sdpb(ABC):

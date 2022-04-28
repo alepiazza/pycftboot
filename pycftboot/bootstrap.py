@@ -28,8 +28,7 @@ from .common import (
     rf, gather, deepcopy, unitarity_bound, coefficients, get_index,
 )
 from .constants import prec, delta, one, delta_ext, r_cross, zero, tiny
-from .sdpb_binary import SdpbBinary
-from .sdpb_docker import SdpbDocker
+from .sdpb import SdpbBinary, SdpbDocker
 
 if have_mpfr is False:
     print("Symengine must be compiled with MPFR support")
