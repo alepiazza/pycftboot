@@ -44,10 +44,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#module-pycftboot.sdpb.sdpb">sdpb</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-pycftboot.sdpb.sdpb_binary">sdpb_binary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-pycftboot.sdpb.sdpb_docker">sdpb_docker</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#sdpb-singularity">sdpb_singularity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pycftboot.sdpb.sdpb_singularity">sdpb_singularity</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../api.html#pycftboot-bootstrap">pycftboot.bootstrap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-pycftboot.bootstrap">pycftboot.bootstrap</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-pycftboot.polynomial_vector">pycftboot.polynomial_vector</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-pycftboot.block_vector">pycftboot.block_vector</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-pycftboot.cbt_common">pycftboot.cbt_common</a></li>
@@ -362,8 +362,39 @@ command line command:</p>
 </dd></dl>
 
 </section>
-<section id="sdpb-singularity">
-<h2>sdpb_singularity<a class="headerlink" href="#sdpb-singularity" title="Permalink to this headline"></a></h2>
+<section id="module-pycftboot.sdpb.sdpb_singularity">
+<span id="sdpb-singularity"></span><h2>sdpb_singularity<a class="headerlink" href="#module-pycftboot.sdpb.sdpb_singularity" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb_singularity.SdpbSingularity">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.sdpb.sdpb_singularity.</span></span><span class="sig-name descname"><span class="pre">SdpbSingularity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">volume</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'docker://wlandry/sdpb:2.5.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sdpb_bin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/usr/local/bin/sdpb'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pvm2sdp_bin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/usr/local/bin/pvm2sdp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpirun_bin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/usr/bin/mpirun'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unisolve_bin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/usr/local/bin/unisolve'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.sdpb_singularity.SdpbSingularity" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pycftboot.sdpb.sdpb_docker.SdpbDocker" title="pycftboot.sdpb.sdpb_docker.SdpbDocker"><code class="xref py py-class docutils literal notranslate"><span class="pre">pycftboot.sdpb.sdpb_docker.SdpbDocker</span></code></a></p>
+<p>Interface for running <code class="docutils literal notranslate"><span class="pre">SDPB</span></code> and related software in sigularity container</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>To use this interface singularity must be installed and has to be able to pull
+the specified image</p>
+</div>
+<p>By default it uses the <a class="reference external" href="https://hub.docker.com/r/wlandry/sdpb">official docker image</a>
+and the executable path are the ones of this docker image.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb_singularity.SdpbSingularity.run_command">
+<span class="sig-name descname"><span class="pre">run_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">subprocess.CompletedProcess</span></span></span><a class="headerlink" href="#pycftboot.sdpb.sdpb_singularity.SdpbSingularity.run_command" title="Permalink to this definition"></a></dt>
+<dd><p>Run command in the singularity container specified by <code class="docutils literal notranslate"><span class="pre">image</span></code></p>
+<p>This is basically a wrapper of <code class="xref py py-func docutils literal notranslate"><span class="pre">spython.main.Client.execute()</span></code> which
+runs equivalent command line command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">singularity</span> <span class="o">-</span><span class="n">s</span> <span class="n">exec</span> <span class="o">-</span><span class="n">B</span> <span class="o">&lt;</span><span class="n">volume</span><span class="o">&gt;</span><span class="p">:</span><span class="o">/</span><span class="n">work</span><span class="o">/&lt;</span><span class="n">volume</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">W</span> <span class="o">/</span><span class="n">work</span> <span class="o">&lt;</span><span class="n">image</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">command</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>If the <code class="docutils literal notranslate"><span class="pre">debug</span></code> attribute is <code class="docutils literal notranslate"><span class="pre">True</span></code> it prints to <code class="docutils literal notranslate"><span class="pre">stdout</span></code> the <code class="docutils literal notranslate"><span class="pre">command</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>command</strong> – command to run as a list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
