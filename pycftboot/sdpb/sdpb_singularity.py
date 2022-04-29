@@ -1,3 +1,4 @@
+import os
 from subprocess import CompletedProcess
 from spython.main import Client
 
@@ -41,11 +42,40 @@ class SdpbSingularity(SdpbDocker):
         result = Client.execute(
             image=self.image,
             command=command,
-            singularity_options=['--silent', '--workdir', '/work'],
-            environ={'OMPI_ALLOW_RUN_AS_ROOT': '1', 'OMPI_ALLOW_RUN_AS_ROOT_CONFIRM': '1'},
-            bind=[self.volume_abs, f'/work/{self.volume}'],
+            singularity_options=['--silent'],
+            options=[
+                '--workdir', '/work',
+                '--env', 'OMPI_ALLOW_RUN_AS_ROOT=1',
+                '--env', 'OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1'
+            ],
+            bind=f'{self.volume_abs}:{os.path.join("/work", self.volume)}',
             return_result=True
         )
+
+        # For some reason spython drops and sqashes the singularity
+        # stdout and stderr (which is a subprocess.Popen output) into
+        # message. We try to reconstrut the tuple (stdout, stderr). We
+        # guess that if the message is a string, output is stdout or
+        # stderr based on the exit code. beware that this might not
+        # always be correct.
+        #
+        # https://github.com/singularityhub/singularity-cli/blob/master/spython/main/base/command.py#L103
+        # https://github.com/singularityhub/singularity-cli/blob/master/spython/utils/terminal.py#L162
+
+        if isinstance(result['message'], str):
+            if result['return_code'] == 0:
+                result['message'] = (result['message'], '')
+            else:
+                result['message'] = ('', result['message'])
+        elif isinstance(result['message'], list):
+            if len(result['message']) == 0:
+                result['message'] = ('', '')
+            if len(result['message']) == 2:
+                result['message'] = (result['message'][0], result['message'][1])
+            else:
+                raise RuntimeError("Failed to interpret singularity cast into (stdout, stderr)")
+        else:
+            raise RuntimeError("Failed to interpret singularity cast into (stdout, stderr)")
 
         completed_process = CompletedProcess(
             args=command,
