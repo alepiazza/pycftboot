@@ -28,7 +28,7 @@ from .common import (
     rf, gather, deepcopy, unitarity_bound, coefficients, get_index,
 )
 from .constants import prec, delta, one, delta_ext, r_cross, zero, tiny
-from .sdpb import SdpbBinary, SdpbDocker
+from .sdpb import sdpb_switch
 
 if have_mpfr is False:
     print("Symengine must be compiled with MPFR support")
@@ -281,13 +281,7 @@ class SDP:
                 self.basis.append(mat)
             self.set_bound(reset_basis=False)
 
-        # Initialize sdpb object based on `sdpb_mode`
-        if sdpb_mode == 'binary':
-            self.sdpb = SdpbBinary(**sdpb_kwargs)
-        elif sdpb_mode == 'docker':
-            self.sdpb = SdpbDocker(**sdpb_kwargs)
-        else:
-            raise ValueError(f"sdpb_mode = {sdpb_mode} must be either 'binary' or 'docker'")
+        self.sdpb = sdpb_switch(sdpb_mode, sdpb_kwargs)
         self.sdpb_mode = sdpb_mode
         self.sdpb_kwargs = sdpb_kwargs
 
