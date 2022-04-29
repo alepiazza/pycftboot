@@ -26,3 +26,12 @@ sdpb_docker
    :members:
    :undoc-members:
    :show-inheritance:
+
+
+sdpb_singularity
+--------------------------
+
+.. automodule:: pycftboot.sdpb.sdpb_singularity
+   :members:
+   :undoc-members:
+   :show-inheritance:
