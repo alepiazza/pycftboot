@@ -41,12 +41,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">PyCFTBoot</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">SDPB interface</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#module-pycftboot.sdpb">sdpb</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#sdpb-docker">sdpb_docker</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#sdpb-binary">sdpb_binary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pycftboot.sdpb.sdpb">sdpb</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pycftboot.sdpb.sdpb_binary">sdpb_binary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pycftboot.sdpb.sdpb_docker">sdpb_docker</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sdpb-singularity">sdpb_singularity</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../api.html#module-pycftboot.bootstrap">pycftboot.bootstrap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#pycftboot-bootstrap">pycftboot.bootstrap</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-pycftboot.polynomial_vector">pycftboot.polynomial_vector</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-pycftboot.block_vector">pycftboot.block_vector</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#module-pycftboot.cbt_common">pycftboot.cbt_common</a></li>
@@ -90,12 +91,174 @@
              
   <section id="sdpb-interface">
 <h1>SDPB interface<a class="headerlink" href="#sdpb-interface" title="Permalink to this headline"></a></h1>
-<section id="module-pycftboot.sdpb">
-<span id="sdpb"></span><h2>sdpb<a class="headerlink" href="#module-pycftboot.sdpb" title="Permalink to this headline"></a></h2>
+<section id="module-pycftboot.sdpb.sdpb">
+<span id="sdpb"></span><h2>sdpb<a class="headerlink" href="#module-pycftboot.sdpb.sdpb" title="Permalink to this headline"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="pycftboot.sdpb.SdpbBinary">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.sdpb.</span></span><span class="sig-name descname"><span class="pre">SdpbBinary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdpb_bin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/usr/bin/sdpb'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pvm2sdp_bin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/usr/bin/pvm2sdp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpirun_bin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/usr/bin/mpirun'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unisolve_bin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/usr/bin/unisolve'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.SdpbBinary" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pycftboot.sdpb.sdpb.Sdpb</span></code></p>
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb.Sdpb">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.sdpb.sdpb.</span></span><span class="sig-name descname"><span class="pre">Sdpb</span></span><a class="headerlink" href="#pycftboot.sdpb.sdpb.Sdpb" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Abstract class for interacting with <a class="reference external" href="https://github.com/davidsd/sdpb">SDPB</a></p>
+<p>The actual <a class="reference internal" href="#pycftboot.sdpb.sdpb.Sdpb.run_command" title="pycftboot.sdpb.sdpb.Sdpb.run_command"><code class="xref py py-func docutils literal notranslate"><span class="pre">pycftboot.sdpb.sdpb.Sdpb.run_command()</span></code></a> must be implemented by a
+derived class, but this class implements everything else is needed
+to interact with the <code class="docutils literal notranslate"><span class="pre">SDPB</span></code> program</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb.Sdpb.version">
+<span class="sig-name descname"><span class="pre">version</span></span><a class="headerlink" href="#pycftboot.sdpb.sdpb.Sdpb.version" title="Permalink to this definition"></a></dt>
+<dd><p>version of the sdpb program</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb.Sdpb.options">
+<span class="sig-name descname"><span class="pre">options</span></span><a class="headerlink" href="#pycftboot.sdpb.sdpb.Sdpb.options" title="Permalink to this definition"></a></dt>
+<dd><p>manually set options, managed by <a class="reference internal" href="#pycftboot.sdpb.sdpb.Sdpb.set_option" title="pycftboot.sdpb.sdpb.Sdpb.set_option"><code class="xref py py-func docutils literal notranslate"><span class="pre">set_option()</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb.Sdpb.defaults">
+<span class="sig-name descname"><span class="pre">defaults</span></span><a class="headerlink" href="#pycftboot.sdpb.sdpb.Sdpb.defaults" title="Permalink to this definition"></a></dt>
+<dd><p>default options of sdpb</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb.Sdpb.get_all_default_options">
+<span class="sig-name descname"><span class="pre">get_all_default_options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#pycftboot.sdpb.sdpb.Sdpb.get_all_default_options" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>dictionary with the default SDPB options as given by <code class="docutils literal notranslate"><span class="pre">sdpb</span> <span class="pre">--help</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb.Sdpb.get_option">
+<span class="sig-name descname"><span class="pre">get_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#pycftboot.sdpb.sdpb.Sdpb.get_option" title="Permalink to this definition"></a></dt>
+<dd><p>This is the recommended way to set options
+:param key: the name of the <code class="docutils literal notranslate"><span class="pre">SDPB</span></code> parameter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a value that <code class="docutils literal notranslate"><span class="pre">SDPB</span></code> will use, whether or not it has been explicitly set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb.Sdpb.get_version">
+<span class="sig-name descname"><span class="pre">get_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#pycftboot.sdpb.sdpb.Sdpb.get_version" title="Permalink to this definition"></a></dt>
+<dd><p>Find out the version of sdpb that we are using</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb.Sdpb.options_to_args">
+<span class="sig-name descname"><span class="pre">options_to_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#pycftboot.sdpb.sdpb.Sdpb.options_to_args" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pycftboot.sdpb.sdpb.Sdpb.options" title="pycftboot.sdpb.sdpb.Sdpb.options"><code class="xref py py-attr docutils literal notranslate"><span class="pre">options</span></code></a> as command line options</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb.Sdpb.pvm2sdp_run">
+<span class="sig-name descname"><span class="pre">pvm2sdp_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_xml</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">subprocess.CompletedProcess</span></span></span><a class="headerlink" href="#pycftboot.sdpb.sdpb.Sdpb.pvm2sdp_run" title="Permalink to this definition"></a></dt>
+<dd><p>Runs <code class="docutils literal notranslate"><span class="pre">pvm2spb</span> <span class="pre">&lt;input_xml&gt;</span> <span class="pre">&lt;output_file&gt;</span></code> with <code class="docutils literal notranslate"><span class="pre">mpirun</span></code>. This is
+converts the xml file into the sdpb input</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb.Sdpb.read_output">
+<span class="sig-name descname"><span class="pre">read_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#pycftboot.sdpb.sdpb.Sdpb.read_output" title="Permalink to this definition"></a></dt>
+<dd><p>Reads an <code class="docutils literal notranslate"><span class="pre">SDPB</span></code> output file and returns a dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> – the name of the file (sdpb v1) or directory (sdpb v2)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb.Sdpb.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extra_options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">subprocess.CompletedProcess</span></span></span><a class="headerlink" href="#pycftboot.sdpb.sdpb.Sdpb.run" title="Permalink to this definition"></a></dt>
+<dd><p>Runs an sdpb command with options specified by self.options</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>extra_options</strong> – extra options passed to sdpb, it’s recommended
+to use <a class="reference internal" href="#pycftboot.sdpb.sdpb.Sdpb.set_option" title="pycftboot.sdpb.sdpb.Sdpb.set_option"><code class="xref py py-func docutils literal notranslate"><span class="pre">pycftboot.sdpb.sdpb.Sdpb.set_option()</span></code></a> instead</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb.Sdpb.run_command">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">subprocess.CompletedProcess</span></span></span><a class="headerlink" href="#pycftboot.sdpb.sdpb.Sdpb.run_command" title="Permalink to this definition"></a></dt>
+<dd><p>Abstract function to run an arbitrary command</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>command</strong> – command as a list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb.Sdpb.set_default_option">
+<span class="sig-name descname"><span class="pre">set_default_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.sdpb.Sdpb.set_default_option" title="Permalink to this definition"></a></dt>
+<dd><p>Sets an <code class="docutils literal notranslate"><span class="pre">SDPB</span></code> option to default</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>key</strong> – the name of the <code class="docutils literal notranslate"><span class="pre">SDPB</span></code> option to restore to default</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb.Sdpb.set_option">
+<span class="sig-name descname"><span class="pre">set_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.sdpb.Sdpb.set_option" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the value of an option that should be passed to <code class="docutils literal notranslate"><span class="pre">SDPB</span></code> on the command
+line. <code class="docutils literal notranslate"><span class="pre">SDPB</span></code> options that do not take a parameter are managed by <code class="docutils literal notranslate"><span class="pre">True</span></code>
+or <code class="docutils literal notranslate"><span class="pre">False</span></code>, for instance calling <code class="docutils literal notranslate"><span class="pre">set_option('findPrimalFeasible',</span> <span class="pre">True)</span></code>
+will have the effect of calling <code class="docutils literal notranslate"><span class="pre">sdpb</span> <span class="pre">[...]</span> <span class="pre">--findPrimalFeasible</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> – the name of the <code class="docutils literal notranslate"><span class="pre">SDPB</span></code> parameter being set without any
+<code class="docutils literal notranslate"><span class="pre">--</span></code> at the beginning or <code class="docutils literal notranslate"><span class="pre">=</span></code> at the end. Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code> which
+means all parameters will be reset to their default values.</p></li>
+<li><p><strong>value</strong> – the value that should accompany <code class="docutils literal notranslate"><span class="pre">key</span></code>. Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code> which
+means that the parameter for <code class="docutils literal notranslate"><span class="pre">key</span></code> will be reset to its default value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb.Sdpb.unisovle_run">
+<span class="sig-name descname"><span class="pre">unisovle_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">subprocess.CompletedProcess</span></span></span><a class="headerlink" href="#pycftboot.sdpb.sdpb.Sdpb.unisovle_run" title="Permalink to this definition"></a></dt>
+<dd><p>Runs the <code class="docutils literal notranslate"><span class="pre">unisolve</span></code> on given file</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pycftboot.sdpb.sdpb_binary">
+<span id="sdpb-binary"></span><h2>sdpb_binary<a class="headerlink" href="#module-pycftboot.sdpb.sdpb_binary" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb_binary.SdpbBinary">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.sdpb.sdpb_binary.</span></span><span class="sig-name descname"><span class="pre">SdpbBinary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdpb_bin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/usr/bin/sdpb'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pvm2sdp_bin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/usr/bin/pvm2sdp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpirun_bin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/usr/bin/mpirun'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unisolve_bin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/usr/bin/unisolve'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.sdpb_binary.SdpbBinary" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pycftboot.sdpb.sdpb.Sdpb" title="pycftboot.sdpb.sdpb.Sdpb"><code class="xref py py-class docutils literal notranslate"><span class="pre">pycftboot.sdpb.sdpb.Sdpb</span></code></a></p>
 <p>Interface for running <code class="docutils literal notranslate"><span class="pre">SDPB</span></code> binary and related software</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -115,14 +278,14 @@ Hence, if not found we look for the binaries in <code class="docutils literal no
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pycftboot.sdpb.SdpbBinary.debug">
-<span class="sig-name descname"><span class="pre">debug</span></span><a class="headerlink" href="#pycftboot.sdpb.SdpbBinary.debug" title="Permalink to this definition"></a></dt>
-<dd><p>flags for debugging (makes <code class="xref py py-func docutils literal notranslate"><span class="pre">pycftboot.sdpb_binary.SdpbBinary.run_command()</span></code> output the command to <code class="docutils literal notranslate"><span class="pre">stdout</span></code>)</p>
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb_binary.SdpbBinary.debug">
+<span class="sig-name descname"><span class="pre">debug</span></span><a class="headerlink" href="#pycftboot.sdpb.sdpb_binary.SdpbBinary.debug" title="Permalink to this definition"></a></dt>
+<dd><p>flags for debugging (makes <a class="reference internal" href="#pycftboot.sdpb.sdpb_binary.SdpbBinary.run_command" title="pycftboot.sdpb.sdpb_binary.SdpbBinary.run_command"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_command()</span></code></a> output the command to <code class="docutils literal notranslate"><span class="pre">stdout</span></code>)</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pycftboot.sdpb.SdpbBinary.run_command">
-<span class="sig-name descname"><span class="pre">run_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">subprocess.CompletedProcess</span></span></span><a class="headerlink" href="#pycftboot.sdpb.SdpbBinary.run_command" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb_binary.SdpbBinary.run_command">
+<span class="sig-name descname"><span class="pre">run_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">subprocess.CompletedProcess</span></span></span><a class="headerlink" href="#pycftboot.sdpb.sdpb_binary.SdpbBinary.run_command" title="Permalink to this definition"></a></dt>
 <dd><p>This is just a wrapper around <code class="xref py py-func docutils literal notranslate"><span class="pre">subprocess.run()</span></code></p>
 <p>If the <code class="docutils literal notranslate"><span class="pre">debug</span></code> attribute is <code class="docutils literal notranslate"><span class="pre">True</span></code> it prints to <code class="docutils literal notranslate"><span class="pre">stdout</span></code> the <code class="docutils literal notranslate"><span class="pre">command</span></code></p>
 <dl class="field-list simple">
@@ -134,11 +297,14 @@ Hence, if not found we look for the binaries in <code class="docutils literal no
 
 </dd></dl>
 
+</section>
+<section id="module-pycftboot.sdpb.sdpb_docker">
+<span id="sdpb-docker"></span><h2>sdpb_docker<a class="headerlink" href="#module-pycftboot.sdpb.sdpb_docker" title="Permalink to this headline"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="pycftboot.sdpb.SdpbDocker">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.sdpb.</span></span><span class="sig-name descname"><span class="pre">SdpbDocker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">volume</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'wlandry/sdpb:2.5.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sdpb_bin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/usr/local/bin/sdpb'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pvm2sdp_bin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/usr/local/bin/pvm2sdp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpirun_bin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/usr/bin/mpirun'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unisolve_bin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/usr/local/bin/unisolve'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.SdpbDocker" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pycftboot.sdpb.sdpb.Sdpb</span></code></p>
-<p>Interface for running <code class="docutils literal notranslate"><span class="pre">SDPB</span></code> and related software in docker</p>
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb_docker.SdpbDocker">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pycftboot.sdpb.sdpb_docker.</span></span><span class="sig-name descname"><span class="pre">SdpbDocker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">volume</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'wlandry/sdpb:2.5.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sdpb_bin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/usr/local/bin/sdpb'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pvm2sdp_bin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/usr/local/bin/pvm2sdp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpirun_bin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/usr/bin/mpirun'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unisolve_bin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/usr/local/bin/unisolve'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pycftboot.sdpb.sdpb_docker.SdpbDocker" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pycftboot.sdpb.sdpb.Sdpb" title="pycftboot.sdpb.sdpb.Sdpb"><code class="xref py py-class docutils literal notranslate"><span class="pre">pycftboot.sdpb.sdpb.Sdpb</span></code></a></p>
+<p>Interface for running <code class="docutils literal notranslate"><span class="pre">SDPB</span></code> and related software in docker container</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>To use this interface docker must be installed and has to be able to pull
@@ -164,25 +330,25 @@ which is the current user</p></li>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pycftboot.sdpb.SdpbDocker.volume_abs">
-<span class="sig-name descname"><span class="pre">volume_abs</span></span><a class="headerlink" href="#pycftboot.sdpb.SdpbDocker.volume_abs" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb_docker.SdpbDocker.volume_abs">
+<span class="sig-name descname"><span class="pre">volume_abs</span></span><a class="headerlink" href="#pycftboot.sdpb.sdpb_docker.SdpbDocker.volume_abs" title="Permalink to this definition"></a></dt>
 <dd><p>absolute path of <code class="docutils literal notranslate"><span class="pre">volume</span></code></p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pycftboot.sdpb.SdpbDocker.debug">
-<span class="sig-name descname"><span class="pre">debug</span></span><a class="headerlink" href="#pycftboot.sdpb.SdpbDocker.debug" title="Permalink to this definition"></a></dt>
-<dd><p>flags for debugging (makes <code class="xref py py-func docutils literal notranslate"><span class="pre">pycftboot.sdpb_docker.SdpbDocker.run_command()</span></code>
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb_docker.SdpbDocker.debug">
+<span class="sig-name descname"><span class="pre">debug</span></span><a class="headerlink" href="#pycftboot.sdpb.sdpb_docker.SdpbDocker.debug" title="Permalink to this definition"></a></dt>
+<dd><p>flags for debugging (makes <a class="reference internal" href="#pycftboot.sdpb.sdpb_docker.SdpbDocker.run_command" title="pycftboot.sdpb.sdpb_docker.SdpbDocker.run_command"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_command()</span></code></a>
 output the command to <code class="docutils literal notranslate"><span class="pre">stdout</span></code>)</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pycftboot.sdpb.SdpbDocker.run_command">
-<span class="sig-name descname"><span class="pre">run_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">subprocess.CompletedProcess</span></span></span><a class="headerlink" href="#pycftboot.sdpb.SdpbDocker.run_command" title="Permalink to this definition"></a></dt>
-<dd><p>Run command in the docker image specified by <code class="docutils literal notranslate"><span class="pre">image</span></code></p>
+<dt class="sig sig-object py" id="pycftboot.sdpb.sdpb_docker.SdpbDocker.run_command">
+<span class="sig-name descname"><span class="pre">run_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">subprocess.CompletedProcess</span></span></span><a class="headerlink" href="#pycftboot.sdpb.sdpb_docker.SdpbDocker.run_command" title="Permalink to this definition"></a></dt>
+<dd><p>Run command in the docker container specified by <code class="docutils literal notranslate"><span class="pre">image</span></code></p>
 <p>This is basically a wrapper of docker API which runs equivalent
 command line command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">v</span> <span class="o">&lt;</span><span class="n">volume</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">u</span> <span class="o">&lt;</span><span class="n">user</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">d</span> <span class="o">&lt;</span><span class="n">image</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">command</span><span class="o">&gt;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">v</span> <span class="o">&lt;</span><span class="n">volume</span><span class="o">&gt;</span><span class="p">:</span><span class="o">/</span><span class="n">work</span><span class="o">/&lt;</span><span class="n">volume</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">w</span> <span class="o">/</span><span class="n">work</span> <span class="o">-</span><span class="n">u</span> <span class="o">&lt;</span><span class="n">user</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">d</span> <span class="o">&lt;</span><span class="n">image</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">command</span><span class="o">&gt;</span>
 </pre></div>
 </div>
 <p>If the <code class="docutils literal notranslate"><span class="pre">debug</span></code> attribute is <code class="docutils literal notranslate"><span class="pre">True</span></code> it prints to <code class="docutils literal notranslate"><span class="pre">stdout</span></code> the <code class="docutils literal notranslate"><span class="pre">command</span></code></p>
@@ -196,11 +362,8 @@ command line command:</p>
 </dd></dl>
 
 </section>
-<section id="sdpb-docker">
-<h2>sdpb_docker<a class="headerlink" href="#sdpb-docker" title="Permalink to this headline"></a></h2>
-</section>
-<section id="sdpb-binary">
-<h2>sdpb_binary<a class="headerlink" href="#sdpb-binary" title="Permalink to this headline"></a></h2>
+<section id="sdpb-singularity">
+<h2>sdpb_singularity<a class="headerlink" href="#sdpb-singularity" title="Permalink to this headline"></a></h2>
 </section>
 </section>
 
