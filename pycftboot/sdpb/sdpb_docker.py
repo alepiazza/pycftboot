@@ -6,7 +6,7 @@ from .sdpb import Sdpb
 
 
 class SdpbDocker(Sdpb):
-    """Interface for running ``SDPB`` and related software in docker
+    """Interface for running ``SDPB`` and related software in docker container
 
     Warning:
         To use this interface docker must be installed and has to be able to pull
@@ -31,7 +31,7 @@ class SdpbDocker(Sdpb):
 
     Attributes:
         volume_abs: absolute path of ``volume``
-        debug: flags for debugging (makes :func:`pycftboot.sdpb_docker.SdpbDocker.run_command`
+        debug: flags for debugging (makes :func:`~pycftboot.sdpb.sdpb_docker.SdpbDocker.run_command`
                output the command to ``stdout``)
     """
 
@@ -57,12 +57,12 @@ class SdpbDocker(Sdpb):
         super().__init__()
 
     def run_command(self, command: list) -> CompletedProcess:
-        """Run command in the docker image specified by ``image``
+        """Run command in the docker container specified by ``image``
 
         This is basically a wrapper of docker API which runs equivalent
         command line command::
 
-            docker run -v <volume> -u <user> -d <image> <command>
+            docker run -v <volume>:/work/<volume> -w /work -u <user> -d <image> <command>
 
         If the ``debug`` attribute is ``True`` it prints to ``stdout`` the ``command``
 

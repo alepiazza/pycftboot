@@ -11,13 +11,13 @@ from ..constants import prec
 class Sdpb(ABC):
     """Abstract class for interacting with `SDPB <https://github.com/davidsd/sdpb>`_
 
-    The actual :func:`pycftboot.sdpb.Sdpb.run_command` must be implemented by a
+    The actual :func:`pycftboot.sdpb.sdpb.Sdpb.run_command` must be implemented by a
     derived class, but this class implements everything else is needed
     to interact with the ``SDPB`` program
 
     Attributes:
         version (int): version of the sdpb program
-        options (dict): manually set options, managed by :func:`pycftboot.sdpb.Sdpb.set_option`
+        options (dict): manually set options, managed by :func:`~pycftboot.sdpb.sdpb.Sdpb.set_option`
         defaults (dict): default options of sdpb
     """
 
@@ -44,7 +44,7 @@ class Sdpb(ABC):
 
         Args:
            extra_options: extra options passed to sdpb, it's recommended
-                          to use :func:`pycftboot.sdpb.Sdpb.set_option` instead
+                          to use :func:`pycftboot.sdpb.sdpb.Sdpb.set_option` instead
         """
         if 'sdpDir' not in self.options.keys():
             raise RuntimeError("sdpDir is mandatory argument of sdpb but was not set")
@@ -158,7 +158,7 @@ class Sdpb(ABC):
     def options_to_args(self) -> list:
         """
         Returns:
-            :attr:`pycftboot.sdpb.Sdpb.options` as command line options
+            :attr:`~pycftboot.sdpb.sdpb.Sdpb.options` as command line options
         """
         options_without_bools = self.options
         for (key, value) in self.options.items():

@@ -22,7 +22,7 @@ class SdpbBinary(Sdpb):
         unisolve_bin: path of the ``unisolve`` binary
 
     Attributes:
-        debug: flags for debugging (makes :func:`pycftboot.sdpb_binary.SdpbBinary.run_command` output the command to ``stdout``)
+        debug: flags for debugging (makes :func:`~pycftboot.sdpb.sdpb_binary.SdpbBinary.run_command` output the command to ``stdout``)
     """
 
     def __init__(self, sdpb_bin='/usr/bin/sdpb', pvm2sdp_bin='/usr/bin/pvm2sdp', mpirun_bin='/usr/bin/mpirun', unisolve_bin='/usr/bin/unisolve'):
