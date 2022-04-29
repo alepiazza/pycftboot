@@ -5,7 +5,7 @@ import subprocess
 import filecmp
 from symengine.lib.symengine_wrapper import RealMPFR
 
-from pycftboot import SdpbDocker, SdpbBinary
+from pycftboot import SdpbDocker, SdpbBinary, SdpbSingularity
 from pycftboot.constants import prec
 
 
@@ -44,6 +44,8 @@ class TestSdpb(unittest.TestCase):
 
         if have_binary('docker'):
             self.s = SdpbDocker(volume=self.volume)
+        elif have_binary('singularity'):
+            self.s = SdpbSingularity(volume=self.volume)
         elif have_binary('sdpb'):
             self.s = SdpbBinary()
         else:
@@ -60,6 +62,20 @@ class TestSdpb(unittest.TestCase):
     @unittest.skipUnless(have_binary('docker'), "No docker")
     def test_sdpb_docker_run_command(self):
         command = 'echo "running in docker"'.split()
+        out_docker = self.s.run_command(command)
+        out_shell = subprocess.run(command, capture_output=True, check=True, text=True)
+
+        self.assertEqual(out_docker.__dict__, out_shell.__dict__)
+
+        self.s.run_command(f"touch '{DIR}/test'")
+        self.assertTrue(os.path.isfile(f'{DIR}/test'))
+
+        self.s.run_command(f"rm '{DIR}/test'")
+        self.assertFalse(os.path.isfile(f'{DIR}/test'))
+
+    @unittest.skipUnless(have_binary('singularity'), "No singularity")
+    def test_sdpb_singularity_run_command(self):
+        command = 'echo "running in singularity"'.split()
         out_docker = self.s.run_command(command)
         out_shell = subprocess.run(command, capture_output=True, check=True, text=True)
 
