@@ -16,3 +16,7 @@ docs/build
 venv
 .flake8
 .dir-locals.el
+
+# Examples output
+examples/work
+examples/saves
