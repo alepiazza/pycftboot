@@ -17,12 +17,12 @@ tableFminus = ConvolvedBlockTable(tableG)
 
 N = 3
 tables = [tableFplus, tableFminus]
-vecS = [[0, 1], [1, 1], [1, 0]]
-vecT = [[1, 1], [1 - (2 / N), 1], [-(1 + (2 / N)), 0]]
-vecA = [[1, 1], [-1, 1], [1, 0]]
+vecS = [[1, 1], [0, 0], [1, 0]]
+vecT = [[N - 1, 1], [1, 1], [-(1 + N / 2), 0]]
+vecA = [[0, 0], [1, 1], [N / 2, 0]]
 vector_types = [[vecS, 0, 'singlet'], [vecT, 0, 'symmetric'], [vecA, 1, 'antisymmetric']]
 
-dim_phi = np.linspace(0.515, 0.7, 5)
+dim_phi = np.linspace(0.52, 0.53, 1)
 dim_eps = []
 
 for phi in dim_phi:
@@ -30,8 +30,8 @@ for phi in dim_phi:
     sdp.sdpb.set_option('procsPerNode', 2)
 
     lower = 0.5
-    upper = 2
-    tol = 0.001
+    upper = 4
+    tol = 0.01
     channel = [0, 'singlet']
 
     result = sdp.bisect(lower, upper, tol, channel, name=f'work/ON_{N}_{phi}')
