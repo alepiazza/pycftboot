@@ -47,7 +47,7 @@ if choice == 1:
     # Computes the convolution.
     table2 = bootstrap.ConvolvedBlockTable(table1)
     # Sets up a semidefinite program that we can use to study this.
-    sdp = bootstrap.SDP(dim_phi, table2, sdpb_mode="docker")
+    sdp = bootstrap.SDP(dim_phi, table2)
     sdp.sdpb.set_option("procsPerNode", 2)
     # We think it is perfectly fine for all internal scalars coupling to our external one to have dimension above 0.7.
     lower = 0.7
@@ -109,7 +109,7 @@ if choice == 2:
     # The spins of these irreps (with arbitrary names) are even, even, odd.
     info = [[vec1, 0, "singlet"], [vec2, 0, "symmetric"], [vec3, 1, "antisymmetric"]]
     # Sets up an SDP here.
-    sdp1 = bootstrap.SDP(dim_phi1, [table2, table3], vector_types=info, sdpb_mode="docker")
+    sdp1 = bootstrap.SDP(dim_phi1, [table2, table3], vector_types=info)
     sdp1.sdpb.set_option("procsPerNode", 2)
     # This time channel needs two labels.
     channel1 = [0, "singlet"]
@@ -124,7 +124,7 @@ if choice == 2:
     cprint("Bounding the same coefficient in the free theory to get a point of comparison...")
     # Sets up a new SDP where this time, the external scalar has a dimension very close to unitarity.
     dim_phi2 = 0.5001
-    sdp2 = bootstrap.SDP(dim_phi2, [table2, table3], vector_types=info, sdpb_mode="docker")
+    sdp2 = bootstrap.SDP(dim_phi2, [table2, table3], vector_types=info)
     sdp2.sdpb.set_option("procsPerNode", 2)
     result2 = sdp2.opemax(dim_t, channel2, name="tutorial_2c")
     # Uses the central charge formula which follows from the Ward identity to compute the ratio.
@@ -180,7 +180,7 @@ if choice == 3:
     # Spins for these again go even, even, odd.
     info = [[vec1, 0, "z2-even-l-even"], [vec2, 0, "z2-odd-l-even"], [vec3, 1, "z2-odd-l-odd"]]
     cprint("Checking if (" + str(pair1[0]) + ", " + str(pair1[1]) + ") is allowed if we require only one relevant Z2-odd scalar...")
-    sdp1 = bootstrap.SDP(pair1, tab_list1, vector_types=info, sdpb_mode="docker")
+    sdp1 = bootstrap.SDP(pair1, tab_list1, vector_types=info)
     sdp1.sdpb.set_option("procsPerNode", 2)
     # The pair[1] scalar is Z2-even so have the corresponding channel start here.
     sdp1.set_bound([0, "z2-even-l-even"], pair1[1])
@@ -196,7 +196,7 @@ if choice == 3:
         cprint("No")
     cprint("Checking if (" + str(pair2[0]) + ", " + str(pair2[1]) + ") is allowed under the same conditions...")
     # All bounds / points changed in the first SDP will be changed again so we may use it as a prototype.
-    sdp2 = bootstrap.SDP(pair2, tab_list2, vector_types=info, prototype=sdp1, sdpb_mode="docker")
+    sdp2 = bootstrap.SDP(pair2, tab_list2, vector_types=info, prototype=sdp1)
     sdp2.sdpb.set_option("procsPerNode", 2)
     # Does the exact same testing for the second point.
     sdp2.set_bound([0, "z2-even-l-even"], pair2[1])
@@ -246,7 +246,7 @@ if choice == 4:
     vec3 = [[0, 0], [1, 0], [-1, 1]]
     info = [[vec1, 0, "singlet"], [vec2, 1, "antisymmetric"], [vec3, 0, "symmetric"]]
     # Allocates an SDP and makes it easier for a problem to be recognized as dual feasible.
-    sdp = bootstrap.SDP(dim_phi, tab_list, vector_types=info, sdpb_mode="docker")
+    sdp = bootstrap.SDP(dim_phi, tab_list, vector_types=info)
     sdp.sdpb.set_option("procsPerNode", 2)
     sdp.sdpb.set_option("dualErrorThreshold", 1e-22)
     # Goes through all the spins and tells the symmetric channel to contain a BPS operator and then a gap.

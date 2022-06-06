@@ -1,0 +1,22 @@
+# Git
+.git
+
+# Packaging
+build
+dist
+__pycache__
+*.egg-info
+*.pyc
+
+# Test and coverage
+.coverage
+htmlcov
+
+# Docs
+docs/build
+
+# Virtualenv
+venv
+
+# Examples
+examples
