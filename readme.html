@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PyCFTBoot &mdash; PyCFTBoot  documentation</title>
@@ -14,6 +14,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -74,14 +75,14 @@
            <div itemprop="articleBody">
              
   <section id="pycftboot">
-<h1>PyCFTBoot<a class="headerlink" href="#pycftboot" title="Permalink to this headline"></a></h1>
+<h1>PyCFTBoot<a class="headerlink" href="#pycftboot" title="Permalink to this heading"></a></h1>
 <p><a class="reference external" href="https://github.com/alepiazza/pycftboot/actions"><img alt="pycftboot Actions Status" src="https://github.com/alepiazza/pycftboot/actions/workflows/main.yml/badge.svg" /></a>
 <a class="reference external" href="https://codecov.io/gh/alepiazza/pycftboot?branch=master"><img alt="codecov.io" src="https://codecov.io/gh/alepiazza/pycftboot/coverage.svg?branch=master" /></a></p>
 <p>:warning: <strong>This is a rewriting of <a class="reference external" href="https://github.com/cbehan/pycftboot">cbehan/pycftboot</a> and is not meant to be backward compatible with that version</strong> :warning:</p>
 <p>PyCFTBoot is an interface for the conformal bootstrap as discussed in <a class="reference external" href="http://arxiv.org/abs/0807.0004">its 2008 revival</a>. Starting from the analytic structure of conformal blocks, the code formulates semidefinite programs without any proprietary software. The code does NOT perform the actual optimization. It assumes you already have a program for that, namely <a class="reference external" href="https://github.com/davidsd/sdpb">SDPB</a> by David Simmons-Duffin.</p>
 <p>PyCFTBoot supports bounds on scaling dimensions and OPE coefficients in an arbitrary number of spacetime dimensions. The four-point functions used for the bounds must contain only scalars but they may have any combination of scaling dimensions and transform in arbitrary representations of a global symmetry.</p>
 <section id="installation-on-linux">
-<h2>Installation on Linux<a class="headerlink" href="#installation-on-linux" title="Permalink to this headline"></a></h2>
+<h2>Installation on Linux<a class="headerlink" href="#installation-on-linux" title="Permalink to this heading"></a></h2>
 <p>If you use one of the mainstream Linux distributions, the following instructions should help you install PyCFTBoot and everything it depends on.</p>
 <ol class="arabic">
 <li><p>Follow <a class="reference external" href="https://github.com/davidsd/sdpb/blob/master/Install.md#linux">the instructions</a> for installing SDPB. When this is done, you will have <a class="reference external" href="http://www.boost.org">Boost</a> and <a class="reference external" href="https://gmplib.org">GMP</a> as well, so we will not need to discuss those further.</p></li>
@@ -99,7 +100,7 @@
 </ol>
 </section>
 <section id="installation-on-mac">
-<h2>Installation on Mac<a class="headerlink" href="#installation-on-mac" title="Permalink to this headline"></a></h2>
+<h2>Installation on Mac<a class="headerlink" href="#installation-on-mac" title="Permalink to this heading"></a></h2>
 <p>Thanks to Jaehoon Lee for writing these instructions and testing them on OS X 10.11 (El Capitan).</p>
 <ol class="arabic">
 <li><p>Follow the instructions for <a class="reference external" href="https://github.com/davidsd/sdpb/blob/master/Install.md#mac-os-x">installing SDPB</a> on Mac OS X. Installing gcc takes a long time, so be patient. Also, you don’t need <code class="docutils literal notranslate"><span class="pre">sudo</span></code> for installing boost due to recent changes. After that, you will have homebrew, gcc, gmp, mpfr and boost installed. The default compilers should be renamed as <code class="docutils literal notranslate"><span class="pre">gcc</span></code> and <code class="docutils literal notranslate"><span class="pre">g++</span></code> following the instructions.</p></li>
@@ -148,7 +149,7 @@
 </ol>
 </section>
 <section id="usage">
-<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h2>
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading"></a></h2>
 <p>To test that PyCFTBoot is working, try to run:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>    python
     import bootstrap
@@ -162,7 +163,7 @@
 <p>Assuming that all of this works, <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">tutorial.py</span></code> will enter a tutorial with four examples. There are two changes that you might want to make to <code class="docutils literal notranslate"><span class="pre">bootstrap.py</span></code>. One is changing <code class="docutils literal notranslate"><span class="pre">python2</span></code> to <code class="docutils literal notranslate"><span class="pre">python</span></code> in the first line, for systems that don’t append a specific number. The other is setting the path of SDPB and related executables by searching for <code class="docutils literal notranslate"><span class="pre">/usr/bin/sdpb</span></code> and updating this. Have fun constraining CFTs and convincing cluster maintainers to install fairly new software!</p>
 </section>
 <section id="attribution">
-<h2>Attribution<a class="headerlink" href="#attribution" title="Permalink to this headline"></a></h2>
+<h2>Attribution<a class="headerlink" href="#attribution" title="Permalink to this heading"></a></h2>
 <p>If PyCFTBoot is helpful in one of your publications, please cite:</p>
 <ul class="simple">
 <li><p>C. Behan, “PyCFTBoot: A flexible interface for the conformal bootstrap”, <a class="reference external" href="http://arxiv.org/abs/1602.02810">arXiv:1602.02810 [hep-th]</a>.</p></li>
