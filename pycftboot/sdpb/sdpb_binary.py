@@ -1,8 +1,10 @@
 import os
 import subprocess
+import asyncio
 import shutil
 
 from .sdpb import Sdpb
+from .async_subprocess import read_and_display
 
 
 class SdpbBinary(Sdpb):
@@ -25,10 +27,11 @@ class SdpbBinary(Sdpb):
         debug: flags for debugging (makes :func:`~pycftboot.sdpb.sdpb_binary.SdpbBinary.run_command` output the command to ``stdout``)
     """
 
-    def __init__(self, sdpb_bin='/usr/bin/sdpb', pvm2sdp_bin='/usr/bin/pvm2sdp', mpirun_bin='/usr/bin/mpirun', unisolve_bin='/usr/bin/unisolve'):
+    def __init__(self, realtime_output=False, sdpb_bin='/usr/bin/sdpb', pvm2sdp_bin='/usr/bin/pvm2sdp', mpirun_bin='/usr/bin/mpirun', unisolve_bin='/usr/bin/unisolve'):
         self.bin = self.__find_executable(sdpb_bin)
 
         self.debug = False
+        self.realtime_output = realtime_output
 
         super().__init__()
 
@@ -64,4 +67,17 @@ class SdpbBinary(Sdpb):
         if self.debug:
             print(" ".join(command))
 
-        return subprocess.run(command, capture_output=True, check=True, text=True)
+        if self.realtime_output is True:
+            rc, stdout, stderr = asyncio.run(read_and_display(*command))
+
+            completed_process = subprocess.CompletedProcess(
+                args=command,
+                returncode=rc,
+                stdout=stdout,
+                stderr=stderr
+            )
+            completed_process.check_returncode()
+        else:
+            completed_process = subprocess.run(command, capture_output=True, check=True, text=True)
+
+        return completed_process
