@@ -1,7 +1,7 @@
 from symengine.lib.symengine_wrapper import RealMPFR, Symbol, zero, one, sqrt
 
 cutoff = 0
-prec = 660
+prec = 1024
 dec_prec = int((3.0 / 10.0) * prec)
 tiny = RealMPFR("1e-" + str(dec_prec // 2), prec)
 
