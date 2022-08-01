@@ -67,8 +67,11 @@ class SdpbBinary(Sdpb):
         if self.debug:
             print(" ".join(command))
 
+        current_env = os.environ
+
         if self.realtime_output is True:
-            rc, stdout, stderr = asyncio.run(read_and_display(*command))
+            loop = asyncio.get_event_loop()
+            rc, stdout, stderr = loop.run_until_complete(read_and_display(*command))
 
             completed_process = subprocess.CompletedProcess(
                 args=command,
@@ -78,6 +81,6 @@ class SdpbBinary(Sdpb):
             )
             completed_process.check_returncode()
         else:
-            completed_process = subprocess.run(command, capture_output=True, check=True, text=True)
+            completed_process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True, env=current_env)
 
         return completed_process
