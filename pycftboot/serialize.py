@@ -9,9 +9,11 @@ def read_table(name, form="json"):
     if form == "json":
         return json_read(name)
     elif form == "scalar_blocks":
-        return scalar_blocks_read(name)
+        raise NotImplementedError
+        # return scalar_blocks_read(name)
     elif form == "juliboots":
-        return juliboots_read(name)
+        raise NotImplementedError
+        # return juliboots_read(name)
     else:
         raise ValueError("form parameter must be either json, scalar_blocks or juliboots")
 
@@ -33,9 +35,11 @@ def write_table(block_table, name, form="json"):
         if form == "json":
             json_write(block_table, name)
         elif form == "juliboots":
-            juliboots_write(block_table, name)
+            raise NotImplementedError
+            # juliboots_write(block_table, name)
         elif form == "scalar_blocks":
-            scalar_blocks_write(block_table, name)
+            raise NotImplementedError
+            # scalar_blocks_write(block_table, name)
         else:
             raise ValueError("form parameter must be either json, scalar_blocks or juliboots")
     else:
