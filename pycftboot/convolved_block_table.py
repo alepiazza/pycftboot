@@ -64,10 +64,27 @@ class ConvolvedBlockTable:
                  corresponding entry in a `PolynomialVector` in `table`.
     """
 
-    def __init__(self, block_table: ConformalBlockTable, odd_spins=True, symmetric=False, spins=[], content=[[1, 0, 0]]):
-        if not isinstance(block_table, ConformalBlockTable):
-            raise TypeError(f"block_table = {block_table} must be a ConformalBlockTable")
+    def __init__(self, block_table: ConformalBlockTable = None, odd_spins=True, symmetric=False, spins=[], content=[[1, 0, 0]], compute=True):
+        self.dim = 0
+        self.k_max = 0
+        self.l_max = 0
+        self.m_max = 0
+        self.n_max = 0
+        self.delta_12 = 0
+        self.delta_34 = 0
+        self.m_order = []
+        self.n_order = []
+        self.odd_spins = odd_spins
+        self.table = []
 
+        if compute is True:
+            if block_table is None:
+                raise ValueError('When compute is True a ConformalBlockTable must be provided as block_table')
+            if not isinstance(block_table, ConformalBlockTable):
+                raise TypeError(f"block_table = {block_table} must be a ConformalBlockTable")
+            self._compute_convolved_table(block_table, odd_spins, symmetric, spins, content)
+
+    def _compute_convolved_table(self, block_table: ConformalBlockTable, odd_spins, symmetric, spins, content):
         # Copying everything but the unconvolved table is fine from a memory standpoint
         self.dim = block_table.dim
         self.k_max = block_table.k_max

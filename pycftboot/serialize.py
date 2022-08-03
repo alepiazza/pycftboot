@@ -1,4 +1,5 @@
 from .conformal_block_table import ConformalBlockTable
+from .convolved_block_table import ConvolvedBlockTable
 from .compat_json import json_write, json_read
 from .compat_juliboots import juliboots_write, juliboots_read
 from .compat_scalar_blocks import scalar_blocks_write, scalar_blocks_read
@@ -28,7 +29,7 @@ def write_table(block_table, name, form="json"):
           another program's format if it is equal to "scalar_blocks" or
           "juliboots". Any other value will be ignored. Defaults to "json".
     """
-    if isinstance(block_table, ConformalBlockTable):
+    if isinstance(block_table, (ConformalBlockTable, ConvolvedBlockTable)):
         if form == "json":
             json_write(block_table, name)
         elif form == "juliboots":
@@ -38,4 +39,4 @@ def write_table(block_table, name, form="json"):
         else:
             raise ValueError("form parameter must be either json, scalar_blocks or juliboots")
     else:
-        raise TypeError(f"{block_table} is not a ConformalBlockTable")
+        raise TypeError(f"{block_table} is not a ConformalBlockTable or a ConvolvedBlockTable")
