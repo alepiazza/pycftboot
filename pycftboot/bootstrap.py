@@ -826,7 +826,11 @@ class SDP:
         output = self.sdpb.read_output(self.sdpb.get_option("outDir"))
 
         terminate_reason = output["terminateReason"]
-        return terminate_reason == "found primal feasible solution"
+        allowed = terminate_reason == "found primal feasible solution"
+
+        print(f'{"allowed" if allowed else "not allowed"} ({terminate_reason})')
+
+        return allowed
 
     @manage_name
     def bisect(self, lower, upper, threshold, spin_irrep, isolated=False, reverse=False, bias=None, *, name: str = None):
@@ -881,7 +885,7 @@ class SDP:
                 bias_found = True
 
             test = lower + x * (upper - lower)
-            print("Trying " + test.__str__())
+            print(f'Trying {test}: ', end='', flush=True)
             if isolated is True:
                 self.add_point(spin_irrep, test)
             else:
