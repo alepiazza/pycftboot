@@ -57,7 +57,8 @@ class SdpbBinary(Sdpb):
     def run_command(self, command: list, log_file: str = None) -> subprocess.CompletedProcess:
         """This is just a wrapper around :func:`subprocess.run`
 
-        If the ``debug`` attribute is ``True`` it prints to ``stdout`` the ``command``
+        If the ``debug`` attribute is ``True`` it prints to ``stdout`` the ``command``.
+        Be aware that this does not check the exit status
 
         Args:
             command: command to run as a list
@@ -65,8 +66,6 @@ class SdpbBinary(Sdpb):
         # Print command to stdout if debug is true
         if self.debug:
             print(" ".join(command))
-
-        current_env = os.environ
 
         if log_file is not None:
             loop = asyncio.get_event_loop()
@@ -78,8 +77,7 @@ class SdpbBinary(Sdpb):
                 stdout=stdout,
                 stderr=stderr
             )
-            completed_process.check_returncode()
         else:
-            completed_process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True, env=current_env)
+            completed_process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         return completed_process

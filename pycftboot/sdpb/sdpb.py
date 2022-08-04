@@ -80,15 +80,21 @@ class Sdpb(ABC):
         if 'procsPerNode' not in self.options.keys():
             raise RuntimeError("procsPerNode is mandatory argument of sdpb (v2) but was not set")
         procs_per_node = self.options['procsPerNode']
-        return self.run_command(
+
+        proc = self.run_command(
             [self.mpirun_bin] + ["--allow-run-as-root"] + ["-n", f"{procs_per_node}"] +
             [self.pvm2sdp_bin, str(self.options["precision"]), input_xml, output_file]
         )
 
+        proc.check_returncode()
+        return proc
+
     def unisovle_run(self, precision: int, input_file: str) -> CompletedProcess:
         """Runs the ``unisolve`` on given file
         """
-        return self.run_command([self.unisolve_bin, "-H1", "-o" + str(prec), "-Oc", "-Ga", input_file])
+        proc = self.run_command([self.unisolve_bin, "-H1", "-o" + str(prec), "-Oc", "-Ga", input_file])
+        proc.check_returncode()
+        return proc
 
     def get_version(self) -> int:
         """Find out the version of sdpb that we are using
@@ -276,3 +282,8 @@ class Sdpb(ABC):
             ret["y"] = y
 
         return ret
+
+    def remove_log(self):
+        log_file = self.get_option('sdpDir') + '.log'
+        if os.path.exists(log_file):
+            os.remove(log_file)
