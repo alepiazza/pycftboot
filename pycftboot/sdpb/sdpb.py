@@ -26,6 +26,11 @@ class Sdpb(ABC):
 
         self.options = {'precision': prec}
         self.default_options = self.get_all_default_options()
+        self.clear_checkpoint_retry_condition = [
+            'A was not numerically HPD'
+        ]
+        self.max_retry = 1
+        self.retry = 0
 
         if self.version not in (1, 2):
             raise ValueError(f"Unkwon sdpb version = {self.version}")
@@ -60,16 +65,31 @@ class Sdpb(ABC):
             if 'procsPerNode' not in self.options.keys():
                 raise RuntimeError("procsPerNode is mandatory argument of sdpb (v2) but was not set")
 
-            procs_per_node = self.options['procsPerNode']
-            sdpb_out = self.run_command(
-                [self.mpirun_bin] + ["--allow-run-as-root"] + ["-n", f"{procs_per_node}"] +
-                [self.bin] + args
-            )
+            command = [self.mpirun_bin] + ["--allow-run-as-root"] + ["-n", str(self.options['procsPerNode'])] + [self.bin] + args
+            log_file = self.get_option('sdpDir') + '.log'
+
+            proc = self.run_command(command, log_file)
+
+
+        # If Sdpb has crashed, maybe there's a problem with checkpoints
+        # and deleting the directory might solve the problem
+        if proc.returncode != 0:
+            for condition in self.clear_checkpoint_retry_condition:
+                if condition in proc.stdout:
+                    self.retry += 1
+                    if self.retry <= self.max_retry:
+                        print(f'sdpb terminated with non-zero exit status but deliting checkpointDir might solve this: retrying ({self.retry}/{self.max_retry})')
+                        shutil.rmtree(self.get_option('checkpointDir'))
+                        self.run(extra_options=extra_options)
+                    else:
+                        print(f'max retry ({self.max_retry}) exceeded, exiting with non-zero status')
+                else:
+                    proc.check_returncode()
 
         for key in extra_options.keys():
             self.set_default_option(key)
 
-        return sdpb_out
+        return proc
 
     def pvm2sdp_run(self, input_xml: str, output_file: str) -> CompletedProcess:
         """Runs ``pvm2spb <input_xml> <output_file>`` with ``mpirun``. This is
