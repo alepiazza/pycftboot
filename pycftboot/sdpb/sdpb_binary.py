@@ -4,7 +4,7 @@ import asyncio
 import shutil
 
 from .sdpb import Sdpb
-from .async_subprocess import read_and_display
+from .async_subprocess import read_and_logtofile
 
 
 class SdpbBinary(Sdpb):
@@ -27,11 +27,10 @@ class SdpbBinary(Sdpb):
         debug: flags for debugging (makes :func:`~pycftboot.sdpb.sdpb_binary.SdpbBinary.run_command` output the command to ``stdout``)
     """
 
-    def __init__(self, realtime_output=False, sdpb_bin='/usr/bin/sdpb', pvm2sdp_bin='/usr/bin/pvm2sdp', mpirun_bin='/usr/bin/mpirun', unisolve_bin='/usr/bin/unisolve'):
+    def __init__(self, sdpb_bin='/usr/bin/sdpb', pvm2sdp_bin='/usr/bin/pvm2sdp', mpirun_bin='/usr/bin/mpirun', unisolve_bin='/usr/bin/unisolve'):
         self.bin = self.__find_executable(sdpb_bin)
 
         self.debug = False
-        self.realtime_output = realtime_output
 
         super().__init__()
 
@@ -55,7 +54,7 @@ class SdpbBinary(Sdpb):
                 raise EnvironmentError(f"{bin_in_path} is in PATH but was not found")
             return bin_in_path
 
-    def run_command(self, command: list) -> subprocess.CompletedProcess:
+    def run_command(self, command: list, log_file: str = None) -> subprocess.CompletedProcess:
         """This is just a wrapper around :func:`subprocess.run`
 
         If the ``debug`` attribute is ``True`` it prints to ``stdout`` the ``command``
@@ -69,9 +68,9 @@ class SdpbBinary(Sdpb):
 
         current_env = os.environ
 
-        if self.realtime_output is True:
+        if log_file is not None:
             loop = asyncio.get_event_loop()
-            rc, stdout, stderr = loop.run_until_complete(read_and_display(*command))
+            rc, stdout, stderr = loop.run_until_complete(read_and_logtofile(command, log_file))
 
             completed_process = subprocess.CompletedProcess(
                 args=command,
