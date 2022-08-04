@@ -858,6 +858,8 @@ class SDP:
                     cannot be. Defaults to `None` which means that this will be
                     measured as the binary search progresses.
         """
+        self.sdpb.remove_log()
+
         x = 0.5
         d_time = 0
         p_time = 0

@@ -70,6 +70,9 @@ class Sdpb(ABC):
 
             proc = self.run_command(command, log_file)
 
+            with open(log_file, 'a') as f:
+                f.write(u'\u2500' * 158 + '\n')
+
 
         # If Sdpb has crashed, maybe there's a problem with checkpoints
         # and deleting the directory might solve the problem
