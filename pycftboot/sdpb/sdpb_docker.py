@@ -56,7 +56,7 @@ class SdpbDocker(Sdpb):
 
         super().__init__()
 
-    def run_command(self, command: list) -> CompletedProcess:
+    def run_command(self, command: list, log_file: str = None) -> CompletedProcess:
         """Run command in the docker container specified by ``image``
 
         This is basically a wrapper of docker API which runs equivalent
