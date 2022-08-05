@@ -78,7 +78,7 @@ class Sdpb(ABC):
         # and deleting the directory might solve the problem
         if proc.returncode != 0:
             for condition in self.clear_checkpoint_retry_condition:
-                if condition in proc.stdout:
+                if condition in proc.stdout.decode('utf-8'):
                     self.retry += 1
                     if self.retry <= self.max_retry:
                         print(f'sdpb terminated with non-zero exit status but deliting checkpointDir might solve this: retrying ({self.retry}/{self.max_retry})')
