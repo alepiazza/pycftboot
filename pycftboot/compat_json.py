@@ -1,6 +1,6 @@
 import json
 import os
-from symengine.lib.symengine_wrapper import Add, RealMPFR, ComplexInfinity, Mul
+from symengine.lib.symengine_wrapper import Add, RealMPFR, ComplexInfinity, Mul, Zero
 
 from .polynomial_vector import PolynomialVector
 from .conformal_block_table import ConformalBlockTable
@@ -25,7 +25,7 @@ class CustomEncoder(json.JSONEncoder):
                 "_type": "pycftboot.PolynomialVector",
                 "_value": obj.__dict__
             }
-        elif isinstance(obj, (RealMPFR, ComplexInfinity, Add)):
+        elif isinstance(obj, (RealMPFR, Zero, ComplexInfinity, Add)):
             return {
                 "_type": "symengine.Add",
                 "_value": obj.__str__()
