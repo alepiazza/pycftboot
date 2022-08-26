@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import re
 import os
+import shutil
 from typing import Union
 from symengine.lib.symengine_wrapper import RealMPFR
 from subprocess import CompletedProcess
@@ -26,9 +27,6 @@ class Sdpb(ABC):
 
         self.options = {'precision': prec}
         self.default_options = self.get_all_default_options()
-        self.clear_checkpoint_retry_condition = [
-            'A was not numerically HPD'
-        ]
         self.max_retry = 1
         self.retry = 0
 
@@ -77,17 +75,16 @@ class Sdpb(ABC):
         # If Sdpb has crashed, maybe there's a problem with checkpoints
         # and deleting the directory might solve the problem
         if proc.returncode != 0:
-            for condition in self.clear_checkpoint_retry_condition:
-                if condition in proc.stdout.decode('utf-8'):
-                    self.retry += 1
-                    if self.retry <= self.max_retry:
-                        print(f'sdpb terminated with non-zero exit status but deliting checkpointDir might solve this: retrying ({self.retry}/{self.max_retry})')
-                        shutil.rmtree(self.get_option('checkpointDir'))
-                        self.run(extra_options=extra_options)
-                    else:
-                        print(f'max retry ({self.max_retry}) exceeded, exiting with non-zero status')
-                else:
-                    proc.check_returncode()
+            self.retry += 1
+            if self.retry <= self.max_retry:
+                print(f'sdpb terminated with non-zero exit status but deliting checkpointDir might solve this: retrying ({self.retry}/{self.max_retry})')
+                shutil.rmtree(self.get_option('checkpointDir'))
+                self.run(extra_options=extra_options)
+            else:
+                print(f'max retry ({self.max_retry}) exceeded, exiting with non-zero status')
+                proc.check_returncode()
+        else:
+            self.retry = 0
 
         for key in extra_options.keys():
             self.set_default_option(key)
