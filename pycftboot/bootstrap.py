@@ -613,7 +613,7 @@ class SDP:
 
         return ret
 
-    def write_xml(self, obj, norm, name="mySDP"):
+    def write_xml(self, obj, norm, name="mySDP", pvm2sdp=True):
         """
         Outputs an XML file describing the `table`, `bounds`, `points` and `basis`
         for this `SDP` in a format that `SDPB` can use to check for solvability.
@@ -775,7 +775,7 @@ class SDP:
 
         doc.unlink()
 
-        if self.sdpb.version == 2:
+        if self.sdpb.version == 2 and pvm2sdp:
             self.sdpb.pvm2sdp_run(f"{name}.xml", name)
 
     def manage_name(method):
