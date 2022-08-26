@@ -87,7 +87,8 @@ class Sdpb(ABC):
             self.retry = 0
 
         for key in extra_options.keys():
-            self.set_default_option(key)
+            if key in self.options:
+                self.set_default_option(key)
 
         return proc
 
